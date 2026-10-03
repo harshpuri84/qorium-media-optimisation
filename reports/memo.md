@@ -17,15 +17,17 @@ Run five formulations next: four new blends of the four commercial media, plus a
 | 4 | Expected improvement | 45% | 21% | 27% | 7% | 178.31 | 69.1 (51.5 to 86.7) | 0.38 |
 | Anchor | E19 re-run | 44.6% | 20.1% | 19.6% | 15.7% | 178.43 | historical mean 81.0 | |
 
+![The four picks (stars) and the E19 anchor against the 24 historical blends, projected onto DMEM and X-VIVO 15. Colour is observed viability. The projection hides RPMI-10 and AR5.](figures/08_next_batch.png){width=50%}
+
 *Intervals are for one newly measured recipe mean, conditional on the model. P(above E19) compares the model's underlying responses for each blend and E19 and excludes unmodelled shifts between batches.*
 
 Every new blend costs no more per litre than E19 at base prices, and meets that rule in at least 7 of 9 price scenarios. The batch has a job beyond finding a better blend. It tests the two assumptions the model leans on hardest: that the round-3 results reproduce on a new plate, and that AR5 volume can move to the other media at no cost to viability.
 
 ## The problem
 
-A lab wants better culture performance at lower media cost. Experiments are slow, noisy and run in small batches. My job is to choose the next 3 to 5 formulations, not to win a prediction contest. A good choice is one the lab learns from whatever the result turns out to be.
+The job is to choose the next 3 to 5 formulations under slow, noisy, small-batch experiments, not to win a prediction contest. A good choice teaches the lab something whatever the result.
 
-I used the public PBMC media-blending data from Narayanan et al. (2025). It has 24 blends of four commercial media (DMEM-10, RPMI-10, X-VIVO 15, AR5), run in four rounds of six, with 103 viability readings at 72 hours. I chose it over the Cosenza et al. (2022) muscle-cell repository because its tables are labelled and complete, and because a four-part mixture keeps feasibility and cost easy to reason about. The cost of that choice is that PBMC viability is far from Qorium's endpoints. The method transfers. The numbers do not.
+I used the public PBMC media-blending data from Narayanan et al. (2025): 24 blends of four commercial media (DMEM-10, RPMI-10, X-VIVO 15, AR5) in four rounds of six, with 103 viability readings at 72 hours. I chose it over the Cosenza et al. (2022) repository because its tables are labelled and complete, and a four-part mixture keeps feasibility and cost easy to check. PBMC viability is far from Qorium's endpoints. The method transfers. The numbers do not.
 
 **Objective.** Maximise viability at 72 hours, subject to a cost ceiling equal to E19's cost per litre under the same price scenario. In words, beat our best blend without paying more for it. I chose a constraint over a weighted desirability score because a lab manager can check a constraint by hand. A desirability weight hides the trade-off inside a number nobody signed off.
 
@@ -41,7 +43,7 @@ I used the public PBMC media-blending data from Narayanan et al. (2025). It has 
 | No single medium was tested in the main study | 0 of 24 | The model extrapolates at the edges of the mixture |
 | Cost barely separates the historical blends | EUR 172.49 to 180.98 per litre; r = 0.05 with viability | Base-price differences are small, but the ceiling still rules out 49.7% of candidate recipes, and FBS or AR5 price moves widen the spread |
 
-Prices are provisional. I sourced EUR list prices for DMEM, RPMI 1640, Penicillin-Streptomycin and X-VIVO 15 from supplier pages. I added 10% FBS and 1% antibiotics to DMEM and RPMI, as the paper did. The FBS price (EUR 672 per 500 mL) comes from a search snippet, and FBS makes up 74 to 80% of the supplemented-media cost. I could not find a price for AR5 (CellGenix 20807), so I set it equal to X-VIVO 15 and varied it up to 2.02 times. Across those scenarios, E19 costs EUR 134.9 to 250.9 per litre. Real FBS and AR5 quotes are the most important missing inputs.
+Prices are provisional. Basal media, antibiotics and X-VIVO 15 are supplier list prices; DMEM and RPMI include 10% FBS and 1% antibiotics, as in the paper. FBS (EUR 672 per 500 mL, from a search snippet) is 74 to 80% of the supplemented cost. AR5 (CellGenix 20807) has no public price, so I set it equal to X-VIVO 15 and varied it up to 2.02 times. Across 9 FBS and AR5 scenarios, E19 costs EUR 134.9 to 250.9 per litre. Real FBS and AR5 quotes are the most important missing inputs.
 
 ## Approach and why
 
@@ -54,7 +56,7 @@ I compared five surrogate models with leave-one-out validation and a forward-rou
 | Scheffe quadratic mixture model | 19.72 | -0.01 | 0.75 | 4.49 |
 | Mean only | 18.77 | | 0.83 | 4.44 |
 
-RMSE is the typical prediction error in viability points. Coverage is the share of results inside the 80% interval; 0.80 is ideal. NLPD rewards accurate predictions with honest uncertainty; lower is better. A second GP variant, with per-recipe noise, is in the detailed report.
+RMSE is typical error in viability points; coverage of 0.80 is ideal; lower NLPD means accurate and honestly uncertain. A per-recipe-noise GP variant is in the detailed report.
 
 No model clearly beats the average. In leave-one-out, the GP ranks blends better than chance (rank correlation 0.61). The Scheffe quadratic performed poorly here (-0.01), and these data do not establish why. I chose the GP because it gives a usable uncertainty-based selection rule, which the batch needs. When E02 and E14 are withheld, the GP's error falls to 7.56 points. I report that as sensitivity, not as grounds to delete them.
 
@@ -112,8 +114,8 @@ One limit matters most. The fitted model is close to two-dimensional. Its DMEM l
 - **Transfer.** PBMC viability stands in for the method only. For Qorium, the same loop would run on bovine fibroblast expansion, collagen output and leather-relevant quality assays, with real supplier quotes.
 - **Model.** The forward-round failure is the main warning. If the next plate's E19 lands far from 81%, refit with a batch term before choosing the round after.
 - **Thresholds.** The cost ceiling, the 2.5% margin and the 5% gap are judgement calls. The stress table shows which picks depend on them.
-- **Validation.** Success for this batch is at least one new blend passing the screening rule above, and a slot 3 result that tells us whether the search space is wider than round 3 suggested. Adoption needs the confirmation run. Over the next two rounds, I would track the best confirmed viability per euro and the share of the batch that moves the model's ranking.
+- **Validation.** Success for this batch is at least one new blend passing the screening rule above, and a slot 3 result that tells us whether the search space is wider than round 3 suggested. Adoption needs the confirmation run. Over the next two rounds, track the best confirmed viability per euro.
 
-**Code.** `run_all.sh` rebuilds every table, figure and the recommendation from the public data with seed 20261002; a run from a fresh environment took 5 minutes 7 seconds on an Apple-silicon laptop. The README gives the command that renders this memo. The schema, decision log and two external reviews are in `docs/`.
+**Code.** `run_all.sh` rebuilds every table, figure and the recommendation from public data (seed 20261002; 5 min 7 s from a fresh environment on an Apple-silicon laptop). The schema, decision log and three external reviews are in `docs/`.
 
 *Sources.* Narayanan H. et al. (2025), Nature Communications 16, 6055, data at doi:10.6084/m9.figshare.27715134. Cosenza Z. et al. (2022), Biotechnology and Bioengineering 119(9), 2447-2458. Prices from Thermo Fisher Germany, Lonza and Fisher Scientific Austria, accessed 2 October 2026 (see `data/inputs/price_sources.csv`).

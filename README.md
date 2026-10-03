@@ -18,13 +18,14 @@ data/
   inputs/          Price sources, prepared-media prices and price scenarios
 docs/              Plan, schema, data dictionary, decisions, data audit and external reviews
 scripts/           Data preparation, cost rule, model comparison, batch selection and GP checks
+notebooks/         Narrated walkthrough notebook, executed with outputs (renders on GitHub)
 reports/           Memo (md, pdf), walkthrough script, exploratory, model and batch reports
 reports/figures/   Figures 01 to 08
 reports/tables/    Generated evidence tables
 outputs/           Recommended blends, plate formulations and randomised plate layout
 ```
 
-Start with `reports/memo.pdf`. Then `reports/batch_selection.md` for the recommendation detail, `reports/model_comparison.md` for the evidence, and `docs/SCHEMA.md` for the data model.
+Start with `reports/memo.pdf`, or `notebooks/walkthrough.ipynb` for the same story with the evidence inline. Then `reports/batch_selection.md` for the recommendation detail, `reports/model_comparison.md` for the evidence, and `docs/SCHEMA.md` for the data model.
 
 ## Reproduce everything
 
@@ -40,6 +41,12 @@ Render the memo (needs pandoc and Google Chrome):
 ```sh
 cd reports && pandoc memo.md -s --css memo.css --embed-resources -o memo.html \
   && "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --no-pdf-header-footer --print-to-pdf=memo.pdf "file://$PWD/memo.html"
+```
+
+Rebuild the notebook after `run_all.sh` (needs `pip install -r requirements-notebook.txt`):
+
+```sh
+python scripts/build_notebook.py
 ```
 
 The individual steps, in order:
