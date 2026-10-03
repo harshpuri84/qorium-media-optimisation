@@ -81,6 +81,10 @@ details p{margin:10px 0 2px}
   <a href="#bo">How BO picks experiments</a>
   <a href="#papers">The two papers</a>
   <a href="#scenarios">The six "what ifs"</a>
+  <a href="#approach">Our approach</a>
+  <a href="#picks">The recommendation</a>
+  <a href="#reviews">What reviewers changed</a>
+  <a href="#notes">Notes to own in the interview</a>
   <a href="#plan">Reading plan</a>
   <a href="#quiz">Check yourself</a>
 </nav>
@@ -89,7 +93,7 @@ details p{margin:10px 0 2px}
 <header>
   <div class="eyebrow">Head of Data Science case · due Wed 14 Oct 2026</div>
   <h1>Picking the next four cell-culture recipes</h1>
-  <p class="lede">A primer for someone who knows logistics and data, but not biotech. Read this before the papers.</p>
+  <p class="lede">A primer for someone who knows logistics and data, but not biotech. Read this before the papers. The finished analysis, memo and code are in the <a href="https://github.com/harshpuri84/qorium-media-optimisation">public repo</a>.</p>
 </header>
 
 <section id="brief">
@@ -271,7 +275,7 @@ details p{margin:10px 0 2px}
 
 <section id="scenarios">
 <h2>The six "what ifs" the brief asks about</h2>
-<p>These are first answers for you to test, not final memo text.</p>
+<p>The final versions are in the <a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/reports/memo.md">memo</a>, section "How the strategy changes". The short form is below.</p>
 <div class="tbl"><table>
 <thead><tr><th>If…</th><th>Then the strategy changes like this</th></tr></thead>
 <tbody>
@@ -284,6 +288,65 @@ details p{margin:10px 0 2px}
 </tbody></table></div>
 </section>
 
+<section id="approach">
+<h2>Our approach, step by step</h2>
+<p>This is what the repo actually does, in the order it runs. Each step names the file that holds the result.</p>
+<div class="tbl"><table>
+<thead><tr><th>Step</th><th>What we did</th><th>Why</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>Cleaned the PBMC workbook: 24 recipes, 103 readings, fractions scaled to sum to 100%</td><td>Every later number traces back to one checked table</td><td><a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/docs/data_audit.md">data_audit.md</a></td></tr>
+<tr><td class="num">2</td><td>Looked at the data before modelling</td><td>Found the round-3 cluster at 44% DMEM and the E10/E14 pair (2.60% apart, 40.63 points apart)</td><td><a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/reports/exploratory_analysis.md">exploratory_analysis.md</a></td></tr>
+<tr><td class="num">3</td><td>Priced each medium per litre, with 10% FBS and 1% antibiotics added to DMEM and RPMI</td><td>The brief needs cost. FBS is a search-snippet price and AR5 has no price, so we ran 9 price scenarios</td><td>EUR 168.45 to 181.00 per litre at base prices</td></tr>
+<tr><td class="num">4</td><td>Set the cost rule: a new blend may cost no more per litre than E19</td><td>"Beat our best blend without paying more." A lab manager can check it by hand</td><td>50.3% of 176,851 recipes pass at base prices</td></tr>
+<tr><td class="num">5</td><td>Compared 5 models: GP (two noise versions), random forest, Scheffe mixture model, plain average</td><td>The brief asks for at least two approaches</td><td>No model clearly beats the average. The GP ranks better than chance in leave-one-out (0.61)</td></tr>
+<tr><td class="num">6</td><td>Forward test: trained on earlier rounds, predicted the next</td><td>The closest the data gets to a real forecast</td><td>Every model missed round 3 by 22 to 29 points. GP forward ranking 0.26, -0.31, 0.26</td></tr>
+<tr><td class="num">7</td><td>Simulated 30 paired campaigns against two made-up "true" surfaces, at two noise levels</td><td>Real data cannot replay a policy, because the lab only ran one sequence</td><td>Our four-role policy beat random in 19 to 23 of 30 seeds. Always picking the best was no better than random</td></tr>
+<tr><td class="num">8</td><td>Picked 4 blends one slot at a time, plus an E19 re-run</td><td>Each slot has a job. After each pick the model marks it as pending, so the next pick looks elsewhere</td><td><a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/outputs/next_experiments.csv">next_experiments.csv</a></td></tr>
+<tr><td class="num">9</td><td>Re-ran the selection 14 times, plus 7 threshold changes</td><td>Shows which picks depend on our choices</td><td><a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/reports/batch_selection.md">batch_selection.md</a></td></tr>
+</tbody></table></div>
+<p>Why a GP if it fails the forward test? Because it gives a usable rule for choosing a diverse batch that weighs "likely good" against "we know little here". It is not used as a forecast. The decision rests on comparing each new blend with E19 on the same plate.</p>
+</section>
+
+<section id="picks">
+<h2>The recommendation</h2>
+<p>Five formulations, the most the brief allows. Four wells each, 20 wells in total, in random positions on the inner part of a 96-well plate.</p>
+<div class="tbl"><table>
+<thead><tr><th>Slot</th><th>Role</th><th>DMEM / RPMI-10 / X-VIVO / AR5</th><th>EUR/L</th><th>Predicted</th><th>What it tests</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>Exploit</td><td class="num">44 / 26 / 19 / 11</td><td class="num">177.69</td><td class="num">70.2%</td><td>Can some AR5 move to RPMI-10 with no loss? Level with E19, EUR 0.74/L cheaper</td></tr>
+<tr><td class="num">2</td><td>Cheaper</td><td class="num">43 / 56 / 1 / 0</td><td class="num">173.92</td><td class="num">65.9%</td><td>Does a blend with almost no serum-free medium hold up? The models disagree (51.9 to 69.9%)</td></tr>
+<tr><td class="num">3</td><td>Explore</td><td class="num">37 / 33 / 30 / 0</td><td class="num">176.82</td><td class="num">60.1%</td><td>Is the 44% DMEM band really special, or does good viability extend further?</td></tr>
+<tr><td class="num">4</td><td>Expected improvement</td><td class="num">45 / 21 / 27 / 7</td><td class="num">178.31</td><td class="num">69.1%</td><td>Does swapping AR5 for X-VIVO 15 beat E19? Biggest upside</td></tr>
+<tr><td>Anchor</td><td>E19 re-run</td><td class="num">44.6 / 20.1 / 19.6 / 15.7</td><td class="num">178.43</td><td class="num">81.0% (historical)</td><td>Did round 3 reproduce, or was it a good lab day?</td></tr>
+</tbody></table></div>
+<div class="callout"><p><b>Decision rule, set before the plate runs.</b> A blend passes the screen if its mean is no more than 5 points below the same-plate E19, at equal or lower cost. Four wells cannot prove two blends are equal: the uncertainty on the difference is about ±11 points. So a pass goes to a confirmation run of about 20 wells per arm, over at least two independent cell and medium preparations.</p></div>
+<p>In logistics terms: this plate is a pilot on four lanes plus a control lane. A pilot that looks good gets a proper trial before anyone changes the network.</p>
+</section>
+
+<section id="reviews">
+<h2>What the reviewers changed</h2>
+<p>Three independent reviews ran on the work, each read-only: GPT-6 Astra twice and Claude Fable 5.1 once. Each one changed something real.</p>
+<div class="tbl"><table>
+<thead><tr><th>Review</th><th>Biggest finding</th><th>What changed</th></tr></thead>
+<tbody>
+<tr><td>Astra, analysis (2 Oct)</td><td>The "pretend result" step dropped measurement noise. The batch had 6 formulations, over the brief's limit of 5</td><td>Rewrote the GP maths with a test script. Slot 4 moved. Dropped the second control. Rewrote overclaims</td></tr>
+<tr><td>Fable 5.1, fixes (2 Oct)</td><td>The model treats RPMI-10 and AR5 as interchangeable, so slot 1's "54% better than E19" means the model cannot tell them apart. The explore pick searched only a 19% sample</td><td>Explore now searches every candidate, which moved slot 3. Added a test that limits the model; picks moved by 2% at most</td></tr>
+<tr><td>Astra, memo (3 Oct)</td><td>The GP's forward ranking is weak too, so "ranking aid" overclaims. "Within noise" is not a decision rule</td><td>Memo now says the GP proposes, it does not forecast. Added the 5-point screening rule and the confirmation run</td></tr>
+</tbody></table></div>
+<p class="src">Full texts: <a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/docs/review_gpt6_astra_2026-10-02.md">Astra 1</a>, <a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/docs/review_fable51_2026-10-02.md">Fable 5.1</a>, <a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/docs/review_gpt6_astra_memo_2026-10-03.md">Astra 2</a>. Every change is logged in <a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/docs/DECISIONS.md">DECISIONS.md</a>.</p>
+</section>
+
+<section id="notes">
+<h2>Notes to own in the interview</h2>
+<p>Say these before the panel does. Each one is a weakness that turns into evidence of judgement once you name it.</p>
+<details><summary>"The model fails the forward test."</summary><p>Yes. Every model missed round 3 by 22 to 29 points, and the GP's forward ranking was weak. That is why I use it only to propose a diverse batch, and why E19 is on the plate. The decision is a same-plate comparison, not a forecast.</p></details>
+<details><summary>"The model only really sees two ingredients."</summary><p>Its RPMI-10 and AR5 settings sit at the upper limit, so it treats them as interchangeable. All four picks hold less AR5 than E19, so the plate tests that assumption directly. Limiting the model moved the picks by 2% at most.</p></details>
+<details><summary>"Your prices are guesses."</summary><p>Partly. Basal media and X-VIVO 15 come from supplier pages. FBS is a search snippet, and FBS is 74 to 80% of the supplemented cost. AR5 has no public price. So cost is a constraint checked across 9 scenarios, and real quotes are the first thing I would buy.</p></details>
+<details><summary>"Why not just pick the top four predictions?"</summary><p>In simulation, always picking the current best was no better than random, and worse on one truth. Mixing roles beat random in 19 to 23 of 30 seeds. That supports mixing roles. It does not prove one exploration slot is the right split.</p></details>
+<details><summary>"What does this mean for Qorium?"</summary><p>PBMC viability is a stand-in. The same loop would run on bovine skin-cell growth and collagen output, with a cheap screening assay paired with an expensive confirmatory one, and real supplier quotes. The schema already supports that without changes.</p></details>
+<details><summary>"How did you work?" (suggested answer, adjust to your own view)</summary><p>I used AI agents for the analysis and code, and ran three independent model reviews against my own work. Each review found real problems, and each fix is logged with the before and after values. That is how I would run a data science team: fast drafts, adversarial review, every change traceable.</p></details>
+</section>
+
 <section id="plan">
 <h2>Reading plan</h2>
 <div class="tbl"><table>
@@ -293,7 +356,9 @@ details p{margin:10px 0 2px}
 <tr><td class="num">2</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12218302/">Narayanan 2025</a>: abstract, Fig. 1, PBMC results</td><td class="num">90 min</td><td>How they set up the blend and the batch</td></tr>
 <tr><td class="num">3</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9541924/">Cosenza 2022</a>: abstract, Fig. 1, results</td><td class="num">60 min</td><td>How cost and two assay types enter the model</td></tr>
 <tr><td class="num">4</td><td><a href="https://distill.pub/2019/visual-exploration-gaussian-processes/">Distill: A Visual Exploration of Gaussian Processes</a></td><td class="num">60 min</td><td>Kernels and length scales, by picture</td></tr>
-<tr><td class="num">5</td><td>reports/exploratory_analysis.md in the repo</td><td class="num">30 min</td><td>Can you explain each figure out loud?</td></tr>
+<tr><td class="num">5</td><td><a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/reports/exploratory_analysis.md">Exploratory analysis</a></td><td class="num">30 min</td><td>Can you explain each figure out loud?</td></tr>
+<tr><td class="num">6</td><td><a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/reports/memo.pdf">The memo</a> (4 pages)</td><td class="num">40 min</td><td>Could you defend every number in it?</td></tr>
+<tr><td class="num">7</td><td><a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/reports/walkthrough.md">Walkthrough script</a> and likely questions</td><td class="num">60 min</td><td>Say it out loud twice, timed at 8 minutes</td></tr>
 </tbody></table></div>
 </section>
 
