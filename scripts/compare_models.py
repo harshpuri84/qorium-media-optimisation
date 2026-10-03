@@ -244,8 +244,8 @@ def ei(mu, sd, best):
 
 def four_role(gp, cand, X):
     """The deployed policy from select_batch.py (imported here to avoid a circular import)."""
-    from select_batch import select
-    return select(gp, X, cand, base_prices())
+    from select_batch import FOUR_ROLE, select
+    return select(gp, X, cand, base_prices(), roles=FOUR_ROLE, cost_tolerance=0.0)
 
 
 POLICIES = {'Random (feasible)': None, 'GP greedy (exploit only)': greedy,

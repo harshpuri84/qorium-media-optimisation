@@ -1,0 +1,13 @@
+batch,recipe,predicted_viability_pct,latent_sd_pct_points,cost_eur_per_litre_base,corr_with_e19
+chosen: DMEM titration + 2 model picks,40/22/21/17,66.3,7.3,178.19,0.576
+chosen: DMEM titration + 2 model picks,50/18/18/14,62.5,7.4,178.69,0.515
+chosen: DMEM titration + 2 model picks,43/56/1/0,65.9,5.5,173.92,0.201
+chosen: DMEM titration + 2 model picks,44/21/28/7,69.1,7.2,178.32,0.852
+earlier: four-role GP batch,44/26/19/11,70.2,5.2,177.69,0.981
+earlier: four-role GP batch,43/56/1/0,65.9,5.5,173.92,0.201
+earlier: four-role GP batch,37/33/30/0,60.1,9.1,176.82,0.369
+earlier: four-role GP batch,45/21/27/7,69.1,6.9,178.31,0.882
+reviewer: E10 + E14 re-runs + exploit + cheaper,24/39/0/36,35.9,6.5,176.04,-0.015
+reviewer: E10 + E14 re-runs + exploit + cheaper,27/37/0/36,35.7,6.5,176.35,-0.016
+reviewer: E10 + E14 re-runs + exploit + cheaper,44/26/19/11,70.2,5.2,177.69,0.981
+reviewer: E10 + E14 re-runs + exploit + cheaper,43/56/1/0,65.9,5.5,173.92,0.201

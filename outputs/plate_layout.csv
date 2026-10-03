@@ -12,40 +12,75 @@ A10,PBS edge,edge,PBS against evaporation,
 A11,PBS edge,edge,PBS against evaporation,
 A12,PBS edge,edge,PBS against evaporation,
 B1,PBS edge,edge,PBS against evaporation,
-B6,formulation,slot 1,Exploit,2
-B7,formulation,slot 3,Explore,3
-B8,formulation,slot 1,Exploit,3
-B11,formulation,slot 1,Exploit,4
+B2,formulation,slot 3,Cheaper alternative,5
+B3,formulation,slot 2,"DMEM titration, 50%",6
+B4,formulation,slot 3,Cheaper alternative,6
+B5,formulation,slot 1,"DMEM titration, 40%",5
+B6,formulation,slot 1,"DMEM titration, 40%",6
+B7,formulation,slot 4,Expected improvement,6
+B8,formulation,anchor,PBMC-E19 re-run (historical 81.0%),5
+B9,formulation,slot 2,"DMEM titration, 50%",5
+B10,formulation,anchor,PBMC-E19 re-run (historical 81.0%),6
+B11,formulation,slot 4,Expected improvement,5
 B12,PBS edge,edge,PBS against evaporation,
 C1,PBS edge,edge,PBS against evaporation,
-C2,formulation,slot 3,Explore,1
-C3,formulation,slot 2,Cheaper alternative,1
-C5,formulation,slot 2,Cheaper alternative,2
-C7,formulation,anchor,PBMC-E19 re-run (historical 81.0%),3
-C8,formulation,slot 2,Cheaper alternative,3
-C10,control,no-cell blank,no-cell blank,1
-C11,formulation,anchor,PBMC-E19 re-run (historical 81.0%),4
+C2,control,dead-cell control (heat-killed),dead-cell control (heat-killed),
+C3,control,no-cell blank,no-cell blank,
+C4,formulation,slot 4,Expected improvement,11
+C5,formulation,slot 2,"DMEM titration, 50%",11
+C6,formulation,slot 3,Cheaper alternative,11
+C7,control,no-cell blank,no-cell blank,
+C8,control,dead-cell control (heat-killed),dead-cell control (heat-killed),
+C9,formulation,slot 1,"DMEM titration, 40%",11
+C11,formulation,anchor,PBMC-E19 re-run (historical 81.0%),11
 C12,PBS edge,edge,PBS against evaporation,
 D1,PBS edge,edge,PBS against evaporation,
+D2,formulation,slot 4,Expected improvement,2
+D3,formulation,slot 4,Expected improvement,1
+D4,formulation,slot 2,"DMEM titration, 50%",1
+D5,formulation,anchor,PBMC-E19 re-run (historical 81.0%),1
+D6,formulation,slot 3,Cheaper alternative,1
+D7,formulation,slot 2,"DMEM titration, 50%",2
+D8,formulation,slot 1,"DMEM titration, 40%",1
+D9,formulation,slot 3,Cheaper alternative,2
+D10,formulation,slot 1,"DMEM titration, 40%",2
+D11,formulation,anchor,PBMC-E19 re-run (historical 81.0%),2
 D12,PBS edge,edge,PBS against evaporation,
 E1,PBS edge,edge,PBS against evaporation,
-E4,control,no-cell blank,no-cell blank,2
-E5,formulation,slot 4,Expected improvement,2
-E7,formulation,slot 4,Expected improvement,3
-E9,formulation,slot 3,Explore,4
-E10,formulation,slot 4,Expected improvement,4
+E2,formulation,slot 3,Cheaper alternative,7
+E3,formulation,slot 1,"DMEM titration, 40%",8
+E4,formulation,anchor,PBMC-E19 re-run (historical 81.0%),7
+E5,formulation,slot 1,"DMEM titration, 40%",7
+E6,formulation,slot 2,"DMEM titration, 50%",8
+E7,formulation,slot 4,Expected improvement,8
+E8,formulation,slot 2,"DMEM titration, 50%",7
+E9,formulation,slot 3,Cheaper alternative,8
+E10,formulation,anchor,PBMC-E19 re-run (historical 81.0%),8
+E11,formulation,slot 4,Expected improvement,7
 E12,PBS edge,edge,PBS against evaporation,
 F1,PBS edge,edge,PBS against evaporation,
-F2,formulation,slot 4,Expected improvement,1
-F9,formulation,slot 2,Cheaper alternative,4
-F11,control,dead-cell control (heat-killed),dead-cell control (heat-killed),2
+F2,formulation,anchor,PBMC-E19 re-run (historical 81.0%),9
+F3,formulation,slot 3,Cheaper alternative,10
+F4,formulation,slot 1,"DMEM titration, 40%",9
+F5,formulation,slot 4,Expected improvement,10
+F6,formulation,slot 4,Expected improvement,9
+F7,formulation,slot 1,"DMEM titration, 40%",10
+F8,formulation,slot 2,"DMEM titration, 50%",10
+F9,formulation,slot 2,"DMEM titration, 50%",9
+F10,formulation,anchor,PBMC-E19 re-run (historical 81.0%),10
+F11,formulation,slot 3,Cheaper alternative,9
 F12,PBS edge,edge,PBS against evaporation,
 G1,PBS edge,edge,PBS against evaporation,
-G2,formulation,anchor,PBMC-E19 re-run (historical 81.0%),1
-G3,formulation,slot 1,Exploit,1
-G4,control,dead-cell control (heat-killed),dead-cell control (heat-killed),1
-G5,formulation,slot 3,Explore,2
-G6,formulation,anchor,PBMC-E19 re-run (historical 81.0%),2
+G2,formulation,slot 4,Expected improvement,4
+G3,formulation,anchor,PBMC-E19 re-run (historical 81.0%),3
+G4,formulation,slot 1,"DMEM titration, 40%",3
+G5,formulation,slot 2,"DMEM titration, 50%",3
+G6,formulation,slot 4,Expected improvement,3
+G7,formulation,slot 1,"DMEM titration, 40%",4
+G8,formulation,slot 2,"DMEM titration, 50%",4
+G9,formulation,slot 3,Cheaper alternative,3
+G10,formulation,anchor,PBMC-E19 re-run (historical 81.0%),4
+G11,formulation,slot 3,Cheaper alternative,4
 G12,PBS edge,edge,PBS against evaporation,
 H1,PBS edge,edge,PBS against evaporation,
 H2,PBS edge,edge,PBS against evaporation,

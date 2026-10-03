@@ -1,115 +1,103 @@
-# Next batch: four blends plus one anchor
+# Next batch: two DMEM steps, two model picks, one anchor
 
 Regenerate with `python scripts/select_batch.py`. Outputs:
 
-- `outputs/next_experiments.csv`: the four recipes and the evidence for each.
-- `outputs/plate_formulations.csv`: dispensing volumes for all five formulations.
-- `reports/tables/batch_stability.csv`: sensitivity reruns.
-- `reports/tables/batch_threshold_stress.csv`: threshold stress tests.
+- `outputs/next_experiments.csv`: the four new recipes and the evidence for each.
+- `outputs/plate_formulations.csv`, `outputs/plate_layout.csv`: dispensing volumes and the 96-well map.
+- `outputs/recipe_manifest.csv`, `outputs/results_template.csv`: approvable run list and per-well results sheet.
+- `reports/tables/batch_stability.csv`, `reports/tables/batch_threshold_stress.csv`: sensitivity reruns.
+- `reports/tables/batch_alternatives.csv`: the batches considered and rejected.
 
 ## Recommendation
 
-The batch has five formulations, the most the brief allows: four new blends plus a re-run of E19.
+| Slot | Role | DMEM | RPMI-10 | X-VIVO 15 | AR5 | EUR/L base (scenario range) | Model estimate (80% range) | P(above E19) | Corr. with E19 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | DMEM step down (designed) | 40% | 22% | 21% | 17% | 178.19 (136.53 to 251.24) | 66.3 (48.4 to 84.1) | 0.26 | 0.576 |
+| 2 | DMEM step up (designed) | 50% | 18% | 18% | 14% | 178.69 (132.99 to 250.23) | 62.5 (44.6 to 80.4) | 0.12 | 0.515 |
+| 3 | Cheaper alternative (model) | 43% | 56% | 1% | 0% | 173.92 (107.40 to 240.45) | 65.9 (49.2 to 82.6) | 0.27 | 0.201 |
+| 4 | Expected improvement (model) | 44% | 21% | 28% | 7% | 178.32 (134.64 to 234.92) | 69.1 (51.3 to 86.8) | 0.39 | 0.852 |
+| Anchor | E19 re-run | 44.6 mL | 20.1 mL | 19.6 mL | 15.7 mL | 178.43 | 70.1 (observed 81.0) | | 1 |
 
-| Slot | Role | DMEM | RPMI-10 | X-VIVO 15 | AR5 | EUR/L base (scenario range) | Predicted viability (80% range of measured mean) | P(true viability above E19) |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Exploit | 44% | 26% | 19% | 11% | 177.69 (130.65 to 245.04) | 70.2 (53.6 to 86.8) | 0.54 |
-| 2 | Cheaper alternative | 43% | 56% | 1% | 0% | 173.92 (107.40 to 240.45) | 65.9 (49.2 to 82.6) | 0.27 |
-| 3 | Explore | 37% | 33% | 30% | 0% | 176.82 (129.78 to 223.86) | 60.1 (41.1 to 79.2) | 0.12 |
-| 4 | Expected improvement | 45% | 21% | 27% | 7% | 178.31 (133.96 to 235.59) | 69.1 (51.5 to 86.7) | 0.38 |
-| Anchor | E19 re-run | 44.6 mL | 20.1 mL | 19.6 mL | 15.7 mL | 178.43 | historical 81.0 | n/a |
+Each formulation gets 11 wells: 55 formulation wells, 2 no-cell blanks and 2 heat-killed controls in the 60 interior wells, and a PBS ring on the edge.
 
-The anchor volumes are per 100 mL and sum to exactly 100.0 mL. The published E19 recipe sums to 100.1%, so it was normalised before rounding.
+- **Model estimate.** Posterior mean of the pooled-noise GP. The model shrinks E19's observed 81.0 to 70.1, so compare picks with 70.1. The forward test missed round 3 by up to 29 points, so these are conditional on the model.
+- **P(above E19).** From the joint posterior of each pick and E19. It ignores shifts between batches.
+- **Cost.** Model picks cost no more than E19 (EUR 178.43/L) at base prices and in at least 6 of 9 price scenarios (slot 3: 7, slot 4: 8). The designed steps may cost up to 1% more; slot 2 is EUR 0.26/L over at base prices and meets the ceiling in 6 of 9 scenarios, slot 1 in 3 of 9.
 
-How to read the table:
+## How the batch was built
 
-- **Cost.** Every pick meets the base ceiling of EUR 178.43/L and the cost rule in at least 7 of 9 price scenarios. The prices are provisional (see `reports/model_comparison.md`).
-- **Predicted viability.** This is the GP's posterior mean. The 80% range is for one measured recipe mean. The forward-round check shows these ranges miss shifts between rounds of up to 29 points. Treat them as conditional on the model, not as forecasts.
-- **P(true viability above E19).** This comes from the joint posterior of each pick and E19, so it includes E19's own uncertainty and the correlation between the two. It is a probability under the model. It does not account for a batch effect between rounds. Slot 1 is 0.981 correlated with E19 under the model, so its 0.54 means the model cannot tell the two apart. It is not evidence that slot 1 is better. Treating the two as independent would give 0.51, 0.29, 0.17 and 0.45.
+1. **Designed DMEM steps.** E19's RPMI-10 : X-VIVO 15 : AR5 ratios are held fixed and DMEM moves to 40% and 50%, rounded to whole percentages. DMEM is the only component with a clear signal, and the GP's DMEM length scale sits at its floor of 0.1, so the model claims a sharp peak near 44% that nobody has tested on either side.
+2. **Pending first.** The E19 anchor and both designed steps are conditioned on as pending results before the model chooses, so the model picks look away from them.
+3. **Cheaper alternative.** Highest posterior mean at least 2.5% below E19's cost.
+4. **Expected improvement.** Highest expected improvement over the incumbent posterior mean (70.2), with every earlier slot pending.
 
-![Next batch](figures/08_next_batch.png)
-
-The figure projects the recipes onto DMEM and X-VIVO 15. Two points that look close here can still differ in RPMI-10 and AR5.
+Every pick keeps at least 5% of volume from every tested recipe, the single media and every other pick.
 
 ## Why each recipe
 
-1. **Exploit: 44 / 26 / 19 / 11.** This is the highest posterior mean among recipes at least 5% of volume away from every tested recipe. It keeps the round-3 DMEM level and moves volume from AR5 to RPMI-10. Expected viability is level with E19 (P = 0.54), at EUR 0.74/L less. It is the most stable pick: unchanged in 10 of 18 reruns, median shift 0%. The per-recipe noise model moves it 26% of volume. The model treats RPMI-10 and AR5 as interchangeable (both length scales sit at the 10.0 ceiling), so this pick tests that assumption rather than relying on it.
+1. **DMEM 40%: 40 / 22 / 21 / 17.** Tests the lower side of the claimed peak. The model predicts 66.3, a 3.8-point drop from E19's 70.1. If viability holds, the peak is broader than the model thinks. FBS share 6.2%, slightly below E19's 6.5%.
+2. **DMEM 50%: 50 / 18 / 18 / 14.** Tests the upper side. The model predicts 62.5. A strict E19 ceiling would exclude it by EUR 0.26/L, a gap smaller than the uncertainty in the FBS price, which is why the designed steps carry a 1% tolerance.
+3. **Cheaper: 43 / 56 / 1 / 0.** Asks whether RPMI-10 can replace both serum-free media. Saves EUR 4.51/L (2.53%). The models disagree on it (51.9 with per-recipe noise against 65.9). It raises FBS to 9.9%, so it is not a step toward an animal-free medium. It depends on prices: at half-price FBS the cheaper pick becomes 44 / 26 / 19 / 11.
+4. **Expected improvement: 44 / 21 / 28 / 7.** Keeps the round-3 DMEM level and moves volume from AR5 to X-VIVO 15. AR5 is the medium with no public price, so a pass here would remove the least certain cost from the problem. Correlation with E19 is 0.852, so it is the pick most likely to read close to the anchor.
 
-2. **Cheaper alternative: 43 / 56 / 1 / 0.** This is the highest posterior mean among recipes at least 2.5% below the ceiling. It saves EUR 4.51/L at base prices, which is small. Its value is that it contains almost no serum-free media, so if it performs, AR5's unknown price stops mattering. The models disagree on it: 65.9% for the main GP, 51.9% with per-recipe noise. One measurement will narrow that, but will not settle it given noise of about 12 points. This pick depends on prices. At half-price FBS the cheaper pick becomes 44 / 31 / 19 / 6.
+## Batches considered
 
-3. **Explore: 37 / 33 / 30 / 0.** Of all recipes that could still be the best, this one most reduces posterior variance across that whole region. Every candidate in the region is scored, with no sampling. Moving DMEM from 44% to 37% also changes the other three fractions, so it is a mixture contrast against the round-3 cluster, not a test of DMEM alone. It checks whether good results extend beyond the narrow 43.96% to 44.94% DMEM band of round 3. It is not stable across model variants: 3 of 18 reruns unchanged, and the no-E14 model moves it 40% of volume. That is expected, because exploration chases uncertainty and uncertainty depends on the model. Its expected viability is the lowest of the four, and that is the cost of the information.
-
-4. **Expected improvement: 45 / 21 / 27 / 7.** This has the highest expected improvement over the incumbent posterior mean (70.2%) while slots 1 to 3 are pending. It shifts volume from AR5 to X-VIVO 15 at the round-3 DMEM level. It has the largest upside under alternative fits: 77.6% with per-recipe noise and 86.2% without E14. It moves a median 7% of volume across 18 reruns, and at most 12% except under the three-coordinate fit without DMEM (72%).
-
-## Exploration and exploitation
-
-- **Slots 1 and 4 exploit.** They stay near the best region and try to beat E19.
-- **Slot 2 trades** a little expected viability for lower cost and for less exposure to AR5's unknown price.
-- **Slot 3 explores.**
-
-In the simulation, with the same eligibility rules and measurement errors for every policy, only UCB beats random reliably, and only at low noise. At the fitted noise of 11.83 points no policy differs from random, and the blend the lab would pick from noisy results ends 4.7 to 7.9 points below the best available. The four-role split is therefore a design choice for readability and cost coverage, not a simulation result. The simulation's clearer message is that confirmation, not candidate choice, limits the outcome at this noise level.
-
-Batch-level checks:
-
-| Check | Result |
-| --- | --- |
-| Smallest gap between two picks | 9.0% of volume |
-| Smallest gap to any tested recipe | 5.9% (slot 1 vs E24) |
-| AR5 share in the picks | 11%, 0%, 0%, 7% |
+| Batch | Recipes | Why not chosen |
+| --- | --- | --- |
+| Earlier four-role GP batch | 44/26/19/11, 43/56/1/0, 37/33/30/0, 45/21/27/7 | Slot 1 was 0.981 correlated with E19 and predicted at 70.2 against 70.1: the model priced it at nothing and the screen could not resolve it. The explore pick depended on the model (it moved up to 40% of volume between fits) |
+| Reviewer's diagnostic batch | E10, E14, 44/26/19/11, 43/56/1/0 | Re-running E10 and E14 would test whether their 40.6-point gap reproduces. E14's own readings agree closely (SD 2.70), which points to a technical failure; re-running it mostly teaches about the lab on that day, not about the medium. I rejected it and logged why in `docs/DECISIONS.md` |
+| Chosen | 40/22/21/17, 50/18/18/14, 43/56/1/0, 44/21/28/7 | Tests the one signal in the data, keeps a cost test and an AR5 test, and uses idle wells for replicates |
 
 ## Robustness
 
-**Model and price reruns.** Each row reruns the full selection with one change. A cell is the volume (%) separating the rerun's pick from the main pick.
+**Model and price reruns.** Each row reruns the selection with one change. A cell is the volume (%) separating the rerun's pick from the main pick. The designed steps never move, so only the model slots are shown.
 
-| Rerun | Slot 1 | Slot 2 | Slot 3 | Slot 4 |
-| --- | --- | --- | --- | --- |
-| GP with per-recipe noise | 26 | 23 | 31 | 12 |
-| Length-scale floor 0.05 | 1 | 1 | 11 | 5 |
-| Length-scale floor 0.2 | 7 | 1 | 27 | 7 |
-| Length-scale ceiling 3.0 | 0 | 0 | 0 | 2 |
-| Noise scaled by reading count | 0 | 0 | 0 | 2 |
-| Three coordinates, without DMEM | 18 | 16 | 37 | 72 |
-| Three coordinates, without X-VIVO 15 | 5 | 1 | 13 | 9 |
-| Without E02 | 7 | 0 | 4 | 9 |
-| Without E14 | 7 | 1 | 40 | 7 |
-| Anchor treated as pending | 0 | 0 | 0 | 1 |
-| 8 other price scenarios (median) | 0 | 25 | 21 | 7 |
+| Rerun | Slot 3 | Slot 4 |
+| --- | --- | --- |
+| GP with per-recipe noise | 23 | 34 |
+| Noise scaled by reading count | 0 | 0 |
+| Length-scale floor 0.05 | 1 | 4 |
+| Length-scale floor 0.2 | 1 | 7 |
+| Length-scale ceiling 3.0 | 0 | 0 |
+| Three coordinates, without DMEM | 16 | 72 |
+| Three coordinates, without X-VIVO 15 | 1 | 8 |
+| Without E02 | 0 | 8 |
+| Without E14 | 1 | 1 |
+| E19 not counted as pending | 0 | 1 |
+| Model picks allowed 1% over E19's cost | 0 | 9 |
+| 8 other price scenarios (median) | 30 | 6 |
 
-**Threshold stress.** One selection rule changes at a time, with the GP and prices fixed.
+**Threshold stress.** One rule changes at a time.
 
-| Setting | Slot 1 | Slot 2 | Slot 3 | Slot 4 |
-| --- | --- | --- | --- | --- |
-| Cheaper margin 0% | 0 | 25 | 1 | 2 |
-| Cheaper margin 5% | 0 | 44 | 1 | 1 |
-| Minimum gap 3% | 2 | 0 | 0 | 0 |
-| Minimum gap 8% | 4 | 0 | 1 | 0 |
-| Cost rule in 5 of 9 scenarios | 0 | 0 | 0 | 0 |
-| Cost rule in 7 of 9 scenarios | 0 | 0 | 1 | 0 |
-| Single media allowed | 0 | 0 | 0 | 0 |
+| Setting | Slot 3 | Slot 4 |
+| --- | --- | --- |
+| Cheaper margin 0% | 30 | 1 |
+| Cheaper margin 5% | 44 | 0 |
+| Minimum gap 3% or 8% | 0 | 0 |
+| Cost rule in 5 or 7 of 9 scenarios | 0 | 0 |
+| Single media allowed | 0 | 0 |
+| Model picks allowed 2% over E19's cost | 0 | 10 |
 
-What the robustness checks show:
+What this shows:
 
-- Slots 1 and 4 hold under most changes. The exception is the three-coordinate fit without DMEM, which moves all four picks (16 to 72%). Four fractions carry one redundant coordinate, so which three the kernel sees is a modelling choice; the four-coordinate fit is kept and the choice is flagged.
-- Slot 2 depends on prices and on the 2.5% margin. At a 5% margin it becomes 0 / 92 / 0 / 8, which is nearly pure RPMI-10. The 2.5% margin is a judgement call. A reviewer can fairly ask for a different number.
-- Slot 3 depends on the model, especially on whether E14 is in the fit. It does not depend on the thresholds.
-- Excluding single media is an operational rule. They were measured on a separate comparison sheet whose context does not fully match the main data. Allowing them moves no pick.
+- **Slot 4 is stable** except under the per-recipe noise model (34%) and the fit without DMEM as a coordinate (72%). The direction, less AR5 and more X-VIVO 15 at about 44% DMEM, holds in every other rerun.
+- **Slot 3 depends on prices and on the 2.5% margin.** At a 5% margin it becomes 0/92/0/8, nearly pure RPMI-10. The margin is a judgement call.
+- **Coordinate choice matters.** Four fractions summing to one carry a redundant coordinate. Dropping DMEM hides the one component with signal inside the other three and changes the kernel's smoothness assumptions; dropping X-VIVO 15 changes little. I keep four coordinates with a length-scale floor; log-ratio coordinates are the standard alternative for the next round.
 
-## Model facts to state in the memo
+## Exploration and exploitation
 
-- **Length scales:** DMEM 0.1 (at its floor), RPMI-10 10 and AR5 10 (both at the ceiling), X-VIVO 15 0.326. A short length scale means the model expects viability to change quickly along that component. The model is effectively two-dimensional. It sees a sharp DMEM response, driven by the round-3 cluster, and treats RPMI-10 and AR5 as interchangeable. Slots 1, 2 and 4 all move volume out of AR5, so the batch tests that assumption. Capping the ceiling at 3.0 moves the picks by at most 2% of volume.
-- **Noise:** 11.83 points SD on a recipe mean, against a typical reading SEM of 4.97. The difference covers run-to-run variation plus anything the model gets wrong.
-- **Ranking, not forecasting:** the forward-round check missed round 3 by 22 to 29 points. Compare the picks with the E19 re-run on the same plate, not with E19's historical 81%.
+The batch explores where the model is most confident and least tested: the claimed sharp DMEM peak. That is a designed contrast, not a model pick, because the simulation detected no advantage for any acquisition policy at the fitted noise level, and the blend picked from single noisy readings ended 4.7 to 7.9 points below the best available. The two model picks cover cost (slot 3) and the most promising change at the current DMEM level (slot 4). Eleven wells per arm address the noise directly.
 
 ## What the lab result would tell us
 
-The plate is read only after the assay owner confirms it is valid against criteria set in advance (missing wells, spread, anchor viability, preparation records). An invalid or inconclusive plate is repeated with the same five formulations. On a valid plate:
+The plate is read only after the assay owner confirms it is valid against criteria set in advance. An invalid plate is repeated with the same five formulations.
 
-| Outcome | Interpretation |
+| Valid plate shows | Next step |
 | --- | --- |
-| E19 near its historical 81% and slot 1 passes the screen | The round-3 region holds up on a new plate. Some AR5 volume may move to RPMI-10; confirmation decides |
-| E19 well below 81% | Judge the picks against this plate's E19. Review preparation and assay conditions; one low anchor does not prove a historical batch effect |
-| Slot 3 close to slots 1 and 4 | Good results are not confined to the 44% DMEM band. Widen the search next round |
-| Slot 2 passes the screen | RPMI-10 can stand in for the serum-free media in this system. It raises FBS to 9.9% (E19: 6.5%), so it is not a step toward an animal-free medium |
-| Slot 4 passes or beats E19 | Moving volume from AR5 to X-VIVO 15 is a lead |
+| Viability falls off at 40% or 50% DMEM | The DMEM peak is real; search near 44% and relax the other three components |
+| 40% and 50% within the screen of E19 | The peak is broader than the model thinks; widen the DMEM range next round |
+| Slot 3 not excluded | Candidate for confirmation; not a step toward animal-free media |
+| Slot 4 not excluded | AR5 may be replaceable by X-VIVO 15; confirm before acting on it |
+| E19 far below 80 | Review preparation and assay conditions before the next round |
 
-The screen passes a blend whose mean is no more than 5 points below the same-plate E19, at equal or lower cost. Four wells per formulation from one cell and one medium preparation give about plus or minus 13 points on that difference (t, 6 degrees of freedom), so the screen only filters. One finalist, two at most, goes to a paired confirmation against concurrent E19 across independent preparations, sized from the preparation-level variance the pilot measures. For Qorium, PBMC viability and FBS-supplemented media only stand in for the method. A real campaign would use an approved animal-product-free ingredient list and Qorium's own cell expansion, collagen output and quality assays.
+A blend passes the screen if its mean is no more than 5 points below the same-plate E19 at equal or lower cost. With 11 wells per arm, the 90% interval on that difference is about plus or minus 7 points (t, 20 degrees of freedom): a blend equal to E19 passes 89% of the time, one 10 points worse 11%. A pass means "not excluded"; a lead needs a mean above E19 by more than the interval. This plate measures variation within one cell and medium preparation only. Independent repeats come first; they set the size of the confirmation run.

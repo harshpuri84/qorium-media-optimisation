@@ -19,7 +19,7 @@ This notebook follows the memo (`reports/memo.pdf`) in order and shows the evide
 
 **Question.** Which 3 to 5 media formulations should the lab run next, balancing viability, cost, uncertainty, noise, feasibility and batch size?
 
-**Answer.** Four new blends of DMEM-10, RPMI-10, X-VIVO 15 and AR5, plus a same-plate re-run of the best historical blend, E19."""),
+**Answer.** Two designed DMEM steps (40% and 50% at E19's other ratios), two model picks (a cheaper blend and an AR5-to-X-VIVO swap), plus a same-plate re-run of the best historical blend, E19. Eleven wells each."""),
     code("""from pathlib import Path
 import sys
 import pandas as pd
@@ -72,7 +72,7 @@ print('noise SD on a recipe mean:', round(float(np.sqrt(gp.noise_new) * gp.ys), 
     code("""fig('07_policy_simulation.png', 900)"""),
     md("""## 7. The recommendation
 
-One slot per role, chosen in sequence. After each pick the GP conditions on a pending result, so the exploring slots look elsewhere."""),
+Two designed DMEM steps test the model's sharpest assumption. The anchor and the steps are then treated as pending, and the GP picks a cheaper blend and the best expected improvement."""),
     code("""rec = pd.read_csv(ROOT / 'outputs/next_experiments.csv')
 display(rec[['slot', 'role', 'dmem_pct', 'rpmi_10_pct', 'xvivo_pct', 'ar5_pct', 'cost_eur_per_litre_base',
              'within_ceiling_scenarios', 'predicted_viability_pct', 'measured_mean_80pct_low',
@@ -85,7 +85,7 @@ Each row reruns the full selection with one change. Cells are the volume (%) sep
 pd.read_csv(ROOT / 'reports/tables/batch_threshold_stress.csv').iloc[:, :5]"""),
     md("""## 9. The plate
 
-Five formulations, four wells each spread across four column blocks, a PBS edge ring, two blanks and two heat-killed controls. The screen passes a blend that is no more than 5 points below the same-plate E19 at equal or lower cost. The screen only filters: four wells give about plus or minus 13 points on the difference. One finalist then goes to a paired confirmation against concurrent E19 across independent cell and medium preparations, sized from the variance this pilot measures."""),
+Five formulations, eleven wells each in randomised row blocks, a PBS edge ring, two blanks and two heat-killed controls. The screen passes a blend that is no more than 5 points below the same-plate E19 at equal or lower cost. With 11 wells per arm the 90% interval on the difference is about plus or minus 7 points; a pass means "not excluded". One finalist then goes to a paired confirmation against concurrent E19 across independent cell and medium preparations, sized from the variance this pilot measures."""),
     code("""display(pd.read_csv(ROOT / 'outputs/plate_formulations.csv'))
 pd.read_csv(ROOT / 'outputs/plate_layout.csv').head(8)"""),
 ]

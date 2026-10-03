@@ -1,11 +1,13 @@
-"""Select the next four blends: one slot per role, chosen in sequence with pending-point conditioning.
+"""Select the next batch: two designed DMEM contrasts plus two model picks, with an E19 anchor.
 
-Slots: 1 exploit (highest posterior mean), 2 cheaper alternative, 3 explore (largest integrated
-posterior-variance reduction over recipes that could still be the best), 4 expected improvement over
-the incumbent posterior mean once slots 1 to 3 are pending. Eligibility: base cost rule, the cost rule
-in at least MIN_SCENARIOS_OK of 9 price scenarios, 1% dispensing steps, and a minimum volume gap from
-every historical recipe, from the single-media controls (an operational exclusion, see DECISIONS.md)
-and from each other. The plate holds five formulations: these four plus a re-run of E19.
+Designed slots: E19's RPMI-10 : X-VIVO 15 : AR5 ratios held fixed, DMEM moved to 40% and 50%. DMEM is the only
+component with a clear signal in the data, and the GP's DMEM length scale sits at its floor, so these two
+points test the model's sharpest assumption directly. Model slots, chosen with the anchor and the designed
+points pending: cheaper alternative (highest posterior mean at least CHEAP_DISCOUNT below E19's cost) and
+expected improvement over the incumbent posterior mean. The designed points may cost up to DESIGN_TOLERANCE
+more than E19. Model picks must cost no more than E19 at base prices and in at least MIN_SCENARIOS_OK of 9 price scenarios, 1% dispensing steps, and a minimum volume
+gap from every historical recipe, the single media and each other. The four-role policy (exploit, cheaper,
+explore, EI) remains available for the policy simulation and the sensitivity comparison.
 """
 import csv
 from pathlib import Path
@@ -24,15 +26,34 @@ ROOT = Path(__file__).resolve().parents[1]
 SEED = 20261002
 Z80 = norm.ppf(0.9)
 SINGLE_MEDIA = np.eye(4)
-REPLICATES = 4
-DEFAULTS = dict(cheap_discount=0.025, min_gap_pct=5.0, min_scenarios_ok=6, exclude_single_media=True)
+REPLICATES = 11
+DMEM_LEVELS = (0.40, 0.50)
+DESIGN_TOLERANCE = 0.01   # designed DMEM points may cost up to 1% more than E19 (50% DMEM is EUR 0.26/L over)
+DEFAULTS = dict(cheap_discount=0.025, min_gap_pct=5.0, min_scenarios_ok=6, exclude_single_media=True,
+                cost_tolerance=0.0)
 CHUNK = 2000
-ROLES = [
-    ('Exploit', 'highest posterior mean viability'),
-    ('Cheaper alternative', 'highest posterior mean at least {cheap_discount:.1%} below the cost ceiling'),
-    ('Explore', 'largest integrated posterior-variance reduction over recipes that could still be the best'),
-    ('Expected improvement', 'highest expected improvement over the incumbent posterior mean, slots 1 to 3 pending'),
-]
+RULES = {
+    'Exploit': 'highest posterior mean viability',
+    'Cheaper alternative': 'highest posterior mean at least {cheap_discount:.1%} below E19 cost',
+    'Explore': 'largest integrated posterior-variance reduction over recipes that could still be the best',
+    'Expected improvement': 'highest expected improvement over the incumbent posterior mean, earlier slots pending',
+}
+FOUR_ROLE = ['Exploit', 'Cheaper alternative', 'Explore', 'Expected improvement']
+MODEL_ROLES = ['Cheaper alternative', 'Expected improvement']
+
+
+def to_hundredths(f):
+    """Round fractions to whole percentages, largest remainder, summing to exactly 100."""
+    t = np.asarray(f, float) * 100
+    base = np.floor(t)
+    base[np.argsort(-(t - base))[:int(round(100 - base.sum()))]] += 1
+    return base / 100
+
+
+def titration(ref, levels=DMEM_LEVELS):
+    """Recipes with DMEM at each level and the other three components in the reference's ratios."""
+    rest = ref[1:] / ref[1:].sum()
+    return np.array([to_hundredths(np.r_[d, (1 - d) * rest]) for d in levels])
 
 
 def gap_pct(A, B):
@@ -57,23 +78,29 @@ def variance_reduction(model, cand, mask):
 
 
 def eligible(X, cand, prices, opts):
+    tol = 1 + opts['cost_tolerance']
     cost = blend_cost(cand, prices)
     cap = ceiling(prices)
     tested = np.vstack([X, SINGLE_MEDIA]) if opts['exclude_single_media'] else X
-    robust = sum(blend_cost(cand, p) <= ceiling(p) + 1e-9 for p in scenario_prices().values()) >= opts['min_scenarios_ok']
-    ok = (cost <= cap + 1e-9) & robust & (gap_pct(cand, tested).min(1) >= opts['min_gap_pct'])
+    robust = sum(blend_cost(cand, p) <= ceiling(p) * tol + 1e-9 for p in scenario_prices().values()) >= opts['min_scenarios_ok']
+    ok = (cost <= cap * tol + 1e-9) & robust & (gap_pct(cand, tested).min(1) >= opts['min_gap_pct'])
     return ok, ok & (cost <= cap * (1 - opts['cheap_discount']))
 
 
-def select(model, X, cand, prices, anchor=None, **overrides):
-    """anchor: recipe re-run on the same plate; conditioned on as pending before any slot is chosen."""
+def select(model, X, cand, prices, anchor=None, designed=None, roles=MODEL_ROLES, **overrides):
+    """Pick one candidate per role. anchor and designed recipes are conditioned on as pending first,
+    and every pick keeps the minimum gap from them and from earlier picks."""
     opts = {**DEFAULTS, **overrides}
     ok, cheap = eligible(X, cand, prices, opts)
-    masks = [ok, cheap, ok, ok]
     cur, picks = model, []
-    if anchor is not None:
-        cur = cur.fantasize(np.atleast_2d(anchor))
-    for (role, _), mask in zip(ROLES, masks):
+    fixed = [np.atleast_2d(a) for a in (anchor, designed) if a is not None]
+    if fixed:
+        F = np.vstack(fixed)
+        cur = cur.fantasize(F)
+        ok = ok & (gap_pct(cand, F).min(1) >= opts['min_gap_pct'])
+        cheap = cheap & ok
+    for role in roles:
+        mask = cheap if role == 'Cheaper alternative' else ok
         if picks:
             mask = mask & (gap_pct(cand, cand[picks]).min(1) >= opts['min_gap_pct'])
         if not mask.any():
@@ -131,9 +158,12 @@ def main():
     cand = simplex_grid(1)
     prices = base_prices()
     model = GP('pooled', restarts=10).fit(X, y, sem)
-    picks = select(model, X, cand, prices)
-    P = cand[picks]
     ref = X[ids.index(REFERENCE_ID)]
+    D = titration(ref)
+    picks = select(model, X, cand, prices, anchor=ref, designed=D)
+    P = np.vstack([D, cand[picks]])
+    roles = [(f'DMEM titration, {int(d * 100)}%', f"E19's RPMI-10 : X-VIVO 15 : AR5 ratios with DMEM at {int(d * 100)}%")
+             for d in DMEM_LEVELS] + [(r, RULES[r]) for r in MODEL_ROLES]
 
     mu, sd = model.latent(P)
     obs_sd = np.sqrt(sd ** 2 + model.noise_new * model.ys ** 2)
@@ -142,6 +172,7 @@ def main():
     scen = scenario_prices()
     scen_costs = np.array([blend_cost(P, p) for p in scen.values()])
     scen_ok = np.array([blend_cost(P, p) <= ceiling(p) + 1e-9 for p in scen.values()])
+    assert all(blend_cost(D, prices) <= ceiling(prices) * (1 + DESIGN_TOLERANCE)), 'designed point over tolerance'
     gaps = gap_pct(P, X)
 
     # Alternative fits: (model, X used for eligibility) for prediction checks and full reruns.
@@ -161,22 +192,42 @@ def main():
     }
     var_mu = {k: m.latent(P)[0] for k, (m, _) in variants.items()}
 
-    reruns = {k: cand[select(m, Xv, cand, prices)] for k, (m, Xv) in variants.items()}
-    reruns['anchor_pending'] = cand[select(model, X, cand, prices, anchor=ref)]
+    def batch(m, Xv, p=prices, **kw):
+        return np.vstack([D, cand[select(m, Xv, cand, p, anchor=ref, designed=D, **kw)]])
+    reruns = {k: batch(m, Xv) for k, (m, Xv) in variants.items()}
+    reruns['anchor_not_pending'] = np.vstack([D, cand[select(model, X, cand, prices, designed=D)]])
+    reruns['model_picks_cost_tolerance_1%'] = batch(model, X, cost_tolerance=0.01)
     for name, p in scen.items():
         if name != 'fbs_x1.0_ar5_x1.0':  # identical to base prices
-            reruns[f'price_{name}'] = cand[select(model, X, cand, p)]
+            reruns[f'price_{name}'] = batch(model, X, p)
     shift = {k: np.diag(gap_pct(P, R)) for k, R in reruns.items()}
+
+    # Batches considered: the earlier four-role GP batch and the reviewer's diagnostic batch, for the record.
+    four = cand[select(model, X, cand, prices, roles=FOUR_ROLE, cost_tolerance=0.0)]
+    alt = {'chosen: DMEM titration + 2 model picks': P,
+           'earlier: four-role GP batch': four,
+           'reviewer: E10 + E14 re-runs + exploit + cheaper': np.vstack([X[ids.index('PBMC-E10')], X[ids.index('PBMC-E14')], four[:2]])}
+    alt_rows = []
+    for name, B in alt.items():
+        bm, bs = model.latent(B)
+        for k in range(len(B)):
+            alt_rows.append(dict(batch=name, recipe=recipe(B[k]), predicted_viability_pct=round(float(bm[k]), 1),
+                                 latent_sd_pct_points=round(float(bs[k]), 1),
+                                 cost_eur_per_litre_base=round(float(blend_cost(B[k], prices)), 2),
+                                 corr_with_e19=round(float(model.latent_cov(B[k:k + 1], ref[None])[0, 0] /
+                                                           (bs[k] * model.latent(ref[None])[1][0])), 3)))
+    write(ROOT / 'reports/tables/batch_alternatives.csv', alt_rows)
 
     # Threshold stress: change one selection rule at a time.
     stress_settings = {'cheap_discount_0%': dict(cheap_discount=0.0), 'cheap_discount_5%': dict(cheap_discount=0.05),
                        'min_gap_3%': dict(min_gap_pct=3.0), 'min_gap_8%': dict(min_gap_pct=8.0),
                        'min_scenarios_5_of_9': dict(min_scenarios_ok=5), 'min_scenarios_7_of_9': dict(min_scenarios_ok=7),
                        'single_media_allowed': dict(exclude_single_media=False)}
-    stress = {k: cand[select(model, X, cand, prices, **v)] for k, v in stress_settings.items()}
+    stress_settings['model_cost_tolerance_2%'] = dict(cost_tolerance=0.02)
+    stress = {k: batch(model, X, **v) for k, v in stress_settings.items()}
 
     rows = []
-    for i, (role, rule) in enumerate(ROLES):
+    for i, (role, rule) in enumerate(roles):
         j = int(np.argmin(gaps[i]))
         rows.append(dict(
             slot=i + 1, role=role, selection_rule=rule.format(**DEFAULTS),
@@ -206,25 +257,26 @@ def main():
                       **{f'{c}_ml_per_100ml': v for c, v in zip(COMPONENTS, to_tenths(ref))}))
     write(ROOT / 'outputs/plate_formulations.csv', plate)
 
-    # Plate map on a 96-well plate. Outer ring (rows A and H, columns 1 and 12) holds PBS against evaporation.
-    # Interior columns 2-11 form four column blocks; replicate r of every formulation goes to a random well in
-    # block r, so each formulation spans the plate. Two no-cell blanks and two dead-cell (heat-killed) controls
-    # for AOPI gating take random remaining interior wells. Replicate count is an assumption, see DECISIONS.md.
+    # Plate map on a 96-well plate, randomised complete blocks by row. Outer ring (rows A and H, columns 1 and
+    # 12) holds PBS against evaporation. Interior rows B-G are blocks: five rows carry two wells of every
+    # formulation, one row carries one well of each plus two no-cell blanks and two heat-killed controls for
+    # AOPI gating. Positions within each row are random. 11 wells per formulation is an assumption on cell
+    # and medium supply, see DECISIONS.md.
     rng = np.random.default_rng(SEED)
-    blocks = [range(2, 4), range(4, 7), range(7, 9), range(9, 12)]
-    free = {f'{r}{c}' for r in 'BCDEFG' for c in range(2, 12)}
-    layout = []
-    for q in plate:
-        for rep in range(REPLICATES):
-            options = sorted(w for w in free if int(w[1:]) in blocks[rep])
-            w = str(rng.choice(options))
-            free.discard(w)
-            layout.append(dict(well=w, well_type='formulation', position=q['position'], role=q['role'], replicate=rep + 1))
-    for kind, n in [('no-cell blank', 2), ('dead-cell control (heat-killed)', 2)]:
-        for rep in range(n):
-            w = str(rng.choice(sorted(free)))
-            free.discard(w)
-            layout.append(dict(well=w, well_type='control', position=kind, role=kind, replicate=rep + 1))
+    rows_order = list(rng.permutation(list('BCDEFG')))
+    layout, count = [], {q['position']: 0 for q in plate}
+    for bi, r in enumerate(rows_order):
+        cells = [q for q in plate for _ in range(2 if bi < 5 else 1)]
+        if bi == 5:
+            cells += [dict(position='no-cell blank', role='no-cell blank')] * 2 + \
+                     [dict(position='dead-cell control (heat-killed)', role='dead-cell control (heat-killed)')] * 2
+        cols = rng.permutation(range(2, 12))
+        for q, c in zip(cells, cols):
+            control = q['position'] not in count
+            if not control:
+                count[q['position']] += 1
+            layout.append(dict(well=f'{r}{c}', well_type='control' if control else 'formulation', position=q['position'],
+                               role=q['role'], replicate='' if control else count[q['position']]))
     for w in [f'{r}{c}' for r in 'AH' for c in range(1, 13)] + [f'{r}{c}' for r in 'BCDEFG' for c in (1, 12)]:
         layout.append(dict(well=w, well_type='PBS edge', position='edge', role='PBS against evaporation', replicate=''))
     layout = sorted(layout, key=lambda r: (r['well'][0], int(r['well'][1:])))
@@ -256,7 +308,7 @@ def main():
 
     fig, ax = plt.subplots(figsize=(6.5, 5))
     sc = ax.scatter(X[:, 0] * 100, X[:, 2] * 100, c=y, cmap='viridis', vmin=0, vmax=85, s=45, edgecolor='white')
-    for i, (role, _) in enumerate(ROLES):
+    for i, (role, _) in enumerate(roles):
         ax.scatter(P[i, 0] * 100, P[i, 2] * 100, marker='*', s=320, color='#C15F3C', edgecolor='black', zorder=3)
         ax.annotate(f'{i + 1} {role}', (P[i, 0] * 100, P[i, 2] * 100), xytext=(8, 6), textcoords='offset points', fontsize=8)
     ax.scatter(ref[0] * 100, ref[2] * 100, s=160, facecolor='none', edgecolor='black', lw=1.5)

@@ -108,3 +108,26 @@ Five read-only audits (numbers, statistics, biology, hiring panel, code). Applie
 - **Plate.** PBS edge ring, four column blocks per formulation, 2 no-cell blanks, 2 heat-killed controls. Results template adds donor, thaw, seeding, well volume, pH, osmolality and total and viable cells per mL.
 - **Lab plan.** `reports/lab_plan.md`: protocol fields, validity checks, screen and confirmation figures, the Qorium version of the plate, questions for the CSO.
 - **Repo.** MIT LICENSE, data licence note, AI-assistance note, optional reference download (`FETCH_REFERENCE=1`), sturdier figure labels, README corrections, diff summary at the end of `run_all.sh`.
+
+## 2026 10 03 Adversarial reviews and the batch redesign
+
+Two adversarial reviews of commit c37a45f: statistics and decisions (`docs/review_adversarial_astra_2026-10-03.md`) and biology and leadership, playing the CSO (`docs/review_adversarial_fable51_2026-10-03.md`).
+
+**Accepted**
+
+- **Batch redesigned.** Both reviews showed that the exploit pick (44/26/19/11) was indistinguishable from E19 under the model: correlation 0.981, posterior mean 70.2 against 70.1. It and the exploration pick were replaced by two designed DMEM steps at E19's other ratios, 40/22/21/17 and 50/18/18/14. DMEM is the only component with a clear signal, and the GP's DMEM length scale sits at its floor, so these test the model's sharpest assumption. Model picks: cheaper alternative 43/56/1/0 (unchanged) and expected improvement 44/21/28/7, chosen with the anchor and designed points pending.
+- **Cost tolerance for designed points only.** 50% DMEM costs EUR 178.69/L, EUR 0.26 over E19, smaller than the uncertainty in the FBS price. Designed points may cost up to 1% more than E19. Model picks must still cost no more than E19; allowing them the 1% moved slot 4 to a more expensive recipe, so the tolerance was not extended to them.
+- **11 wells per formulation.** The plate had 36 idle interior wells. Eleven per arm in randomised row blocks narrows the 90% interval on a blend-versus-E19 difference from about 13 to about 7 points.
+- **E19 reproduction.** The comparison sheet in the same paper re-ran E19's recipe at 80.2% (n = 6, SD 7.5). Now in the memo; the batch-effect claim is "partly answered".
+- **E19 posterior mean (70.1) in the recommendation table**, so picks are compared with the shrunk value, not 81.0.
+- **Belief on E14 stated:** most likely a technical failure, kept in the fit because dropping data by outcome biases the model.
+- **Screening conclusions provisional.** A pass means "not excluded"; a lead needs a mean above E19 by more than the interval. This plate estimates within-preparation variation only; independent repeats size the confirmation.
+- **Simulation wording.** "No detected difference" instead of "no difference"; the 16 tests labelled exploratory; causal claims about the eligibility rules and about confirmation withdrawn.
+- **Biology.** Kolkmann et al. 2020 scoped to bovine myoblasts; fibroblasts are among the easier cells to grow serum-free, so the open question is collagen output per cell. Qorium rounds take weeks. FBS lot logged. Collagen endpoint, destructive sampling and what changes in the code are listed in `reports/lab_plan.md`.
+- **Count error fixed:** cell-containing wells are now 57 (55 formulation wells and 2 heat-killed controls).
+
+**Rejected**
+
+- **Re-running E10 and E14 (Astra).** The reviewer proposed E19, E10, E14 and two model picks, to test whether the 40.6-point gap reproduces. Rejected: E14's own readings agree closely (SD 2.70), which points to a failed run; re-running it would teach about the lab on that day rather than the medium, and it would spend two of five slots on the 24-36% DMEM region the data already rate poorly.
+- **Swapping the exploit pick for UCB as the deployed policy (Fable, implied).** The simulation found UCB the only policy beating random, but only at low noise. At the fitted noise no policy was detected to beat random, so designed contrasts were preferred to any acquisition rule.
+- **Log-ratio coordinates now (both).** Kept four coordinates with a length-scale floor for this round and reported the three-coordinate sensitivity. Log-ratio coordinates are listed for the next round; changing the model now would invalidate the comparison work already reviewed.

@@ -100,10 +100,10 @@ Each cell gives two medians after 18 runs, in viability points. The first is dis
 
 What this shows:
 
-1. **The eligibility rules do much of the work.** Random sampling inside them ends a median 2.12 (GP truth) and 1.56 (Scheffe truth) points from the best blend. An earlier run without these rules, on a wider grid, gave 7.82.
-2. **Only UCB beats random reliably, and only at low noise:** 22 and 24 of 30 paired seeds, sign test p = 0.016 and 0.001. EI, exploit-only and the four-role policy do not reach p < 0.05 in any setting.
-3. **At realistic noise, no policy differs from random.** At 11.83 every policy beats random in 10 to 16 of 30 seeds (p ≥ 0.42), and the finalist the lab would pick sits 4.7 to 7.9 points below the best available.
-4. **So the bottleneck is confirmation.** With noise near 12 points, choosing and confirming a winner limits the outcome more than choosing candidates. That supports spending capacity on an anchor, replicate wells and a confirmation run.
+1. **Random picks inside the rules land close to the best.** Random sampling under the same eligibility rules ends a median 2.12 (GP truth) and 1.56 (Scheffe truth) points from the best blend. An earlier run without these rules gave 7.82, but on a wider grid with a different optimum, so the two cannot be compared directly and the benefit of the rules is not isolated.
+2. **Only UCB beats random reliably, and only at low noise:** 22 and 24 of 30 paired seeds, sign test p = 0.016 and 0.001. These are 16 exploratory comparisons without a multiplicity correction. EI, exploit-only and the four-role policy do not reach p < 0.05 in any setting.
+3. **At realistic noise, no advantage was detected.** At 11.83 every policy beats random in 10 to 16 of 30 seeds (p ≥ 0.42). That is "no detected difference" with 30 seeds, not evidence of equivalence. The sign tests are on discovery regret; on finalist regret UCB at low noise on the GP truth wins only 13 of 30 (median 2.66 against random's 2.12).
+4. **Picking a winner from single noisy readings is costly.** Under the rule "pick the highest observed mean", the finalist sits 4.7 to 7.9 points below the best available at the fitted noise. The simulation shows this selection error; it does not test remedies such as replication or confirmation, or how to split a budget between them.
 
 Common random numbers: within a seed, every policy that measures a given recipe sees the same measurement error, and random picks draw from their own generator, so paired differences reflect the policies, not the noise draws.
 
@@ -116,11 +116,12 @@ Common random numbers: within a seed, every policy that measures a given recipe 
 
 ## Decision for batch selection
 
-- **Model:** pooled-noise GP fit on all 24 recipes, with the four-role selection policy, under the cost rule, in 1% steps.
-- **How the batch is built:** each pick is added as a pending point. Its pretend result is the current posterior mean. The hyperparameters, the data scaling and every historical noise term stay fixed. `check_gp.py` verifies that the posterior mean does not move and the variance never increases.
-- **Why the four-role policy, given the simulation:** no policy dominates at realistic noise. The four-role policy makes cost and exploration explicit, one slot each, which a lab can read and challenge.
-- **Sensitivity checks:** per-recipe noise; length-scale floors of 0.05 and 0.2 and a ceiling of 3.0; dropping E02 or E14; E19 counted as pending; 8 alternative price scenarios. Separately, one-at-a-time changes to the selection thresholds. See `reports/batch_selection.md`.
-- **Anchor:** a re-run of E19 on the same plate.
+- **Model:** pooled-noise GP fit on all 24 recipes, used to propose candidates, not to forecast.
+- **Batch design:** two designed DMEM steps at E19's other ratios (40% and 50%), then two model picks (cheaper alternative, expected improvement) chosen with the anchor and designed points pending. The designed steps test the model's sharpest assumption, its DMEM length scale at the floor. See `reports/batch_selection.md`.
+- **Why not four model picks:** at the fitted noise the simulation detected no advantage for any policy, and one earlier model pick was indistinguishable from E19 under the model (correlation 0.981).
+- **Pending-point conditioning:** each pending point's pretend result is the current posterior mean, with hyperparameters, data scaling and every historical noise term fixed. `check_gp.py` verifies that the posterior mean does not move and the variance never increases.
+- **Sensitivity checks:** 19 reruns covering noise models, length-scale limits, three-coordinate fits, dropping E02 or E14, the anchor not pending, a cost tolerance for model picks and 8 price scenarios, plus one-at-a-time threshold changes.
+- **Anchor and replicates:** a re-run of E19 on the same plate; 11 wells per formulation.
 
 ## Limits
 
