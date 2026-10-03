@@ -76,3 +76,16 @@ A read-only GPT-6 Astra review (`docs/review_gpt6_astra_2026-10-02.md`) led to t
 - Wording: exploit-only is "no better than random, worse on the Scheffe truth". The simulation states that the four-role policy faces stricter eligibility than the other policies.
 
 Earlier log entries that cite the without-E02/E14 RMSE as the reason for choosing the model, or mention a DMEM-10 control, are superseded.
+
+## 2026 10 03 Changes after the submission and workflow review
+
+`docs/submission_workflow_review_2026-10-03.md` (Astra) found the analysis sound but the bridge from plate to decision thin. Applied:
+
+- **Confirmation.** The "about 20 wells per arm" figure is withdrawn. Using SD 9.51, 20 per arm gives 51% power for a 5-point non-inferiority margin, and about 45 gives 80%. Confirmation is now a paired, blocked comparison against concurrent E19 across independent preparations, sized from the pilot's preparation-level variance. Acceptance is a one-sided 95% lower bound above -5 points, plus cost and quality.
+- **Validity gate.** The memo now runs plate validity, then screen, then confirmation, and includes an inconclusive outcome. Reading wells individually instead of pooling is flagged as a protocol change to agree.
+- **Transfer.** E19 is 6.47% FBS by volume and the picks are 7.0%, 9.9%, 7.0% and 6.6%. Qorium states its process uses no animal products beyond the cells (qorium.com, accessed 3 October 2026), so a Qorium campaign would start from an animal-product-free ingredient list.
+- **Business criterion.** The cost ceiling is a screening gate. Base savings against E19 are 0.41%, 2.53%, 0.90% and 0.07%. Adoption needs an agreed minimum saving, judged on media cost per acceptable output.
+- **Anchor as pending.** Selecting with E19 conditioned as pending moves slot 4 by 1% (45/21/28/6). The picks are kept and the rerun is recorded in `batch_stability.csv`.
+- **Simulation wording.** Gains are credited to the implemented package, not to role mixing alone. The score measures discovery, not confirmation.
+- **Schema.** Adds COMPONENT_LOT, CELL_PREP, MEDIUM_PREP and SAMPLE with pooling membership, plus QC status, exclusion reason, raw-file reference and protocol version.
+- **Scope.** The pipeline reproduces the case-study snapshot. A weekly loop would need a versioned recipe manifest and a results template.

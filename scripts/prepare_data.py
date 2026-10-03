@@ -219,7 +219,7 @@ def main():
         '## Checks completed', '',
         'Source SHA256 verified; required columns unique; experiment and measurement IDs unique; concentration and viability values finite and bounded; mixtures within declared rounding tolerance; normalised fractions sum to one; reading counts reconcile; recomputed means reconcile with supplied means.', '',
         '## Limitations', '',
-        'Reported readings lack donor/pool identities. SEM and variance of the mean use an unverified independence assumption. The separate comparison sheet is excluded and contains a 200% AR5 recipe and a missing XVIVO fraction. No source values have been repaired. Prices and a final cost ceiling are still required. No paired fidelity assays exist in this subset.', '',
+        'Reported readings lack donor/pool identities. SEM and variance of the mean use an unverified independence assumption. The separate comparison sheet is excluded and contains a 200% AR5 recipe and a missing XVIVO fraction. No source values have been repaired. Prices are provisional estimates from `data/inputs/price_sources.csv`; the cost rule and scenarios are applied in later scripts. No paired fidelity assays exist in this subset.', '',
         f'Source context: [Narayanan et al. 2025]({ARTICLE}); [data](https://doi.org/10.6084/m9.figshare.27715134).', ''
     ]
     (ROOT / 'docs/data_audit.md').write_text('\n'.join(audit))

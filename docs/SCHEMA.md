@@ -4,10 +4,10 @@ This schema covers two things. The first is what this repo stores today. The sec
 
 ## Design rules
 
-- Biological replication lives on BATCH (`cell_prep_id`, `medium_prep_id`), not on WELL. Four wells from one cell preparation measure repeatability, not robustness. Confirmation needs independent preparations.
-
-- Keep three kinds of record apart: the recipe (what we intend to mix), the run (what was actually made and when) and the measurement (what the assay read). The same recipe run on two plates is two runs. A model that confuses the two will count re-runs as new information and miss batch effects. The E19 anchor exists for exactly that reason.
-- One measurement row per well and readout. Summaries are derived, never stored as if they were raw data.
+- Keep the recipe (what we intend to mix), the preparation (what was actually mixed, from which lots), the culture (cells in a well) and the measurement (what the assay read) apart. The same recipe on two plates is two runs. A model that confuses them counts re-runs as new information and misses batch effects. The E19 anchor exists for that reason.
+- Biological replication lives on CELL_PREP and MEDIUM_PREP, not on WELL. Four wells from one cell preparation and one medium preparation measure repeatability, not robustness. Confirmation needs independent preparations.
+- A measurement belongs to a SAMPLE. A sample can pool several wells, and one sample can be read several times. This is how the source study worked: it pooled cultures before reading.
+- Raw results are never overwritten. Each measurement keeps its raw-file reference, protocol version, QC status and any exclusion reason. Summaries are derived.
 - Every price carries a currency, a date, a source and a basis (`observed`, `estimate` or `hypothetical`).
 - Every recommendation records the model version, the price scenario and the selection rule that produced it.
 
@@ -16,12 +16,18 @@ This schema covers two things. The first is what this repo stores today. The sec
 ```mermaid
 %%{init: {'theme': 'neutral'}}%%
 erDiagram
+    COMPONENT ||--o{ COMPONENT_LOT : "supplied as"
     COMPONENT ||--o{ FORMULATION_COMPONENT : "used in"
     FORMULATION ||--|{ FORMULATION_COMPONENT : "contains"
     FORMULATION ||--o{ RUN : "prepared as"
     BATCH ||--|{ RUN : "groups"
+    BATCH ||--o{ CELL_PREP : "uses"
+    RUN ||--|| MEDIUM_PREP : "made from"
+    MEDIUM_PREP }o--|{ COMPONENT_LOT : "draws on"
     RUN ||--|{ WELL : "dispensed into"
-    WELL ||--o{ MEASUREMENT : "read by"
+    CELL_PREP ||--o{ WELL : "seeds"
+    SAMPLE }o--|{ WELL : "pools"
+    SAMPLE ||--o{ MEASUREMENT : "read as"
     ASSAY ||--o{ MEASUREMENT : "defines"
     COMPONENT ||--o{ PRICE : "priced by"
     PRICE_SCENARIO ||--o{ PRICE : "groups"
@@ -36,7 +42,13 @@ erDiagram
         string supplier
         string catalogue_number
         string kind "basal, serum-free, supplement"
-        string lot_number "future"
+        bool animal_derived "eligibility for an animal-free campaign"
+    }
+    COMPONENT_LOT {
+        string lot_id PK
+        string component_id FK
+        date expiry "future"
+        string certificate_ref "future"
     }
     FORMULATION {
         string formulation_id PK
@@ -53,10 +65,13 @@ erDiagram
         string batch_id PK
         int round "historical round 0 to 3"
         date run_date "future"
-        string cell_source "donor or pool, future"
-        string cell_prep_id "biological replicate, future"
-        string medium_prep_id "future"
         string operator "future"
+    }
+    CELL_PREP {
+        string cell_prep_id PK
+        string batch_id FK
+        string donor_or_pool "future"
+        int passage "future"
     }
     RUN {
         string run_id PK
@@ -64,28 +79,42 @@ erDiagram
         string batch_id FK
         string role "exploit, cheaper, explore, EI, anchor"
     }
+    MEDIUM_PREP {
+        string medium_prep_id PK
+        string run_id FK
+        float actual_volumes_ml "as dispensed, future"
+        string deviation_note "future"
+    }
     WELL {
         string well_id PK
         string run_id FK
+        string cell_prep_id FK
         string plate_id "future"
         string position "e.g. C7"
         int replicate
-        string culture_id "links wells from one culture across destructive assays, future"
+    }
+    SAMPLE {
+        string sample_id PK
+        string pooling_rule "single well or pooled, future"
     }
     ASSAY {
         string assay_id PK
         string name "AOPI viability"
         int timepoint_hours
         string fidelity "low, high"
+        string protocol_version "future"
         float cost_per_sample "future"
     }
     MEASUREMENT {
         string measurement_id PK
-        string well_id FK
+        string sample_id FK
         string assay_id FK
         float value
         string unit "% viable"
         string source_label "Via1..Via5"
+        string raw_file_ref "future"
+        string qc_status "pass, fail, pending"
+        string exclusion_reason "future"
     }
     PRICE {
         string component_id FK
@@ -126,6 +155,8 @@ erDiagram
     }
 ```
 
+SAMPLE to WELL is many-to-many: one membership row per well in a pooled sample. A destructive assay takes its own sample from sister wells of the same RUN and CELL_PREP, so measurements from one culture stay pairable.
+
 ## Where this repo's files sit
 
 | Entity | Repo file | Notes |
@@ -134,6 +165,7 @@ erDiagram
 | FORMULATION, FORMULATION_COMPONENT | `data/processed/pbmc_formulations.csv` | Wide format: one fraction column per component |
 | BATCH | `round` column | The only batch information in the source |
 | RUN, WELL | absent for history; `outputs/plate_layout.csv` for the next batch | The source gives 2 to 5 readings per recipe with no well or donor identity |
+| CELL_PREP, MEDIUM_PREP, COMPONENT_LOT, SAMPLE | absent | The source describes pooling in its methods but records no preparation or sample identities |
 | MEASUREMENT | `data/processed/pbmc_measurements.csv` | One row per reported reading |
 | ASSAY | `assay`, `timepoint_hours` columns | One assay, so no fidelity levels |
 | PRICE, PRICE_SCENARIO | `data/inputs/component_costs.csv`, `data/inputs/cost_scenarios.csv` | Base prices plus 9 scenarios |
@@ -142,4 +174,4 @@ erDiagram
 
 ## What changes for a multi-fidelity setup
 
-Cosenza et al. (2022) paired cheap 3-day assays (AlamarBlue, LIVE stain) with 6-day cell counts. In this schema, that is two ASSAY rows with different `fidelity` and `cost_per_sample` values. Non-destructive readouts attach to the same WELL. A destructive assay needs its own WELL, linked to its sister wells through `culture_id`, so the model can pair measurements from one culture. The model then learns how the cheap readout maps to the expensive one. No new tables are needed. That is the test of a schema: the next experiment design should fit without a migration.
+Cosenza et al. (2022) paired cheap 3-day assays (AlamarBlue, LIVE stain) with 6-day cell counts. In this schema, that is two ASSAY rows with different `fidelity` and `cost_per_sample` values. Non-destructive readouts become a second MEASUREMENT on the same SAMPLE. A destructive assay takes its own SAMPLE from sister wells of the same RUN and CELL_PREP, so the model can pair the two readouts and learn how the cheap one maps to the expensive one. No new tables are needed. That is the test of a schema: the next experiment design should fit without a migration.

@@ -28,6 +28,6 @@ Source SHA256 verified; required columns unique; experiment and measurement IDs 
 
 ## Limitations
 
-Reported readings lack donor/pool identities. SEM and variance of the mean use an unverified independence assumption. The separate comparison sheet is excluded and contains a 200% AR5 recipe and a missing XVIVO fraction. No source values have been repaired. Prices and a final cost ceiling are still required. No paired fidelity assays exist in this subset.
+Reported readings lack donor/pool identities. SEM and variance of the mean use an unverified independence assumption. The separate comparison sheet is excluded and contains a 200% AR5 recipe and a missing XVIVO fraction. No source values have been repaired. Prices are provisional estimates from `data/inputs/price_sources.csv`; the cost rule and scenarios are applied in later scripts. No paired fidelity assays exist in this subset.
 
 Source context: [Narayanan et al. 2025](https://www.nature.com/articles/s41467-025-61113-5); [data](https://doi.org/10.6084/m9.figshare.27715134).

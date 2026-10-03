@@ -87,6 +87,7 @@ There is no real way to replay a policy, because only one sequence of experiment
 
 **Limits:**
 
+- The score is the true value of the best blend sampled. It measures discovery, not whether the lab could pick and confirm that blend from noisy results. The simulated campaigns also run no anchor.
 - Both truths are smooth fits to the same 24 points. Neither contains a failure mechanism like E14 or a batch shift like round 3. The simulation compares policies under these assumptions. It does not validate the four recipes.
 - The comparison is not exactly like-for-like. The four-role policy must also meet the 5% minimum gap, the 6-of-9 price-scenario rule and the single-media exclusion. Random, greedy, UCB and EI search the whole base-feasible grid, and regret is measured against the best point on that whole grid. These different eligibility rules mean the gains cannot be attributed to the acquisition strategy alone.
 
@@ -104,7 +105,7 @@ Each cell is the median regret after 18 runs: best achievable viability minus be
 What this shows:
 
 1. **Exploit-only is no better than random, and is worse on the Scheffe truth.** On the GP truth the paired median difference from random is 0.00 at low noise and 0.03 at high noise, and exploit-only beats random in only 13 and 9 of 30 seeds. On the Scheffe truth it is worse: paired difference +0.47 and +0.76, and it beats random in 13 and 4 of 30 seeds. Spending every slot on the current best does not pay.
-2. **The edge over random shrinks at realistic noise.** On the GP truth at 11.83 noise, UCB and EI beat random in only 14 and 12 of 30 seeds. The four-role policy beats random in 19 to 23 of 30 seeds across all four settings, the most consistent result in the table.
+2. **The edge over random shrinks at realistic noise.** On the GP truth at 11.83 noise, UCB and EI beat random in only 14 and 12 of 30 seeds. The implemented four-role package beats random in 19 to 23 of 30 seeds across all four settings. Its eligibility rules are stricter than the other policies', so the gain belongs to the package, not to role mixing alone.
 3. **The simulation does not show that one exploration slot in four is optimal.** It shows that mixing roles beats pure exploitation under smooth truths.
 
 ## Decision for batch selection

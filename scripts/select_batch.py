@@ -65,11 +65,14 @@ def eligible(X, cand, prices, opts):
     return ok, ok & (cost <= cap * (1 - opts['cheap_discount']))
 
 
-def select(model, X, cand, prices, **overrides):
+def select(model, X, cand, prices, anchor=None, **overrides):
+    """anchor: recipe re-run on the same plate; conditioned on as pending before any slot is chosen."""
     opts = {**DEFAULTS, **overrides}
     ok, cheap = eligible(X, cand, prices, opts)
     masks = [ok, cheap, ok, ok]
     cur, picks = model, []
+    if anchor is not None:
+        cur = cur.fantasize(np.atleast_2d(anchor))
     for (role, _), mask in zip(ROLES, masks):
         if picks:
             mask = mask & (gap_pct(cand, cand[picks]).min(1) >= opts['min_gap_pct'])
@@ -150,6 +153,7 @@ def main():
     var_mu = {k: m.latent(P)[0] for k, (m, _) in variants.items()}
 
     reruns = {k: cand[select(m, Xv, cand, prices)] for k, (m, Xv) in variants.items()}
+    reruns['anchor_pending'] = cand[select(model, X, cand, prices, anchor=ref)]
     for name, p in scen.items():
         if name != 'fbs_x1.0_ar5_x1.0':  # identical to base prices
             reruns[f'price_{name}'] = cand[select(model, X, cand, p)]
