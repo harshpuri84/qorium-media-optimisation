@@ -1,0 +1,5 @@
+component_id,prepared_medium_label,price_per_litre,currency,price_basis,price_source,as_of_date,notes
+dmem,DMEM with 10% FBS and 1% Penicillin-Streptomycin per article methods,180.89,EUR,estimate,"price_sources.csv: dmem_basal, fbs, pen_strep",2026-10-02,FBS is about 74% of this cost and is a search-snippet price
+rpmi_10,RPMI-10 with 10% FBS and 1% Penicillin-Streptomycin per article methods,168.45,EUR,estimate,"price_sources.csv: rpmi_basal, fbs, pen_strep",2026-10-02,FBS is about 79% of this cost and is a search-snippet price
+xvivo,XVIVO 15 prepared per manufacturer instructions,181.00,EUR,observed,price_sources.csv: xvivo15,2026-10-02,Complete medium; no supplements added
+ar5,AR5 prepared per manufacturer instructions,181.00,EUR,hypothetical,price_sources.csv: ar5 (proxy = X-VIVO 15 per litre),2026-10-02,AR5 price not found; swept 1.0x to 2.02x X-VIVO 15

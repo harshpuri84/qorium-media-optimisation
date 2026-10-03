@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+.DS_Store
+.ipynb_checkpoints/
+# Not redistributed: assignment brief and unlicensed third-party reference files (fetch_data.py downloads them)
+Head of Data Science Case Study.docx
+data/raw/cosenza_2022/
+~$*

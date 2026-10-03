@@ -1,0 +1,21 @@
+well,position,role,replicate
+B3,slot 3,Explore,4
+B4,anchor,PBMC-E19 re-run (historical 81.0%),3
+B6,slot 4,Expected improvement,4
+B7,slot 2,Cheaper alternative,1
+B11,slot 3,Explore,3
+C5,slot 1,Exploit,1
+C7,slot 1,Exploit,4
+D4,slot 2,Cheaper alternative,3
+D11,slot 4,Expected improvement,3
+E5,slot 1,Exploit,2
+E7,anchor,PBMC-E19 re-run (historical 81.0%),1
+E8,slot 4,Expected improvement,2
+E9,slot 2,Cheaper alternative,2
+F2,slot 1,Exploit,3
+F5,anchor,PBMC-E19 re-run (historical 81.0%),4
+F7,slot 4,Expected improvement,1
+F8,slot 3,Explore,1
+G5,anchor,PBMC-E19 re-run (historical 81.0%),2
+G9,slot 2,Cheaper alternative,4
+G11,slot 3,Explore,2

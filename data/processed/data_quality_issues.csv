@@ -1,0 +1,34 @@
+severity,source_file,source_sheet,source_row,issue,action
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,3,Published mixture totals 99.9999%.,Retain raw percentages and proportionally normalise analysis fractions.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,3,1 of five reading slots are blank.,Preserve blanks as missing; summarise available readings only.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,4,Published mixture totals 100%.,Retain raw percentages and proportionally normalise analysis fractions.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,5,Published mixture totals 100.001%.,Retain raw percentages and proportionally normalise analysis fractions.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,6,Published mixture totals 99.9993%.,Retain raw percentages and proportionally normalise analysis fractions.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,7,Published mixture totals 100%.,Retain raw percentages and proportionally normalise analysis fractions.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,8,Published mixture totals 99.9%.,Retain raw percentages and proportionally normalise analysis fractions.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,8,2 of five reading slots are blank.,Preserve blanks as missing; summarise available readings only.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,9,Published mixture totals 99.9%.,Retain raw percentages and proportionally normalise analysis fractions.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,9,2 of five reading slots are blank.,Preserve blanks as missing; summarise available readings only.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,10,Published mixture totals 99.9%.,Retain raw percentages and proportionally normalise analysis fractions.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,12,1 of five reading slots are blank.,Preserve blanks as missing; summarise available readings only.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,14,1 of five reading slots are blank.,Preserve blanks as missing; summarise available readings only.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,15,1 of five reading slots are blank.,Preserve blanks as missing; summarise available readings only.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,16,Published mixture totals 99.9%.,Retain raw percentages and proportionally normalise analysis fractions.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,17,Published mixture totals 99.9%.,Retain raw percentages and proportionally normalise analysis fractions.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,17,1 of five reading slots are blank.,Preserve blanks as missing; summarise available readings only.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,18,1 of five reading slots are blank.,Preserve blanks as missing; summarise available readings only.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,19,1 of five reading slots are blank.,Preserve blanks as missing; summarise available readings only.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,20,Published mixture totals 100.1%.,Retain raw percentages and proportionally normalise analysis fractions.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,21,3 of five reading slots are blank.,Preserve blanks as missing; summarise available readings only.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,22,1 of five reading slots are blank.,Preserve blanks as missing; summarise available readings only.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,24,Published mixture totals 99.9%.,Retain raw percentages and proportionally normalise analysis fractions.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,24,1 of five reading slots are blank.,Preserve blanks as missing; summarise available readings only.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,25,Published mixture totals 100.1%.,Retain raw percentages and proportionally normalise analysis fractions.
+info,PBMC_Experiments.xlsx,MediaBlendingStudies,25,1 of five reading slots are blank.,Preserve blanks as missing; summarise available readings only.
+warning,PBMC_Experiments.xlsx,Control_OptimalMediaComparison,2,DMEM-10 belongs to a separate comparison study; not in initial training.,Exclude from initial training; retain original sheet and resolve context/composition before reuse.
+warning,PBMC_Experiments.xlsx,Control_OptimalMediaComparison,3,RPMI-10 belongs to a separate comparison study; not in initial training.,Exclude from initial training; retain original sheet and resolve context/composition before reuse.
+warning,PBMC_Experiments.xlsx,Control_OptimalMediaComparison,4,XVIVO has a missing mixture fraction.,Exclude from initial training; retain original sheet and resolve context/composition before reuse.
+warning,PBMC_Experiments.xlsx,Control_OptimalMediaComparison,5,AR5 published fractions total 200%.,Exclude from initial training; retain original sheet and resolve context/composition before reuse.
+warning,PBMC_Experiments.xlsx,Control_OptimalMediaComparison,6,Optimal Media belongs to a separate comparison study; not in initial training.,Exclude from initial training; retain original sheet and resolve context/composition before reuse.
+warning,PBMC_Experiments.xlsx,MediaBlendingStudies,,"Donor, well and pool identities are not supplied.",Keep reading labels; treat SEM and noise variance as provisional proxies.
+info,PBMC_Experiments.xlsx,CytokineComposition,,Separate cytokine phase uses different features and outcomes.,Retain source export; exclude from media-blend model.

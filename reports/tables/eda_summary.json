@@ -1,0 +1,84 @@
+{
+  "n_formulations": 24,
+  "n_readings": 103,
+  "mean_viability_min_pct": 6.541675,
+  "mean_viability_max_pct": 81.0,
+  "median_reading_sd_pct_points": 8.257205212946255,
+  "min_reading_sd_pct_points": 1.4774019366780322,
+  "max_reading_sd_pct_points": 17.01959654829299,
+  "pooled_within_formulation_sd_pct_points": 9.512484232096027,
+  "n_means_below_10_pct": 2,
+  "n_means_at_least_70_pct": 4,
+  "top_observed_ids": [
+    "PBMC-E19",
+    "PBMC-E20",
+    "PBMC-E23"
+  ],
+  "component_associations": [
+    {
+      "component": "DMEM",
+      "pearson_all_experiments": 0.30422272465350353,
+      "pearson_after_round_centering": 0.277752697048348,
+      "pearson_excluding_means_below_10_pct": 0.15588083576801212
+    },
+    {
+      "component": "RPMI-10",
+      "pearson_all_experiments": -0.051624947882180715,
+      "pearson_after_round_centering": 0.07971446736399952,
+      "pearson_excluding_means_below_10_pct": 0.04343607298226756
+    },
+    {
+      "component": "XVIVO",
+      "pearson_all_experiments": -0.19138473433926834,
+      "pearson_after_round_centering": -0.15298470247260884,
+      "pearson_excluding_means_below_10_pct": -0.1931905504723845
+    },
+    {
+      "component": "AR5",
+      "pearson_all_experiments": -0.21350762051492483,
+      "pearson_after_round_centering": -0.27386982845548297,
+      "pearson_excluding_means_below_10_pct": -0.08586685943204085
+    }
+  ],
+  "nearest_three_pairs": [
+    {
+      "formulation_a": "PBMC-E19",
+      "formulation_b": "PBMC-E23",
+      "round_a": 3,
+      "round_b": 3,
+      "euclidean_distance_fraction": 0.023498821978744307,
+      "volume_reallocated_pct": 1.962801962801962,
+      "mean_a_pct": 81.0,
+      "mean_b_pct": 71.5,
+      "absolute_mean_gap_pct_points": 9.5
+    },
+    {
+      "formulation_a": "PBMC-E10",
+      "formulation_b": "PBMC-E14",
+      "round_a": 1,
+      "round_b": 2,
+      "euclidean_distance_fraction": 0.03355592347112502,
+      "volume_reallocated_pct": 2.5999999999999996,
+      "mean_a_pct": 48.15,
+      "mean_b_pct": 7.52285,
+      "absolute_mean_gap_pct_points": 40.62715
+    },
+    {
+      "formulation_a": "PBMC-E12",
+      "formulation_b": "PBMC-E22",
+      "round_a": 1,
+      "round_b": 3,
+      "euclidean_distance_fraction": 0.040323690307311935,
+      "volume_reallocated_pct": 2.9000000000000026,
+      "mean_a_pct": 68.0502,
+      "mean_b_pct": 67.4,
+      "absolute_mean_gap_pct_points": 0.6501999999999981
+    }
+  ],
+  "source_analysis_sha256": "ab71f74e9f57839464bc06d5e9c7288877ad6e0bf9201483d15e9c1e8b2841fc",
+  "source_measurements_sha256": "dad3213286d1882609b900f711bf3c8f8b408fbccc3ed31edc3603f6fb70a3a5",
+  "assay_noise_isolated": false,
+  "cost_analysis_available": false,
+  "numpy_version": "2.5.3",
+  "matplotlib_version": "3.10.7"
+}

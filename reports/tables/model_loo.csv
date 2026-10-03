@@ -1,0 +1,21 @@
+training,model,n,rmse,mae,bias,spearman,coverage_80,nlpd
+all 24,"GP, pooled noise",24,16.766,11.125,0.902,0.606,0.792,5.934
+all 24,"GP, per-recipe SEM noise",24,20.112,15.151,1.64,0.542,0.75,5.607
+all 24,Scheffe quadratic (Bayesian ridge),24,19.718,14.89,1.253,-0.012,0.75,4.485
+all 24,Random forest,24,16.323,12.276,1.215,0.554,0.792,5.13
+all 24,Mean only (baseline),24,18.766,14.12,-0.0,nan,0.833,4.435
+without E02,"GP, pooled noise",23,13.37,8.668,0.547,0.661,0.87,5.752
+without E02,"GP, per-recipe SEM noise",23,25.6,17.349,-0.184,0.399,0.783,6.23
+without E02,Scheffe quadratic (Bayesian ridge),23,17.921,14.161,0.793,-0.237,0.826,4.427
+without E02,Random forest,23,13.772,9.406,0.293,0.457,0.826,4.564
+without E02,Mean only (baseline),23,16.405,12.989,-0.0,nan,0.87,4.332
+without E14,"GP, pooled noise",23,15.283,11.082,-0.337,0.597,0.739,4.969
+without E14,"GP, per-recipe SEM noise",23,15.222,11.26,-0.772,0.557,0.826,4.904
+without E14,Scheffe quadratic (Bayesian ridge),23,16.851,13.576,0.823,-0.04,0.783,4.317
+without E14,Random forest,23,12.391,9.124,0.04,0.591,0.826,4.938
+without E14,Mean only (baseline),23,16.536,13.028,-0.0,nan,0.87,4.347
+"without E02, E14","GP, pooled noise",22,7.557,6.648,-1.894,0.722,0.636,3.9
+"without E02, E14","GP, per-recipe SEM noise",22,7.805,6.46,-1.002,0.674,0.818,3.534
+"without E02, E14",Scheffe quadratic (Bayesian ridge),22,14.48,12.809,0.144,-0.336,0.818,4.128
+"without E02, E14",Random forest,22,9.557,7.976,-0.912,0.519,0.864,3.637
+"without E02, E14",Mean only (baseline),22,13.154,11.634,-0.0,nan,0.818,4.023

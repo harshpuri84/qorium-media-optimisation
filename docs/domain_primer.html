@@ -1,0 +1,425 @@
+<title>Qorium Case Primer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (~68ch) with full-width figure rows; a sticky contents strip on wide screens. */
+:root{
+  --bg:#FAF9F5; --surface:#FFFFFF; --fg:#262521; --muted:#6B6960; --line:#E5E4DF;
+  --accent:#C15F3C; --accent-soft:#F6E7E0;
+  --m1:#5B7FA6; --m2:#8AA67A; --m3:#C9A04E; --m4:#A3739B;
+  --good:#3F7D58; --bad:#B4483A;
+  --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1C1B18; --surface:#25241F; --fg:#ECEAE3; --muted:#A3A097; --line:#3A3832;
+  --accent:#E07A55; --accent-soft:#3A2A22;
+  --m1:#7FA0C4; --m2:#A3BE93; --m3:#D9B66A; --m4:#BE90B6; --good:#6FB38A; --bad:#E07A6A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1C1B18; --surface:#25241F; --fg:#ECEAE3; --muted:#A3A097; --line:#3A3832;
+  --accent:#E07A55; --accent-soft:#3A2A22;
+  --m1:#7FA0C4; --m2:#A3BE93; --m3:#D9B66A; --m4:#BE90B6; --good:#6FB38A; --bad:#E07A6A; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:16px/1.6 var(--sans);padding-inline:16px;padding-block:32px 80px}
+.wrap{max-width:1040px;margin:0 auto;display:grid;grid-template-columns:200px minmax(0,1fr);gap:48px}
+@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr)} nav.toc{display:none}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start;font-size:13px}
+nav.toc a{display:block;color:var(--muted);text-decoration:none;padding:4px 0;border-left:2px solid transparent;padding-left:10px}
+nav.toc a:hover{color:var(--fg);border-left-color:var(--accent)}
+main{min-width:0}
+header{padding-bottom:24px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font-size:clamp(28px,4vw,40px);line-height:1.15;margin:12px 0 12px;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+h2{font-size:24px;margin:56px 0 12px;letter-spacing:-.01em;text-wrap:balance}
+h3{font-size:17px;margin:28px 0 8px}
+p,li{max-width:68ch}
+.lede{font-size:18px;color:var(--muted)}
+.mono{font-family:var(--mono)}
+a{color:var(--accent)}
+.callout{background:var(--accent-soft);border-radius:10px;padding:16px 20px;margin:20px 0;max-width:68ch}
+.callout p{margin:0}
+.tbl{overflow-x:auto;margin:16px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:none}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;margin:20px 0}
+.fig h4{margin:0 0 4px;font-size:15px}
+.fig .cap{font-size:13px;color:var(--muted);margin:0 0 12px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;margin-bottom:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block}
+svg text{fill:var(--muted);font-family:var(--mono);font-size:11px}
+.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:12px;font-size:14px}
+button{font:500 14px var(--sans);background:var(--fg);color:var(--bg);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+button.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=range]{accent-color:var(--accent);width:160px}
+.readout{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.row-card{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
+.kv{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.kv b{display:block;font:500 20px var(--mono);font-variant-numeric:tabular-nums}
+.kv small{color:var(--muted);font-size:12px}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;max-width:68ch}
+summary{cursor:pointer;font-weight:600}
+details p{margin:10px 0 2px}
+.tip{position:fixed;pointer-events:none;background:var(--fg);color:var(--bg);font:12px/1.4 var(--mono);padding:8px 10px;border-radius:6px;opacity:0;transition:opacity .1s;z-index:10;max-width:260px}
+.src{font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Contents">
+  <a href="#brief">The brief, simply</a>
+  <a href="#qorium">Who Qorium is</a>
+  <a href="#translate">Logistics translation</a>
+  <a href="#biology">Biology you need</a>
+  <a href="#study">The study we use</a>
+  <a href="#data">Our 24 experiments</a>
+  <a href="#findings">What the data says</a>
+  <a href="#bo">How BO picks experiments</a>
+  <a href="#papers">The two papers</a>
+  <a href="#scenarios">The six "what ifs"</a>
+  <a href="#plan">Reading plan</a>
+  <a href="#quiz">Check yourself</a>
+</nav>
+
+<main>
+<header>
+  <div class="eyebrow">Head of Data Science case · due Wed 14 Oct 2026</div>
+  <h1>Picking the next four cell-culture recipes</h1>
+  <p class="lede">A primer for someone who knows logistics and data, but not biotech. Read this before the papers.</p>
+</header>
+
+<section id="brief">
+<h2>The brief, simply</h2>
+<p>A lab grows living cells in a liquid food called <b>culture media</b>. Media is a recipe. Change the recipe and the cells grow better or worse. Some ingredients are expensive.</p>
+<p>Each recipe test takes days, costs money, and gives a noisy answer. The lab can test only 3 to 5 new recipes in the next batch.</p>
+<p>You get the recipes that were already tested and their results. Your job is to choose the next 3 to 5 recipes and explain why. The choice must balance four things:</p>
+<ul>
+  <li><b>Performance</b>: recipes the model expects to do well.</li>
+  <li><b>Cost</b>: cheaper recipes are worth more at production scale.</li>
+  <li><b>Uncertainty</b>: some recipes are worth testing only because you know little about that area.</li>
+  <li><b>Feasibility</b>: the lab must be able to mix it (fractions add to 100%, pipettes have a minimum step).</li>
+</ul>
+<div class="callout"><p>The panel does not want the best model. They want a sensible bet under limited, noisy data, and a clear reason for each of the four picks.</p></div>
+</section>
+
+<section id="qorium">
+<h2>Who Qorium is</h2>
+<p>Qorium is a Maastricht biotech company. It takes a small sample of skin cells from a living cow, grows them in the lab, and turns them into collagen-based leather. It raised €22 million in November 2025 and is installing new bioreactors (large stainless tanks where cells grow) to scale up.</p>
+<p>Why this case matters to them: at production scale, media is one of the largest running costs. A recipe that keeps the cells healthy at lower cost per litre changes the unit economics. Their real outcome is probably cell growth and collagen output, not the PBMC viability in our dataset. Say this openly in the memo.</p>
+<p class="src">Sources: <a href="https://pulse2.com/qorium-e22-million-secured-to-advance-cultivated-leather-commercialization">Pulse 2.0 on the €22M round</a>, <a href="https://siliconcanals.com/qorium-raises-2-6m/">Silicon Canals</a>, <a href="https://businesswire.com/news/home/20241015009073/en/Bio-Engineering-Scale-Up-Qorium-Showcases-Cultivated-Leather-Breakthrough-Signalling-a-Key-Step-Towards-Commercialisation">Business Wire, Oct 2024</a>.</p>
+</section>
+
+<section id="translate">
+<h2>Logistics translation</h2>
+<div class="tbl"><table>
+<thead><tr><th>Biotech term</th><th>Plain meaning</th><th>Logistics equivalent</th></tr></thead>
+<tbody>
+<tr><td>Media formulation</td><td>The recipe the cells live in</td><td>A blend recipe, like a fuel blend</td></tr>
+<tr><td>Component</td><td>One ingredient</td><td>One product in the blend</td></tr>
+<tr><td>Mixture constraint</td><td>Fractions must add to 100%</td><td>Container fill: more of one means less of another</td></tr>
+<tr><td>Assay</td><td>A measurement method</td><td>A scan event or a weigh-in</td></tr>
+<tr><td>Viability %</td><td>Share of cells still alive</td><td>OTIF: share of units that arrived right</td></tr>
+<tr><td>Replicate / reading</td><td>Measuring the same recipe again</td><td>Re-measuring a lane to see how much is noise</td></tr>
+<tr><td>Assay noise</td><td>Readings vary with no change in recipe</td><td>A KPI that jumps week to week for no visible reason</td></tr>
+<tr><td>Low vs high fidelity</td><td>Cheap rough test vs slow accurate test</td><td>Carrier ETA vs POD scan</td></tr>
+<tr><td>Batch of 3 to 5</td><td>Lab capacity per round</td><td>You can pilot only 4 lanes this month</td></tr>
+<tr><td>Surrogate model (GP)</td><td>A model that predicts a result <i>and</i> how unsure it is</td><td>A forecast with a confidence band</td></tr>
+<tr><td>Bayesian optimisation (BO)</td><td>Choose the next tests using that model</td><td>Choosing pilots by "likely good" plus "we know little here"</td></tr>
+<tr><td>Exploit vs explore</td><td>Test near the best so far, or test the unknown</td><td>Tweak your best lane, or try a new corridor</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="biology">
+<h2>Biology you need (and no more)</h2>
+<h3>Cells and media</h3>
+<ul>
+  <li><b>Cell culture</b>: keeping cells alive and growing outside the body, in plastic plates or tanks, at body temperature.</li>
+  <li><b>Basal medium</b>: the base liquid with sugars, salts, amino acids and vitamins. DMEM and RPMI 1640 are two classic ones, sold by many suppliers.</li>
+  <li><b>FBS (fetal bovine serum)</b>: a blood-derived additive that helps cells grow. It is expensive, varies batch to batch, and is a problem for animal-free products. Cutting it is a major goal in cultivated meat and leather.</li>
+  <li><b>Serum-free medium</b>: a ready-made commercial medium that does not need FBS. X-VIVO 15 (Lonza) and AR5 (CellGenix) are two. They cost more per litre than basal media.</li>
+</ul>
+<h3>Outcomes</h3>
+<ul>
+  <li><b>Viability</b>: percentage of cells alive. A cell can be alive and still not grow.</li>
+  <li><b>Proliferation</b>: how much the cell count increases. This is closer to what a production company cares about.</li>
+  <li><b>AOPI staining</b>: two dyes that mark live cells green and dead cells red. A machine then counts each colour. That is how our viability numbers were made.</li>
+</ul>
+<h3>The cells in our dataset</h3>
+<p><b>PBMCs</b> (peripheral blood mononuclear cells) are white blood cells taken from human blood. They are used in drug testing and cell therapy. They are hard to keep alive outside the body: standard media lose viability and change which cell types survive. They have nothing to do with leather. They are only a stand-in dataset, chosen because it is small, public, and has a clean recipe structure.</p>
+</section>
+
+<section id="study">
+<h2>The study we use</h2>
+<p>Narayanan et al. (2025), Nature Communications, from the Love lab at MIT. They used Bayesian optimisation to blend four commercial media for PBMCs.</p>
+<div class="tbl"><table>
+<thead><tr><th>Item</th><th>What they did</th></tr></thead>
+<tbody>
+<tr><td>Ingredients</td><td>DMEM (Gibco 11965092), RPMI 1640 (Gibco 11875093), X-VIVO 15 (Lonza 04-418Q), AR5 (CellGenix 20807). DMEM and RPMI had 10% FBS and 1% antibiotics added.</td></tr>
+<tr><td>Outcome</td><td>Viability at 72 hours, AOPI stain, Nexcelom Cellaca plate reader</td></tr>
+<tr><td>Design</td><td class="num">4 rounds × 6 recipes = 24</td></tr>
+<tr><td>Round 0</td><td>Random recipes that add to 100%</td></tr>
+<tr><td>Model</td><td>Gaussian process, Matérn kernel (ν = 1.5)</td></tr>
+<tr><td>Picking rule</td><td>Upper confidence bound (UCB); batch of 6 via "constant liar"</td></tr>
+<tr><td>Result</td><td>Best blend reached 75 to 80% viability; single media about 60%</td></tr>
+<tr><td>Cost</td><td>Not part of the PBMC study. That is the gap we must fill.</td></tr>
+</tbody></table></div>
+<p class="src">Source: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12218302/">Narayanan et al. 2025, open access on PMC</a>. Data: <a href="https://doi.org/10.6084/m9.figshare.27715134">figshare</a>.</p>
+<p><b>UCB</b> and <b>constant liar</b> are explained in the <a href="#bo">BO section</a> below.</p>
+</section>
+
+<section id="data">
+<h2>Our 24 experiments</h2>
+<p>Each row is one recipe. The coloured bar shows the blend. The dot on the right shows mean viability, with a line for ± one standard deviation across readings. Hover or tap a row for detail.</p>
+<div class="fig">
+  <h4>Recipe and result, by experiment</h4>
+  <p class="cap">Source: data/processed/pbmc_analysis.csv (Narayanan 2025 workbook, MediaBlendingStudies sheet)</p>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--m1)"></i>DMEM</span>
+    <span><i class="sw" style="background:var(--m2)"></i>RPMI-10</span>
+    <span><i class="sw" style="background:var(--m3)"></i>X-VIVO 15</span>
+    <span><i class="sw" style="background:var(--m4)"></i>AR5</span>
+  </div>
+  <div class="tbl" style="margin:0"><svg id="compChart" role="img" aria-label="Recipe composition and viability for 24 experiments"></svg></div>
+</div>
+
+<h3>How to read one row</h3>
+<p>Take <span class="mono">PBMC-E19</span>, the best result so far.</p>
+<div class="row-card">
+  <div class="kv"><small>DMEM</small><b>44.7%</b></div>
+  <div class="kv"><small>RPMI-10</small><b>20.1%</b></div>
+  <div class="kv"><small>X-VIVO 15</small><b>19.6%</b></div>
+  <div class="kv"><small>AR5</small><b>15.7%</b></div>
+  <div class="kv"><small>Mean viability, 72 h</small><b>81.0%</b></div>
+  <div class="kv"><small>SD across 5 readings</small><b>8.09 pts</b></div>
+</div>
+<p>In words: the lab mixed these four media in these proportions, cultured PBMCs for 72 hours, and measured 5 times. On average 81% of cells were alive. Single readings spread about 8 points either side.</p>
+</section>
+
+<section id="findings">
+<h2>What the data says</h2>
+<div class="fig">
+  <h4>Mean viability by round</h4>
+  <p class="cap">Each dot is one recipe. Lines show ± 1 SD of its readings. Round 0 was random; rounds 1 to 3 were chosen by the authors' optimiser.</p>
+  <div class="tbl" style="margin:0"><svg id="roundChart" role="img" aria-label="Viability by round"></svg></div>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>Finding</th><th>Number</th><th>Why it matters</th></tr></thead>
+<tbody>
+<tr><td>Round 3 is much better than earlier rounds</td><td class="num">72.65% vs 39.98 to 50.65%</td><td>But all of round 3 has DMEM near 44%. We cannot tell a recipe effect from a "better day in the lab" effect.</td></tr>
+<tr><td>Two near-identical recipes disagree hugely</td><td class="num">E10 48.15% vs E14 7.52%</td><td>Only 2.60% of volume differs. Either the biology has a cliff, or E14 failed as a whole run. Readings within E14 agree (SD 2.70), so it is not read noise.</td></tr>
+<tr><td>Readings are noisy</td><td class="num">pooled SD 9.51 pts</td><td>A 5-point gap between two recipes is within noise. The model must allow for this.</td></tr>
+<tr><td>No pure-media corners tested</td><td class="num">0 of 24</td><td>The model is guessing at the edges of the recipe space.</td></tr>
+<tr><td>Costs are missing</td><td class="num">0 of 4 prices</td><td>We must source catalogue prices or use a labelled scenario.</td></tr>
+</tbody></table></div>
+<p class="src">Figures from reports/exploratory_analysis.md and reports/tables/eda_summary.json.</p>
+</section>
+
+<section id="bo">
+<h2>How Bayesian optimisation picks experiments</h2>
+<p>The idea in four steps:</p>
+<ol>
+  <li>Fit a model to the results so far. A <b>Gaussian process (GP)</b> gives two things for any untested recipe: a best guess, and how unsure it is.</li>
+  <li>Score every possible recipe with an <b>acquisition function</b>. UCB is the simplest: <span class="mono">score = guess + κ × uncertainty</span>. Large κ favours exploring; small κ favours exploiting.</li>
+  <li>Run the highest-scoring recipe in the lab.</li>
+  <li>Add the result, refit, repeat.</li>
+</ol>
+<p>The toy below uses one ingredient on a 0 to 100% axis, so you can see it. The real problem has three free dimensions (four fractions that add to 100%), but the logic is the same.</p>
+<div class="fig">
+  <h4>Toy demo: one ingredient, hidden true curve</h4>
+  <p class="cap">Toy example with a made-up curve, not our data. Click anywhere on the chart to run an experiment there, or press the button to run the model's pick.</p>
+  <div class="tbl" style="margin:0"><svg id="boChart" role="img" aria-label="Interactive Gaussian process demo" style="cursor:crosshair"></svg></div>
+  <div class="controls">
+    <button id="boNext" type="button">Run the suggested experiment</button>
+    <button id="boReset" class="ghost" type="button">Reset</button>
+    <label for="boKappa">κ (explore) <input id="boKappa" type="range" min="0" max="4" step="0.1" value="2"></label>
+    <label><input id="boTruth" type="checkbox"> Show hidden truth</label>
+    <span class="readout" id="boRead"></span>
+  </div>
+</div>
+<h3>Three ideas to notice in the demo</h3>
+<ul>
+  <li><b>The band shrinks where you have tested.</b> Away from data the model admits it does not know.</li>
+  <li><b>κ = 0 gets stuck.</b> It keeps testing next to the current best and can miss a better peak. Raise κ and it explores.</li>
+  <li><b>Noise matters.</b> Each result in the demo has random noise added, as in a real assay. The curve does not pass through every point.</li>
+</ul>
+<h3>Picking a batch, not one at a time</h3>
+<p>The lab runs 4 recipes in parallel, so you cannot wait for each result. <b>Constant liar</b> (or "kriging believer") solves this. Pick the best recipe, pretend its result is already known (use the model's guess), refit, and pick again. The pretend result shrinks uncertainty there, so the next pick moves elsewhere. Repeat four times.</p>
+<h3>Adding cost</h3>
+<p>Two common ways. <b>Constraint</b>: only allow recipes below a cost ceiling, then maximise viability. <b>Desirability</b>: combine viability and cost into one score, as Cosenza 2022 did. The first is easier to explain to a lab manager.</p>
+</section>
+
+<section id="papers">
+<h2>The two reference papers</h2>
+<div class="tbl"><table>
+<thead><tr><th></th><th>Cosenza 2022 (primary)</th><th>Narayanan 2025 (ours)</th></tr></thead>
+<tbody>
+<tr><td>Cells</td><td>C2C12 mouse muscle cells (cultivated meat)</td><td>Human PBMCs (immune cells)</td></tr>
+<tr><td>Recipe</td><td>14 supplements on top of DMEM</td><td>Blend of 4 complete media</td></tr>
+<tr><td>Assays</td><td>Cheap: AlamarBlue, LIVE stain (3 days). Expensive: cell counts over 2 passages (6 days)</td><td>One: AOPI viability at 72 h</td></tr>
+<tr><td>Cost</td><td>In the objective, via a desirability score</td><td>Not modelled</td></tr>
+<tr><td>Method</td><td>Multi-information-source BO, batches of ~10 (3 expensive + 7 cheap)</td><td>GP + UCB, batches of 6</td></tr>
+<tr><td>Result</td><td class="num">181% more cells than DMEM control, +1.6% cost, 38% fewer experiments than DoE</td><td class="num">75 to 80% viability vs ~60% for single media</td></tr>
+<tr><td>Usable data</td><td>Repo arrays have no column labels; supplement not yet checked</td><td>Clean public workbook</td></tr>
+</tbody></table></div>
+<p><b>DoE</b> (design of experiments) is the classic statistical way to plan lab tests: a fixed grid or fraction of a grid, chosen up front. BO is adaptive: each round uses the last round's results.</p>
+<p class="src">Sources: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9541924/">Cosenza et al. 2022 on PMC</a>; <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12218302/">Narayanan et al. 2025 on PMC</a>.</p>
+</section>
+
+<section id="scenarios">
+<h2>The six "what ifs" the brief asks about</h2>
+<p>These are first answers for you to test, not final memo text.</p>
+<div class="tbl"><table>
+<thead><tr><th>If…</th><th>Then the strategy changes like this</th></tr></thead>
+<tbody>
+<tr><td>Only 10 to 20 prior experiments</td><td>Use a simpler model (a few parameters), favour exploring, and spend part of the batch on space-filling picks. Do not trust tight uncertainty bands.</td></tr>
+<tr><td>Cheap assays are noisy</td><td>Use them to screen many recipes. Model noise explicitly and repeat readings on promising ones.</td></tr>
+<tr><td>Expensive assays are reliable</td><td>Spend them only on finalists. A multi-fidelity model learns how the cheap assay maps to the expensive one (Cosenza's approach).</td></tr>
+<tr><td>Cost data is incomplete</td><td>Use catalogue prices, labelled as estimates, plus a sensitivity sweep. Show which picks change if a price doubles.</td></tr>
+<tr><td>Some components are categorical or constrained</td><td>Handle categories (e.g. which sugar to use) with a separate kernel or one model per category. Encode limits as hard rules in the candidate generator. The K. phaffii data in the same paper has a categorical carbon source.</td></tr>
+<tr><td>Experiments run in parallel batches</td><td>Pick the batch jointly (constant liar, or q-acquisition functions). Force diversity so four picks are not near-copies.</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="plan">
+<h2>Reading plan</h2>
+<div class="tbl"><table>
+<thead><tr><th>#</th><th>What</th><th>Time</th><th>Focus on</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>This page</td><td class="num">45 min</td><td>Play with the demo until κ makes sense</td></tr>
+<tr><td class="num">2</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12218302/">Narayanan 2025</a>: abstract, Fig. 1, PBMC results</td><td class="num">90 min</td><td>How they set up the blend and the batch</td></tr>
+<tr><td class="num">3</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9541924/">Cosenza 2022</a>: abstract, Fig. 1, results</td><td class="num">60 min</td><td>How cost and two assay types enter the model</td></tr>
+<tr><td class="num">4</td><td><a href="https://distill.pub/2019/visual-exploration-gaussian-processes/">Distill: A Visual Exploration of Gaussian Processes</a></td><td class="num">60 min</td><td>Kernels and length scales, by picture</td></tr>
+<tr><td class="num">5</td><td>reports/exploratory_analysis.md in the repo</td><td class="num">30 min</td><td>Can you explain each figure out loud?</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="quiz">
+<h2>Check yourself</h2>
+<details><summary>Why can you not treat the four fractions as four independent inputs?</summary><p>They add to 100%. Fix three and the fourth is set. There are only three free dimensions, and changing one fraction always changes another.</p></details>
+<details><summary>Round 3 scored much higher. Does that prove the optimiser worked?</summary><p>Not alone. Round 3 recipes are all similar, and they were run at a different time. A better batch of cells or a better day in the lab would look the same. Re-running E19 next to new recipes would help separate the two.</p></details>
+<details><summary>E14 scored 7.52%, next to a recipe that scored 48.15%. What do you do with it?</summary><p>Keep it, and show results with and without it. Its readings agree with each other, so the whole run probably failed or the biology has a sharp drop. The data cannot tell which.</p></details>
+<details><summary>Why would you pick a recipe the model expects to be mediocre?</summary><p>Because the model is very unsure there. One test can remove a large blind spot, which improves every later decision. That is the explore part of the batch.</p></details>
+<details><summary>How does viability relate to Qorium's business?</summary><p>Loosely. Qorium needs skin cells to grow and make collagen at low cost per litre. Viability is a necessary first step, not the goal. The method transfers. The numbers do not.</p></details>
+</section>
+</main>
+</div>
+<div class="tip" id="tip" role="status"></div>
+
+<script>
+const DATA = [{"id":"E01","round":0,"f":[0.0027,0.3851,0.1761,0.4362],"v":60.58,"sd":9.4,"n":5},{"id":"E02","round":0,"f":[0.0511,0.233,0.3804,0.3355],"v":6.54,"sd":1.48,"n":4},{"id":"E03","round":0,"f":[0.1712,0.1988,0.0005,0.6295],"v":40.4,"sd":12.74,"n":5},{"id":"E04","round":0,"f":[0.0807,0.0011,0.5216,0.3966],"v":40.27,"sd":3.4,"n":5},{"id":"E05","round":0,"f":[0.545,0.193,0.0075,0.2544],"v":41.73,"sd":11.31,"n":5},{"id":"E06","round":0,"f":[0.0011,0.6779,0.2103,0.1107],"v":50.38,"sd":6.55,"n":5},{"id":"E07","round":1,"f":[0.2913,0.3183,0.3383,0.0521],"v":48.03,"sd":12.71,"n":3},{"id":"E08","round":1,"f":[0.3293,0.2813,0.0841,0.3053],"v":48.64,"sd":3.95,"n":3},{"id":"E09","round":1,"f":[0.6046,0.1982,0.1431,0.0541],"v":46.9,"sd":12.91,"n":5},{"id":"E10","round":1,"f":[0.244,0.393,0.002,0.361],"v":48.15,"sd":5.56,"n":5},{"id":"E11","round":1,"f":[0.091,0.262,0.381,0.266],"v":44.12,"sd":6.4,"n":4},{"id":"E12","round":1,"f":[0.445,0.356,0.001,0.198],"v":68.05,"sd":11.14,"n":5},{"id":"E13","round":2,"f":[0.208,0.222,0.38,0.19],"v":45.42,"sd":6.64,"n":4},{"id":"E14","round":2,"f":[0.266,0.368,0.001,0.365],"v":7.52,"sd":2.7,"n":4},{"id":"E15","round":2,"f":[0.4895,0.3904,0.001,0.1191],"v":55.32,"sd":5.14,"n":5},{"id":"E16","round":2,"f":[0.7728,0.1502,0.042,0.035],"v":46.15,"sd":7.71,"n":4},{"id":"E17","round":2,"f":[0.771,0.009,0.017,0.203],"v":42.88,"sd":6.28,"n":4},{"id":"E18","round":2,"f":[0.774,0.112,0.094,0.02],"v":56.46,"sd":14.48,"n":4},{"id":"E19","round":3,"f":[0.4466,0.2008,0.1958,0.1568],"v":81.0,"sd":8.09,"n":5},{"id":"E20","round":3,"f":[0.443,0.181,0.175,0.201],"v":76.5,"sd":14.85,"n":2},{"id":"E21","round":3,"f":[0.445,0.0,0.0,0.555],"v":71.25,"sd":13.23,"n":4},{"id":"E22","round":3,"f":[0.444,0.328,0.001,0.227],"v":67.4,"sd":9.63,"n":5},{"id":"E23","round":3,"f":[0.4494,0.2122,0.1762,0.1622],"v":71.5,"sd":17.02,"n":4},{"id":"E24","round":3,"f":[0.4396,0.2747,0.1319,0.1538],"v":68.25,"sd":8.42,"n":4}];
+const NAMES=["DMEM","RPMI-10","X-VIVO 15","AR5"];
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const NS="http://www.w3.org/2000/svg";
+const el=(t,a={},p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+const tip=document.getElementById("tip");
+function showTip(ev,html){tip.innerHTML=html;tip.style.opacity=1;const x=Math.min(ev.clientX+14,innerWidth-270);tip.style.left=x+"px";tip.style.top=(ev.clientY+14)+"px"}
+function hideTip(){tip.style.opacity=0}
+
+function drawComp(){
+  const svg=document.getElementById("compChart");svg.innerHTML="";
+  const W=760,rowH=22,top=24,L=70,barW=380,gap=40,vx=L+barW+gap,vw=W-vx-20,H=top+DATA.length*rowH+30;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.setAttribute("width",W);svg.style.maxWidth="100%";svg.style.height="auto";
+  const cols=["--m1","--m2","--m3","--m4"].map(css);
+  el("text",{x:L,y:14},svg).textContent="Blend (0 to 100%)";
+  el("text",{x:vx,y:14},svg).textContent="Mean viability %";
+  [0,20,40,60,80,100].forEach(t=>{const x=vx+t/100*vw;el("line",{x1:x,x2:x,y1:top-4,y2:H-24,stroke:css("--line")},svg);el("text",{x:x,y:H-8,"text-anchor":"middle"},svg).textContent=t});
+  let prevRound=-1;
+  DATA.forEach((d,i)=>{
+    const y=top+i*rowH;
+    if(d.round!==prevRound&&i>0)el("line",{x1:0,x2:W,y1:y-1,y2:y-1,stroke:css("--line"),"stroke-dasharray":"3 3"},svg);
+    prevRound=d.round;
+    const g=el("g",{},svg);
+    el("rect",{x:0,y:y,width:W,height:rowH,fill:"transparent"},g);
+    el("text",{x:0,y:y+15},g).textContent=d.id;
+    el("text",{x:34,y:y+15},g).textContent="r"+d.round;
+    let x=L;d.f.forEach((f,k)=>{const w=f*barW;el("rect",{x:x,y:y+4,width:Math.max(w,0),height:rowH-8,fill:cols[k]},g);x+=w});
+    const cx=vx+d.v/100*vw,lo=vx+Math.max(0,d.v-d.sd)/100*vw,hi=vx+Math.min(100,d.v+d.sd)/100*vw;
+    el("line",{x1:lo,x2:hi,y1:y+rowH/2,y2:y+rowH/2,stroke:css("--muted"),"stroke-width":1.5},g);
+    const hot=d.id==="E19"||d.id==="E14"||d.id==="E10"||d.id==="E02";
+    el("circle",{cx:cx,cy:y+rowH/2,r:4.5,fill:hot?css("--accent"):css("--fg")},g);
+    const html=`<b>PBMC-${d.id}</b> · round ${d.round}<br>`+d.f.map((f,k)=>`${NAMES[k]}: ${(f*100).toFixed(1)}%`).join("<br>")+`<br>Viability ${d.v.toFixed(2)}% (SD ${d.sd}, n=${d.n})`;
+    g.addEventListener("mousemove",e=>showTip(e,html));g.addEventListener("mouseleave",hideTip);
+    g.addEventListener("click",e=>showTip(e,html));
+  });
+}
+
+function drawRound(){
+  const svg=document.getElementById("roundChart");svg.innerHTML="";
+  const W=640,H=300,L=44,R=16,T=12,B=36,pw=W-L-R,ph=H-T-B;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.setAttribute("width",W);svg.style.maxWidth="100%";svg.style.height="auto";
+  const ys=v=>T+ph*(1-v/100);
+  [0,20,40,60,80,100].forEach(t=>{el("line",{x1:L,x2:W-R,y1:ys(t),y2:ys(t),stroke:css("--line")},svg);el("text",{x:L-8,y:ys(t)+4,"text-anchor":"end"},svg).textContent=t});
+  const bw=pw/4;
+  for(let r=0;r<4;r++){
+    el("text",{x:L+bw*r+bw/2,y:H-12,"text-anchor":"middle"},svg).textContent="Round "+r;
+    const pts=DATA.filter(d=>d.round===r);
+    const m=pts.reduce((s,d)=>s+d.v,0)/pts.length;
+    el("line",{x1:L+bw*r+bw*.2,x2:L+bw*r+bw*.8,y1:ys(m),y2:ys(m),stroke:css("--accent"),"stroke-width":2},svg);
+    pts.forEach((d,j)=>{
+      const x=L+bw*r+bw*(.25+.5*j/(pts.length-1));
+      el("line",{x1:x,x2:x,y1:ys(Math.min(100,d.v+d.sd)),y2:ys(Math.max(0,d.v-d.sd)),stroke:css("--muted")},svg);
+      const c=el("circle",{cx:x,cy:ys(d.v),r:5,fill:css("--fg"),stroke:css("--surface"),"stroke-width":1.5},svg);
+      const html=`<b>PBMC-${d.id}</b><br>${d.v.toFixed(2)}% ± ${d.sd}`;
+      c.addEventListener("mousemove",e=>showTip(e,html));c.addEventListener("mouseleave",hideTip);
+    });
+    el("text",{x:L+bw*r+bw*.82,y:ys(m)-6,fill:css("--accent")},svg).textContent=m.toFixed(1);
+  }
+}
+
+/* Toy 1-D GP with RBF kernel and UCB acquisition. */
+const BO={pts:[],truth:x=>0.55*Math.exp(-((x-0.22)**2)/0.012)+0.9*Math.exp(-((x-0.74)**2)/0.006)+0.15*Math.sin(9*x)+0.1,
+  ell:0.09,sf:0.35,noise:0.05};
+function seedRand(s){return()=>{s=(s*16807)%2147483647;return(s-1)/2147483646}}
+let rnd=seedRand(7);
+function gauss(){let u=rnd(),v=rnd();return Math.sqrt(-2*Math.log(u+1e-12))*Math.cos(2*Math.PI*v)}
+const k=(a,b)=>BO.sf**2*Math.exp(-((a-b)**2)/(2*BO.ell**2));
+function chol(A){const n=A.length,L=A.map(r=>r.map(()=>0));for(let i=0;i<n;i++)for(let j=0;j<=i;j++){let s=A[i][j];for(let p=0;p<j;p++)s-=L[i][p]*L[j][p];L[i][j]=i===j?Math.sqrt(Math.max(s,1e-12)):s/L[j][j]}return L}
+function solveL(L,b){const n=b.length,y=[];for(let i=0;i<n;i++){let s=b[i];for(let p=0;p<i;p++)s-=L[i][p]*y[p];y.push(s/L[i][i])}return y}
+function solveLT(L,y){const n=y.length,x=Array(n);for(let i=n-1;i>=0;i--){let s=y[i];for(let p=i+1;p<n;p++)s-=L[p][i]*x[p];x[i]=s/L[i][i]}return x}
+function posterior(xs){
+  const X=BO.pts.map(p=>p.x),Y=BO.pts.map(p=>p.y);const n=X.length;
+  const mY=n?Y.reduce((a,b)=>a+b,0)/n:0;
+  if(!n)return xs.map(()=>({m:mY,s:BO.sf}));
+  const K=X.map(a=>X.map(b=>k(a,b)));K.forEach((r,i)=>r[i]+=BO.noise**2);
+  const L=chol(K),alpha=solveLT(L,solveL(L,Y.map(y=>y-mY)));
+  return xs.map(x=>{const ks=X.map(a=>k(a,x));const m=mY+ks.reduce((s,v,i)=>s+v*alpha[i],0);const v=solveL(L,ks);const var_=Math.max(BO.sf**2-v.reduce((s,a)=>s+a*a,0),1e-9);return{m,s:Math.sqrt(var_)}});
+}
+function boReset(){rnd=seedRand(7);BO.pts=[0.08,0.45,0.95].map(x=>({x,y:BO.truth(x)+BO.noise*gauss()}));drawBO()}
+function boRun(x){BO.pts.push({x,y:BO.truth(x)+BO.noise*gauss()});drawBO()}
+function suggest(){const kap=+document.getElementById("boKappa").value;const xs=Array.from({length:201},(_,i)=>i/200);const P=posterior(xs);let bi=0,bv=-1e9;P.forEach((p,i)=>{const u=p.m+kap*p.s;if(u>bv){bv=u;bi=i}});return xs[bi]}
+function drawBO(){
+  const svg=document.getElementById("boChart");svg.innerHTML="";
+  const W=760,H=320,L=40,R=16,T=12,B=30,pw=W-L-R,ph=H-T-B;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.setAttribute("width",W);svg.style.maxWidth="100%";svg.style.height="auto";
+  const ymin=-0.4,ymax=1.5,xs=v=>L+v*pw,ys=v=>T+ph*(1-(v-ymin)/(ymax-ymin));
+  el("rect",{x:L,y:T,width:pw,height:ph,fill:"transparent"},svg);
+  [0,0.25,0.5,0.75,1].forEach(t=>{el("line",{x1:xs(t),x2:xs(t),y1:T,y2:T+ph,stroke:css("--line")},svg);el("text",{x:xs(t),y:H-10,"text-anchor":"middle"},svg).textContent=(t*100)+"%"});
+  el("text",{x:L+4,y:T+12},svg).textContent="result (higher is better)";
+  const grid=Array.from({length:161},(_,i)=>i/160),P=posterior(grid),kap=+document.getElementById("boKappa").value;
+  let band="M"+grid.map((x,i)=>`${xs(x)},${ys(P[i].m+2*P[i].s)}`).join("L")+"L"+grid.slice().reverse().map((x,i)=>{const p=P[grid.length-1-i];return`${xs(x)},${ys(p.m-2*p.s)}`}).join("L")+"Z";
+  el("path",{d:band,fill:css("--accent"),"fill-opacity":0.14,stroke:"none"},svg);
+  if(document.getElementById("boTruth").checked)el("path",{d:"M"+grid.map(x=>`${xs(x)},${ys(BO.truth(x))}`).join("L"),fill:"none",stroke:css("--muted"),"stroke-dasharray":"4 4","stroke-width":1.5},svg);
+  el("path",{d:"M"+grid.map((x,i)=>`${xs(x)},${ys(P[i].m)}`).join("L"),fill:"none",stroke:css("--accent"),"stroke-width":2},svg);
+  const ucb=grid.map((x,i)=>P[i].m+kap*P[i].s),umax=Math.max(...ucb),umin=Math.min(...ucb);
+  el("path",{d:"M"+grid.map((x,i)=>`${xs(x)},${T+ph-((ucb[i]-umin)/(umax-umin+1e-9))*ph*0.18}`).join("L"),fill:"none",stroke:css("--m1"),"stroke-width":1.5},svg);
+  const sx=suggest();
+  el("line",{x1:xs(sx),x2:xs(sx),y1:T,y2:T+ph,stroke:css("--m1"),"stroke-dasharray":"2 3"},svg);
+  el("text",{x:Math.min(xs(sx)+6,W-120),y:T+ph-6,fill:css("--m1")},svg).textContent="next pick (UCB)";
+  BO.pts.forEach(p=>el("circle",{cx:xs(p.x),cy:ys(p.y),r:5,fill:css("--fg"),stroke:css("--surface"),"stroke-width":1.5},svg));
+  const best=BO.pts.reduce((a,b)=>b.y>a.y?b:a);
+  document.getElementById("boRead").textContent=`experiments: ${BO.pts.length} · best so far: ${best.y.toFixed(2)} at ${(best.x*100).toFixed(0)}% · κ=${kap}`;
+  svg.onclick=e=>{const r=svg.getBoundingClientRect();const x=((e.clientX-r.left)/r.width*W-L)/pw;if(x>=0&&x<=1)boRun(x)};
+}
+document.getElementById("boNext").onclick=()=>boRun(suggest());
+document.getElementById("boReset").onclick=boReset;
+document.getElementById("boKappa").oninput=drawBO;
+document.getElementById("boTruth").onchange=drawBO;
+function drawAll(){drawComp();drawRound();drawBO()}
+boReset();drawComp();drawRound();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",drawAll);
+new MutationObserver(drawAll).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+</script>

@@ -1,0 +1,78 @@
+{
+  "figshare_article": 27715134,
+  "github_commit": "18e1173b8370a3981e4ee945028cb939465d8011",
+  "files": [
+    {
+      "path": "data/raw/narayanan_2025/KPhaffii_Experiments.xlsx",
+      "url": "https://ndownloader.figshare.com/files/50464740",
+      "sha256": "f204edbc8d60ef6c7ac5d6f2efea3d5b1994e658eefa0203298cba363c1ecea0",
+      "bytes": 48395,
+      "citation": "Narayanan et al. 2025",
+      "licence": "MIT",
+      "retrieved_at_utc": "2026-10-02T13:37:30.397820+00:00"
+    },
+    {
+      "path": "data/raw/narayanan_2025/PBMC_Experiments.xlsx",
+      "url": "https://ndownloader.figshare.com/files/50464743",
+      "sha256": "d69db41faa0dce6dbd1b10baa796786b67bb99735b49d0c31494e3ea59bbfedd",
+      "bytes": 15158,
+      "citation": "Narayanan et al. 2025",
+      "licence": "MIT",
+      "retrieved_at_utc": "2026-10-02T13:37:30.708106+00:00"
+    },
+    {
+      "path": "data/raw/cosenza_2022/README.md",
+      "url": "https://raw.githubusercontent.com/ZacharyCosenza/GradStuff_Cosenza/18e1173b8370a3981e4ee945028cb939465d8011/README.md",
+      "sha256": "ae1540b03dfc6f926ec082e7b60023b2cf11efe402b3d957ea6052bb310c66ba",
+      "bytes": 1910,
+      "citation": "Cosenza reference repository; semantics not verified",
+      "licence": "Check repository licensing before redistribution",
+      "retrieved_at_utc": "2026-10-02T13:37:30.962211+00:00"
+    },
+    {
+      "path": "data/raw/cosenza_2022/DBO_Solver.py",
+      "url": "https://raw.githubusercontent.com/ZacharyCosenza/GradStuff_Cosenza/18e1173b8370a3981e4ee945028cb939465d8011/DBO_Solver.py",
+      "sha256": "f7b04873d3475a03bf72321306023de0aac36fe7b807c144f90f1062b0494823",
+      "bytes": 10029,
+      "citation": "Cosenza reference repository; semantics not verified",
+      "licence": "Check repository licensing before redistribution",
+      "retrieved_at_utc": "2026-10-02T13:37:31.352216+00:00"
+    },
+    {
+      "path": "data/raw/cosenza_2022/torchtoolbox.py",
+      "url": "https://raw.githubusercontent.com/ZacharyCosenza/GradStuff_Cosenza/18e1173b8370a3981e4ee945028cb939465d8011/torchtoolbox.py",
+      "sha256": "f356bd67e9d96b827251b71efb39717888ff75a478f360d1a704bf192286988a",
+      "bytes": 17947,
+      "citation": "Cosenza reference repository; semantics not verified",
+      "licence": "Check repository licensing before redistribution",
+      "retrieved_at_utc": "2026-10-02T13:37:31.618498+00:00"
+    },
+    {
+      "path": "data/raw/cosenza_2022/BO_data.txt",
+      "url": "https://raw.githubusercontent.com/ZacharyCosenza/GradStuff_Cosenza/18e1173b8370a3981e4ee945028cb939465d8011/DBO_Data/BO_data.txt",
+      "sha256": "643a9977db5e80d99c0b61d90641d5456b9532d9d5b628f14be21ee738c2c43c",
+      "bytes": 23351,
+      "citation": "Cosenza reference repository; semantics not verified",
+      "licence": "Check repository licensing before redistribution",
+      "retrieved_at_utc": "2026-10-02T13:37:31.848148+00:00"
+    },
+    {
+      "path": "data/raw/cosenza_2022/BO_outputs.txt",
+      "url": "https://raw.githubusercontent.com/ZacharyCosenza/GradStuff_Cosenza/18e1173b8370a3981e4ee945028cb939465d8011/DBO_Data/BO_outputs.txt",
+      "sha256": "d958af87dd36791a0f46f41dc1a4071dec703eea2124de34b173f6fa2458d86a",
+      "bytes": 5000,
+      "citation": "Cosenza reference repository; semantics not verified",
+      "licence": "Check repository licensing before redistribution",
+      "retrieved_at_utc": "2026-10-02T13:37:32.067128+00:00"
+    },
+    {
+      "path": "data/raw/narayanan_2025/metadata.json",
+      "url": "https://api.figshare.com/v2/articles/27715134",
+      "sha256": "dc9170241d2bad37686ceeb480d61567b541f88d56504b39e68fa5cccfe5e313",
+      "bytes": 5603,
+      "citation": "Figshare article metadata",
+      "licence": "MIT dataset metadata",
+      "retrieved_at_utc": "2026-10-02T13:37:32.067477+00:00"
+    }
+  ]
+}

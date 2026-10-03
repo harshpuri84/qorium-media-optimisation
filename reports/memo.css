@@ -1,0 +1,16 @@
+@page { size: A4; margin: 16mm 15mm 16mm 15mm; }
+body { font-family: "Inter", "Helvetica Neue", Arial, sans-serif; font-size: 9.6pt; line-height: 1.38; color: #262521; max-width: none; margin: 0; padding: 0; }
+header#title-block-header { border-bottom: 2px solid #C15F3C; padding-bottom: 6px; margin-bottom: 10px; }
+h1.title { font-size: 17pt; margin: 0 0 2px; letter-spacing: -0.01em; }
+p.subtitle { font-size: 10pt; margin: 0; color: #6B6960; }
+p.author, p.date { display: inline; font-size: 9pt; color: #6B6960; margin: 0 10px 0 0; }
+h2 { font-size: 11.5pt; margin: 12px 0 4px; color: #262521; border-bottom: 1px solid #E5E4DF; padding-bottom: 2px; break-after: avoid; }
+p { margin: 4px 0 6px; }
+ol, ul { margin: 4px 0 6px; padding-left: 18px; }
+li { margin: 1px 0; }
+table { border-collapse: collapse; width: 100%; margin: 6px 0 8px; font-size: 8.4pt; break-inside: avoid; }
+th { text-align: left; background: #F4F2EC; font-weight: 600; padding: 3px 5px; border-bottom: 1px solid #D5D3CC; }
+td { padding: 3px 5px; border-bottom: 1px solid #ECEAE4; vertical-align: top; }
+code { font-family: "Geist Mono", Menlo, monospace; font-size: 8.4pt; background: #F4F2EC; padding: 0 3px; border-radius: 2px; }
+strong { font-weight: 600; }
+em { color: #6B6960; }
