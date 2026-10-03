@@ -40,7 +40,7 @@ The walkthrough is a screen share of the repo. Each block lists what is on scree
 
 "I pick one slot at a time. After each pick, the model treats that blend as pending. That shrinks uncertainty around it, so the exploring slots look elsewhere, and a 5% volume gap keeps the picks apart. Slot 1 is the highest prediction. Slot 2 is the best blend at least 2.5% cheaper, and it has almost no serum-free medium. Slot 3 is the blend whose result would most shrink the model's uncertainty across the recipes that could still be the best. It moves DMEM down to 37% to test whether the round-3 band is really special. Slot 4 has the biggest expected gain once the other three are pending. It swaps AR5 for X-VIVO 15."
 
-"Why not just pick the top four predictions? In a simulation with 30 paired campaigns, always picking the current best was no better than random, and was worse on one of the two synthetic truths. Our four-role package beat random in 19 to 23 of 30 seeds in every setting. It also has stricter eligibility rules, so I credit the package, not role mixing alone. And the score is the best blend sampled, which is discovery, not picking a confirmed winner."
+"Why not just pick the top four predictions? I simulated 30 paired campaigns with the same rules for every policy. Two things came out. The rules themselves, the cost check and the minimum gap, did a lot of the work. And at the noise level in this data, no policy stood out: the blend you'd pick from noisy single readings ended 5 to 10 points below the best available, whatever chose the candidates. So the real bottleneck is confirming a winner, not proposing candidates. That's why the plate carries an anchor and the plan ends in confirmation. The four roles are a readable way to cover cost and exploration, not something the simulation proved best."
 
 ## 6:00 to 7:15. What could make me wrong
 
@@ -62,7 +62,7 @@ The walkthrough is a screen share of the repo. Each block lists what is on scree
 |---|---|
 | Why trust a GP that missed round 3 by 27 points? | I don't trust it to forecast, and its forward rankings were weak too. I use it to propose a diverse batch. The decision rests on the same-plate E19 comparison and on confirmation |
 | What does "54% better than E19" mean? | Under the model, slot 1 and E19 are 0.98 correlated, so 0.54 is a coin flip. That is why E19 is on the plate |
-| Did the simulation validate these four blends? | No. It compared policies on smooth synthetic truths. It says mixing roles beats pure exploitation |
+| Did the simulation validate these four blends? | No. It compared policies on smooth synthetic truths. Its main finding is that at realistic noise, confirmation limits the outcome more than the choice of policy |
 | Why exclude near-duplicates when a replicate might be worth more? | The E19 anchor is the replicate. Four wells give within-plate repeatability; independent preparations come in the confirmation run |
 | Why 20 or 45 wells for confirmation? | I don't fix a number yet. With the historical SD, 20 per arm gives only 51% power for a 5-point margin and about 45 gives 80%. The real size comes from the preparation-level variance this pilot measures |
 | Does slot 2 help Qorium? | Not directly. It drops the serum-free media but raises FBS to 9.9%. Qorium's process is animal-product-free, so its candidate list would exclude FBS from the start |

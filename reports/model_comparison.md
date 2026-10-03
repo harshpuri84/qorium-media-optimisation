@@ -79,40 +79,45 @@ The consequence for the batch: treat the GP as a ranking aid, not a forecast. Ab
 There is no real way to replay a policy, because only one sequence of experiments was ever run. So each policy runs simulated campaigns against a known synthetic truth:
 
 - Start with 6 random feasible recipes, then run 3 batches of 4.
-- Search 11,585 base-cost-feasible recipes at 2% steps.
+- Search the 6,219 recipes at 2% steps that meet the cost rule at base prices and in at least 6 of 9 price scenarios.
+- Apply the same rules to every policy: a 5% minimum gap from measured recipes, from the single media and from the policy's own other picks.
 - Use 30 paired seeds: every policy sees the same start points and the same noise draws.
 - Use two truths, a GP fit and a Scheffe fit to all 24 recipes.
 - Use two noise levels: the typical reading SEM (4.97) and the GP's fitted noise (11.83).
 - Include the four-role policy actually used for the recommendation.
-
-**Limits:**
-
-- The score is the true value of the best blend sampled. It measures discovery, not whether the lab could pick and confirm that blend from noisy results. The simulated campaigns also run no anchor.
-- Both truths are smooth fits to the same 24 points. Neither contains a failure mechanism like E14 or a batch shift like round 3. The simulation compares policies under these assumptions. It does not validate the four recipes.
-- The comparison is not exactly like-for-like. The four-role policy must also meet the 5% minimum gap, the 6-of-9 price-scenario rule and the single-media exclusion. Random, greedy, UCB and EI search the whole base-feasible grid, and regret is measured against the best point on that whole grid. These different eligibility rules mean the gains cannot be attributed to the acquisition strategy alone.
+- Score two things: discovery (the best blend sampled) and the finalist (the blend the lab would pick from noisy results).
 
 | Truth, noise | Random | Exploit only | GP-UCB | GP-EI | Four-role (deployed) |
 | --- | --- | --- | --- | --- | --- |
-| GP fit, 4.97 | 7.82 | 10.30 | 2.92 | 2.89 | **1.56** (23/30) |
-| GP fit, 11.83 | 7.82 | 10.16 | 4.57 | 4.54 | **3.20** (19/30) |
-| Scheffe fit, 4.97 | 1.99 | 2.73 | **0.01** | 0.36 | 0.74 (21/30) |
-| Scheffe fit, 11.83 | 1.99 | 4.11 | 1.09 | 2.60 | **0.74** (21/30) |
+| GP fit, 4.97 | 3.74 / 4.92 | 1.33 / 4.25 | 1.09 / 3.73 | 1.10 / **1.69** | **1.08** / 2.02 |
+| GP fit, 11.83 | 3.74 / 8.63 | 2.97 / **5.77** | 3.03 / 9.86 | **2.42** / 7.13 | 3.80 / 8.41 |
+| Scheffe fit, 4.97 | 1.54 / 2.95 | 1.67 / 3.10 | **0.01** / 2.38 | 0.14 / **1.98** | 0.56 / 2.32 |
+| Scheffe fit, 11.83 | 1.54 / 8.09 | 2.69 / 6.40 | **0.65** / 7.12 | 1.51 / 5.73 | 1.90 / **5.20** |
 
-Each cell is the median regret after 18 runs: best achievable viability minus best found, in points. The number in brackets is how many of the 30 seeds the deployed policy beat random on, paired. Full results: `reports/tables/policy_simulation_summary.csv`.
+Each cell gives two medians after 18 runs, in viability points. The first is discovery regret: the best achievable viability minus the true viability of the best blend sampled. The second is finalist regret: the best achievable minus the true viability of the blend the lab would pick, the one with the highest noisy observed mean. Every policy faces the same eligibility rules: the cost rule in at least 6 of 9 price scenarios, a 5% minimum gap from measured recipes, single media and the policy's own other picks. Paired wins over random are in `reports/tables/policy_simulation_summary.csv`.
 
 ![Policy simulation](figures/07_policy_simulation.png)
 
 What this shows:
 
-1. **Exploit-only is no better than random, and is worse on the Scheffe truth.** On the GP truth the paired median difference from random is 0.00 at low noise and 0.03 at high noise, and exploit-only beats random in only 13 and 9 of 30 seeds. On the Scheffe truth it is worse: paired difference +0.47 and +0.76, and it beats random in 13 and 4 of 30 seeds. Spending every slot on the current best does not pay.
-2. **The edge over random shrinks at realistic noise.** On the GP truth at 11.83 noise, UCB and EI beat random in only 14 and 12 of 30 seeds. The implemented four-role package beats random in 19 to 23 of 30 seeds across all four settings. Its eligibility rules are stricter than the other policies', so the gain belongs to the package, not to role mixing alone.
-3. **The simulation does not show that one exploration slot in four is optimal.** It shows that mixing roles beats pure exploitation under smooth truths.
+1. **The eligibility rules do much of the work.** Random sampling inside them has a median discovery regret of 3.74 on the GP truth. An earlier run without these rules, on the wider base-feasible grid, gave 7.82. The grids differ, so the comparison is indicative, but most of the four-role policy's earlier advantage came from the rules, not from the acquisition logic.
+2. **At low noise the GP policies help.** UCB, EI and the four-role policy beat random on discovery in 20 to 24 of 30 paired seeds. Exploit-only beats it in 19 on the GP truth and 12 on the Scheffe truth.
+3. **At realistic noise, no policy stands out.** At 11.83 every policy beats random in only 9 to 17 of 30 seeds. The finalist the lab would pick sits 5.2 to 9.9 points below the best available, whichever policy produced the data.
+4. **So the bottleneck is confirmation.** With noise near 12 points, choosing and confirming a winner limits the outcome more than choosing candidates does. That supports spending capacity on an anchor, replicate wells and a confirmation run.
+
+**Limits:**
+
+- Both truths are smooth fits to the same 24 points. Neither contains a failure mechanism like E14 or a batch shift like round 3.
+- The finalist is chosen from single noisy observations. Replicate wells would narrow the finalist gap; the simulation does not model them.
+- The simulated campaigns run no anchor.
+- The four-role policy includes a cheaper-alternative slot, which costs it some viability by design.
 
 ## Decision for batch selection
 
 - **Model:** pooled-noise GP fit on all 24 recipes, with the four-role selection policy, under the cost rule, in 1% steps.
 - **How the batch is built:** each pick is added as a pending point. Its pretend result is the current posterior mean. The hyperparameters, the data scaling and every historical noise term stay fixed. `check_gp.py` verifies that the posterior mean does not move and the variance never increases.
-- **Sensitivity checks:** per-recipe noise; length-scale floors of 0.05 and 0.2; dropping E02 or E14; 3 explore seeds; 8 alternative price scenarios. Separately, one-at-a-time changes to the selection thresholds. See `reports/batch_selection.md`.
+- **Why the four-role policy, given the simulation:** no policy dominates at realistic noise. The four-role policy makes cost and exploration explicit, one slot each, which a lab can read and challenge.
+- **Sensitivity checks:** per-recipe noise; length-scale floors of 0.05 and 0.2 and a ceiling of 3.0; dropping E02 or E14; E19 counted as pending; 8 alternative price scenarios. Separately, one-at-a-time changes to the selection thresholds. See `reports/batch_selection.md`.
 - **Anchor:** a re-run of E19 on the same plate.
 
 ## Limits

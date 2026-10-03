@@ -1,0 +1,6 @@
+recommendation_id,run_id,position,role,dmem_ml_per_100ml,rpmi_10_ml_per_100ml,xvivo_ml_per_100ml,ar5_ml_per_100ml,cost_eur_per_litre_base,model,seed,status,approved_by,approved_on
+REC-PBMC-R4,REC-PBMC-R4-slot1,slot 1,Exploit,44.0,26.0,19.0,11.0,177.69,"GP pooled noise, Matern 5/2",20261002,proposed,,
+REC-PBMC-R4,REC-PBMC-R4-slot2,slot 2,Cheaper alternative,43.0,56.0,1.0,0.0,173.92,"GP pooled noise, Matern 5/2",20261002,proposed,,
+REC-PBMC-R4,REC-PBMC-R4-slot3,slot 3,Explore,37.0,33.0,30.0,0.0,176.82,"GP pooled noise, Matern 5/2",20261002,proposed,,
+REC-PBMC-R4,REC-PBMC-R4-slot4,slot 4,Expected improvement,45.0,21.0,27.0,7.0,178.31,"GP pooled noise, Matern 5/2",20261002,proposed,,
+REC-PBMC-R4,REC-PBMC-R4-anchor,anchor,PBMC-E19 re-run (historical 81.0%),44.6,20.1,19.6,15.7,178.43,"GP pooled noise, Matern 5/2",20261002,proposed,,

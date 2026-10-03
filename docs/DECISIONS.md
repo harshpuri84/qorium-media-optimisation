@@ -89,3 +89,10 @@ Earlier log entries that cite the without-E02/E14 RMSE as the reason for choosin
 - **Simulation wording.** Gains are credited to the implemented package, not to role mixing alone. The score measures discovery, not confirmation.
 - **Schema.** Adds COMPONENT_LOT, CELL_PREP, MEDIUM_PREP and SAMPLE with pooling membership, plus QC status, exclusion reason, raw-file reference and protocol version.
 - **Scope.** The pipeline reproduces the case-study snapshot. A weekly loop would need a versioned recipe manifest and a results template.
+
+## 2026 10 03 Matched-eligibility simulation and handoff files
+
+- **Simulation rerun with the same eligibility rules for every policy** (cost rule in at least 6 of 9 scenarios, 5% gap, single media excluded; 6,219 candidates at 2%). The earlier four-role advantage was mostly the rules: random sampling inside them has median discovery regret 3.74 on the GP truth (7.82 before, on a wider grid). At low noise, GP policies other than exploit-only beat random in 20 to 24 of 30 seeds. At the fitted noise of 11.83, no policy stands out (9 to 17 of 30) and the finalist picked from noisy results sits 5.2 to 9.9 points below the best. Conclusion now stated in the memo: at realistic noise, confirmation limits the outcome more than candidate choice. The four-role policy is kept as a readable design choice, not a simulation-proven optimum.
+- **New simulation score.** Finalist regret: the true shortfall of the recipe with the highest noisy observed mean. Memo figure 10 now shows it.
+- **Handoff files.** `outputs/recipe_manifest.csv` (approvable run list with status and approver fields) and `outputs/results_template.csv` (one row per well with preparation, sample, protocol, QC and exclusion fields).
+- **Layout.** The slot-rule list no longer splits across a page.

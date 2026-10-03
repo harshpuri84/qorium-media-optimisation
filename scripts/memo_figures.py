@@ -48,36 +48,41 @@ def batch_map():
     fig.savefig(FIG / '09_memo_batch_map.png', dpi=220)
 
 
-def paired_wins():
+def finalist_regret():
+    """Median true shortfall of the finalist the lab would pick (highest noisy observed mean), per policy and setting."""
     rows = read(ROOT / 'reports/tables/policy_simulation_summary.csv')
-    policies = ['GP greedy (exploit only)', 'GP-EI (batch)', 'GP-UCB, kappa 2 (batch)', 'Four-role policy (deployed)']
-    names = ['Exploit only', 'EI', 'UCB', 'Four-role (ours)']
-    settings = [('GP fit to all 24', 'low (SEM 4.97)', 'GP truth, low noise', 'o'),
-                ('GP fit to all 24', 'high (fitted 11.83)', 'GP truth, high noise', 's'),
-                ('Scheffe fit to all 24', 'low (SEM 4.97)', 'Scheffe truth, low noise', '^'),
-                ('Scheffe fit to all 24', 'high (fitted 11.83)', 'Scheffe truth, high noise', 'D')]
-    fig, ax = plt.subplots(figsize=(3.4, 2.1))
-    ax.axvspan(0, 15, color='#F4F2EC', zorder=0)
-    ax.axvline(15, color=MUTED, lw=0.8, ls='--', zorder=1)
-    ax.text(15.4, 3.62, 'coin flip', fontsize=6, color=MUTED, va='center')
-    for j, (truth, noise, label, marker) in enumerate(settings):
+    policies = ['Random (feasible)', 'GP greedy (exploit only)', 'GP-UCB, kappa 2 (batch)', 'GP-EI (batch)',
+                'Four-role policy (deployed)']
+    names = ['Random', 'Exploit only', 'UCB', 'EI', 'Four-role (ours)']
+    settings = [('GP fit to all 24', 'low (SEM 4.97)', 'GP truth, noise 5', 'o', True),
+                ('Scheffe fit to all 24', 'low (SEM 4.97)', 'Scheffe truth, noise 5', '^', True),
+                ('GP fit to all 24', 'high (fitted 11.83)', 'GP truth, noise 12', 'o', False),
+                ('Scheffe fit to all 24', 'high (fitted 11.83)', 'Scheffe truth, noise 12', '^', False)]
+    fig, ax = plt.subplots(figsize=(3.4, 2.5))
+    for j, (truth, noise, label, marker, filled) in enumerate(settings):
         for i, pol in enumerate(policies):
             r = next(r for r in rows if r['truth'] == truth and r['noise'] == noise and r['policy'] == pol)
-            wins = int(r['seeds_better_than_random'].split('/')[0])
-            ax.scatter(wins, i + (j - 1.5) * 0.13, marker=marker, s=16, zorder=3,
-                       color=ACCENT if pol.startswith('Four-role') else INK, label=label if i == 0 else None)
+            c = ACCENT if pol.startswith('Four-role') else INK
+            ax.scatter(float(r['median_finalist_regret']), i + (j - 1.5) * 0.12, marker=marker, s=16, zorder=3,
+                       facecolor=c if filled else 'white', edgecolor=c, lw=0.9, label=label if i == 0 else None)
+    ax.axvspan(0, 5, color='#F4F2EC', zorder=0)
+    ax.text(0.2, 4.55, 'low noise', fontsize=6, color=MUTED)
+    ax.text(5.2, 4.55, 'realistic noise', fontsize=6, color=MUTED)
     ax.set_yticks(range(len(names)), names)
-    ax.set_xlim(0, 30)
-    ax.set_ylim(-0.5, 3.85)
-    ax.set_xlabel('Seeds (of 30) where the policy beat random, paired')
-    leg = ax.legend(fontsize=5.8, frameon=False, loc='lower right', handletextpad=0.2, borderaxespad=0.1)
+    ax.set_xlim(0, 11)
+    ax.set_ylim(-0.5, 4.85)
+    ax.set_xlabel('Final pick: points below the best blend available (median)')
+    leg = ax.legend(fontsize=5.6, frameon=False, loc='upper center', bbox_to_anchor=(0.42, -0.24), ncol=2,
+                    handletextpad=0.2, columnspacing=1.0)
     for h in leg.legend_handles:
-        h.set_color(MUTED)
+        h.set_edgecolor(MUTED)
+        if h.get_facecolor()[0][0] < 0.99:
+            h.set_facecolor(MUTED)
     fig.tight_layout(pad=0.3)
-    fig.savefig(FIG / '10_memo_paired_wins.png', dpi=220)
+    fig.savefig(FIG / '10_memo_finalist_regret.png', dpi=220)
 
 
 if __name__ == '__main__':
     batch_map()
-    paired_wins()
-    print('wrote 09_memo_batch_map.png, 10_memo_paired_wins.png')
+    finalist_regret()
+    print('wrote 09_memo_batch_map.png, 10_memo_finalist_regret.png')

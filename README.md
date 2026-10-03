@@ -22,7 +22,7 @@ notebooks/         Narrated walkthrough notebook, executed with outputs (renders
 reports/           Memo (md, pdf), walkthrough script, exploratory, model and batch reports
 reports/figures/   Figures 01 to 08
 reports/tables/    Generated evidence tables
-outputs/           Recommended blends, plate formulations and randomised plate layout
+outputs/           Recommended blends, plate formulations, randomised plate layout, recipe manifest and per-well results template
 ```
 
 Start with `reports/memo.pdf`, or `notebooks/walkthrough.ipynb` for the same story with the evidence inline. Then `reports/batch_selection.md` for the recommendation detail, `reports/model_comparison.md` for the evidence, and `docs/SCHEMA.md` for the data model.

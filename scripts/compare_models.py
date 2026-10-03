@@ -20,7 +20,7 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import ConstantKernel, Matern, WhiteKernel
 from sklearn.linear_model import BayesianRidge
 
-from design_space import base_prices, feasible, load_data, simplex_grid
+from design_space import base_prices, blend_cost, ceiling, feasible, load_data, scenario_prices, simplex_grid
 
 warnings.filterwarnings('ignore', category=ConvergenceWarning)
 ROOT = Path(__file__).resolve().parents[1]
@@ -181,15 +181,24 @@ def forward(rounds, X, y, sem):
 
 
 # ---------- simulated campaigns ----------
-def kriging_believer(gp, cand, q, acq):
-    """Pick q points; after each pick, condition on a pending result equal to the posterior mean (hyperparameters fixed)."""
-    picks, model = [], gp
+MIN_GAP_PCT = 5.0
+
+
+def gap_pct(A, B):
+    """Share of total volume that must move to turn one recipe into the other."""
+    return 50 * np.abs(A[:, None, :] - B[None, :, :]).sum(-1)
+
+
+def kriging_believer(gp, cand, q, acq, ok):
+    """Pick q eligible points, each at least MIN_GAP_PCT from the others; after each pick, condition on a pending
+    result equal to the posterior mean (hyperparameters fixed)."""
+    picks, model, ok = [], gp, ok.copy()
     for _ in range(q):
         mu, sd = model.latent(cand)
-        a = acq(mu, sd, model.best_mean())
-        a[picks] = -np.inf
+        a = np.where(ok, acq(mu, sd, model.best_mean()), -np.inf)
         k = int(np.argmax(a))
         picks.append(k)
+        ok &= gap_pct(cand, cand[[k]])[:, 0] >= MIN_GAP_PCT
         model = model.fantasize(cand[[k]])
     return picks
 
@@ -219,30 +228,38 @@ POLICIES = {'Random (feasible)': None, 'GP greedy (exploit only)': greedy,
 
 
 def campaign(truth, cand, noise_sd, rng, policy, init_idx, rounds=3, q=4):
+    """Every policy faces the same eligibility: the robust-cost grid, at least MIN_GAP_PCT from every measured
+    recipe and the single media, and from its own other picks. Returns best true value sampled after each round,
+    and the true value of the finalist the lab would pick: the recipe with the highest observed (noisy) mean."""
     idx = list(init_idx)
     yobs = truth[idx] + rng.normal(0, noise_sd, len(idx))
     best = [truth[idx].max()]
     for _ in range(rounds):
+        ok = gap_pct(cand, np.vstack([cand[idx], np.eye(4)])).min(1) >= MIN_GAP_PCT
         if POLICIES[policy] is None:
-            pool = np.setdiff1d(np.arange(len(cand)), idx)
-            new = list(rng.choice(pool, q, replace=False))
+            new = []
+            for _ in range(q):
+                k = int(rng.choice(np.flatnonzero(ok)))
+                new.append(k)
+                ok &= gap_pct(cand, cand[[k]])[:, 0] >= MIN_GAP_PCT
         else:
             gp = GP('pooled', restarts=1).fit(cand[idx], yobs, np.zeros(len(idx)))
             if POLICIES[policy] is four_role:
                 new = list(four_role(gp, cand, cand[idx]))
             else:
-                pool = np.setdiff1d(np.arange(len(cand)), idx)
-                new = list(pool[kriging_believer(gp, cand[pool], q, POLICIES[policy])])
+                new = kriging_believer(gp, cand, q, POLICIES[policy], ok)
         idx += new
         yobs = np.append(yobs, truth[new] + rng.normal(0, noise_sd, q))
         best.append(truth[idx].max())
-    return best
+    finalist = truth[idx[int(np.argmax(yobs))]]
+    return best, finalist
 
 
 def simulate(X, y, sem, seeds=30):
     """Illustrative only: both synthetic truths are smooth fits to the same 24 points."""
     cand = simplex_grid(2)
-    cand = cand[feasible(cand, base_prices())]
+    robust = sum(blend_cost(cand, p) <= ceiling(p) + 1e-9 for p in scenario_prices().values()) >= 6
+    cand = cand[feasible(cand, base_prices()) & robust]
     gp_all = GP('pooled').fit(X, y, sem)
     noises = {'low (SEM 4.97)': float(np.sqrt(np.mean(sem ** 2))),
               'high (fitted 11.83)': float(np.sqrt(gp_all.noise_new) * gp_all.ys)}
@@ -256,11 +273,12 @@ def simulate(X, y, sem, seeds=30):
             for s in range(seeds):
                 init = np.random.default_rng(SEED + s).choice(len(cand), 6, replace=False)
                 for pname in POLICIES:
-                    best = campaign(truth, cand, noise_sd, np.random.default_rng(SEED + 1000 + s), pname, init)
+                    best, finalist = campaign(truth, cand, noise_sd, np.random.default_rng(SEED + 1000 + s), pname, init)
                     for r, b in enumerate(best):
                         rows.append(dict(truth=tname, noise=nname, policy=pname, seed=s, round=r, experiments=6 + 4 * r,
                                          best_true_viability=round(float(b), 3),
-                                         regret=round(float(truth.max() - b), 3), truth_max=round(float(truth.max()), 3)))
+                                         regret=round(float(truth.max() - b), 3), truth_max=round(float(truth.max()), 3),
+                                         finalist_regret=round(float(truth.max() - finalist), 3) if r == len(best) - 1 else ''))
     return rows, noises, len(cand)
 
 
@@ -298,10 +316,11 @@ def main():
 
     sim, noises, ncand = simulate(X, y, sem)
     write('policy_simulation.csv', sim)
-    final = {}
+    final, fin = {}, {}
     for r in sim:
         if r['round'] == 3:
             final[(r['truth'], r['noise'], r['policy'], r['seed'])] = r['regret']
+            fin[(r['truth'], r['noise'], r['policy'], r['seed'])] = r['finalist_regret']
     summary = []
     for tname in ['GP fit to all 24', 'Scheffe fit to all 24']:
         for nname in noises:
@@ -309,11 +328,15 @@ def main():
                 reg = np.array([final[(tname, nname, pname, s)] for s in range(30)])
                 rnd = np.array([final[(tname, nname, 'Random (feasible)', s)] for s in range(30)])
                 d = reg - rnd
+                f = np.array([fin[(tname, nname, pname, s)] for s in range(30)])
+                fd = f - np.array([fin[(tname, nname, 'Random (feasible)', s)] for s in range(30)])
                 summary.append(dict(truth=tname, noise=nname, policy=pname,
                                     median_regret_18_runs=round(float(np.median(reg)), 2),
                                     q25=round(float(np.percentile(reg, 25)), 2), q75=round(float(np.percentile(reg, 75)), 2),
                                     median_paired_diff_vs_random=round(float(np.median(d)), 2),
-                                    seeds_better_than_random=f'{int((d < 0).sum())}/30'))
+                                    seeds_better_than_random=f'{int((d < 0).sum())}/30',
+                                    median_finalist_regret=round(float(np.median(f)), 2),
+                                    finalist_seeds_better_than_random=f'{int((fd < 0).sum())}/30'))
     write('policy_simulation_summary.csv', summary)
 
     fig, axes = plt.subplots(2, 2, figsize=(12, 8))

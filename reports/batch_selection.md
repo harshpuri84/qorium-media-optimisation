@@ -47,7 +47,7 @@ The figure projects the recipes onto DMEM and X-VIVO 15. Two points that look cl
 - **Slot 2 trades** a little expected viability for lower cost and for less exposure to AR5's unknown price.
 - **Slot 3 explores.**
 
-In the simulation, exploit-only selection was no better than random on the GP truth and worse on the Scheffe truth. The implemented four-role package, with its stricter eligibility rules, beat random in 19 to 23 of 30 paired seeds. Because the rules differ, the gain cannot be credited to role mixing alone, and the score measures discovery rather than the ability to pick a confirmed winner. It does not show that one slot in four is the best split.
+In the simulation, with the same eligibility rules for every policy, GP policies beat random at low noise, but at the fitted noise of 11.83 points no policy stands out, and the blend the lab would pick from noisy results ends 5 to 10 points below the best available. The four-role split is therefore a design choice for readability and cost coverage, not a simulation result. The simulation's clearer message is that confirmation, not candidate choice, limits the outcome at this noise level.
 
 Batch-level checks:
 

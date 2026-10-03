@@ -205,6 +205,21 @@ def main():
                    replicate=i % REPLICATES + 1) for i, w in enumerate(wells)]
     write(ROOT / 'outputs/plate_layout.csv', sorted(layout, key=lambda r: (r['well'][0], int(r['well'][1:]))))
 
+    # Handoff for a supervised next round: an approvable recipe manifest and a per-well results template.
+    rec_id = 'REC-PBMC-R4'
+    manifest = [dict(recommendation_id=rec_id, run_id=f'{rec_id}-{q["position"].replace(" ", "")}', position=q['position'],
+                     role=q['role'], **{k: v for k, v in q.items() if k.endswith('_ml_per_100ml')},
+                     cost_eur_per_litre_base=round(float(blend_cost(np.array([q[f'{c}_ml_per_100ml'] for c in COMPONENTS]) / 100, prices)), 2),
+                     model='GP pooled noise, Matern 5/2', seed=SEED, status='proposed', approved_by='', approved_on='')
+                for q in plate]
+    write(ROOT / 'outputs/recipe_manifest.csv', manifest)
+    run_of = {m['position']: m['run_id'] for m in manifest}
+    write(ROOT / 'outputs/results_template.csv',
+          [dict(run_id=run_of[r['position']], well=r['well'], replicate=r['replicate'], plate_id='', cell_prep_id='',
+                medium_prep_id='', sample_id='', assay_protocol_version='', timepoint_hours=72, viability_pct='',
+                raw_file_ref='', qc_status='pending', exclusion_reason='', operator='', run_date='')
+           for r in sorted(layout, key=lambda r: (r['well'][0], int(r['well'][1:])))])
+
     write(ROOT / 'reports/tables/batch_stability.csv',
           [dict(variant=k, **{f'slot_{i + 1}_shift_pct': round(float(v[i]), 1) for i in range(4)},
                 **{f'slot_{i + 1}_recipe': recipe(reruns[k][i]) for i in range(4)}) for k, v in shift.items()])

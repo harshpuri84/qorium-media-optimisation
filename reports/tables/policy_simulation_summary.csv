@@ -1,21 +1,21 @@
-truth,noise,policy,median_regret_18_runs,q25,q75,median_paired_diff_vs_random,seeds_better_than_random
-GP fit to all 24,low (SEM 4.97),Random (feasible),7.82,1.58,16.25,0.0,0/30
-GP fit to all 24,low (SEM 4.97),GP greedy (exploit only),10.3,4.26,17.26,0.0,13/30
-GP fit to all 24,low (SEM 4.97),"GP-UCB, kappa 2 (batch)",2.92,1.28,5.45,-2.12,21/30
-GP fit to all 24,low (SEM 4.97),GP-EI (batch),2.89,1.49,7.73,-1.22,21/30
-GP fit to all 24,low (SEM 4.97),Four-role policy (deployed),1.56,1.11,3.53,-5.36,23/30
-GP fit to all 24,high (fitted 11.83),Random (feasible),7.82,1.58,16.25,0.0,0/30
-GP fit to all 24,high (fitted 11.83),GP greedy (exploit only),10.16,3.8,18.88,0.03,9/30
-GP fit to all 24,high (fitted 11.83),"GP-UCB, kappa 2 (batch)",4.57,2.3,16.4,0.0,14/30
-GP fit to all 24,high (fitted 11.83),GP-EI (batch),4.54,2.89,17.05,0.0,12/30
-GP fit to all 24,high (fitted 11.83),Four-role policy (deployed),3.2,1.22,12.83,-0.95,19/30
-Scheffe fit to all 24,low (SEM 4.97),Random (feasible),1.99,1.11,3.74,0.0,0/30
-Scheffe fit to all 24,low (SEM 4.97),GP greedy (exploit only),2.73,0.8,5.41,0.47,13/30
-Scheffe fit to all 24,low (SEM 4.97),"GP-UCB, kappa 2 (batch)",0.01,0.0,0.46,-1.12,25/30
-Scheffe fit to all 24,low (SEM 4.97),GP-EI (batch),0.36,0.01,2.18,-0.74,21/30
-Scheffe fit to all 24,low (SEM 4.97),Four-role policy (deployed),0.74,0.01,2.27,-0.69,21/30
-Scheffe fit to all 24,high (fitted 11.83),Random (feasible),1.99,1.11,3.74,0.0,0/30
-Scheffe fit to all 24,high (fitted 11.83),GP greedy (exploit only),4.11,1.4,5.87,0.76,4/30
-Scheffe fit to all 24,high (fitted 11.83),"GP-UCB, kappa 2 (batch)",1.09,0.05,3.69,-0.21,16/30
-Scheffe fit to all 24,high (fitted 11.83),GP-EI (batch),2.6,0.61,4.58,0.0,12/30
-Scheffe fit to all 24,high (fitted 11.83),Four-role policy (deployed),0.74,0.01,1.87,-1.26,21/30
+truth,noise,policy,median_regret_18_runs,q25,q75,median_paired_diff_vs_random,seeds_better_than_random,median_finalist_regret,finalist_seeds_better_than_random
+GP fit to all 24,low (SEM 4.97),Random (feasible),3.74,1.28,5.31,0.0,0/30,4.92,0/30
+GP fit to all 24,low (SEM 4.97),GP greedy (exploit only),1.33,0.78,6.88,-1.01,19/30,4.25,16/30
+GP fit to all 24,low (SEM 4.97),"GP-UCB, kappa 2 (batch)",1.09,0.13,2.89,-1.14,21/30,3.73,17/30
+GP fit to all 24,low (SEM 4.97),GP-EI (batch),1.1,0.36,3.03,-1.18,20/30,1.69,20/30
+GP fit to all 24,low (SEM 4.97),Four-role policy (deployed),1.08,0.14,1.77,-1.94,21/30,2.02,23/30
+GP fit to all 24,high (fitted 11.83),Random (feasible),3.74,1.28,5.31,0.0,0/30,8.63,0/30
+GP fit to all 24,high (fitted 11.83),GP greedy (exploit only),2.97,1.0,7.43,-0.07,15/30,5.77,16/30
+GP fit to all 24,high (fitted 11.83),"GP-UCB, kappa 2 (batch)",3.03,1.21,4.43,0.0,14/30,9.86,18/30
+GP fit to all 24,high (fitted 11.83),GP-EI (batch),2.42,0.45,4.38,-0.42,17/30,7.13,18/30
+GP fit to all 24,high (fitted 11.83),Four-role policy (deployed),3.8,1.44,5.25,0.0,14/30,8.41,18/30
+Scheffe fit to all 24,low (SEM 4.97),Random (feasible),1.54,0.73,2.27,0.0,0/30,2.95,0/30
+Scheffe fit to all 24,low (SEM 4.97),GP greedy (exploit only),1.67,0.55,4.04,0.15,12/30,3.1,13/30
+Scheffe fit to all 24,low (SEM 4.97),"GP-UCB, kappa 2 (batch)",0.01,0.01,0.65,-1.07,24/30,2.38,16/30
+Scheffe fit to all 24,low (SEM 4.97),GP-EI (batch),0.14,0.01,1.57,-0.65,21/30,1.98,20/30
+Scheffe fit to all 24,low (SEM 4.97),Four-role policy (deployed),0.56,0.01,1.68,-0.47,21/30,2.32,13/30
+Scheffe fit to all 24,high (fitted 11.83),Random (feasible),1.54,0.73,2.27,0.0,0/30,8.09,0/30
+Scheffe fit to all 24,high (fitted 11.83),GP greedy (exploit only),2.69,0.93,3.99,0.11,9/30,6.4,13/30
+Scheffe fit to all 24,high (fitted 11.83),"GP-UCB, kappa 2 (batch)",0.65,0.01,1.42,-0.29,17/30,7.12,16/30
+Scheffe fit to all 24,high (fitted 11.83),GP-EI (batch),1.51,0.53,3.02,0.01,11/30,5.73,14/30
+Scheffe fit to all 24,high (fitted 11.83),Four-role policy (deployed),1.9,0.77,2.44,0.0,12/30,5.2,15/30
