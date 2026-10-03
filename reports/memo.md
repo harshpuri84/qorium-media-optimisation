@@ -17,13 +17,13 @@ Run five formulations next: four new blends of the four commercial media, plus a
 | 4 | Expected improvement | 45% | 21% | 27% | 7% | 178.31 | 69.1 (51.5 to 86.7) | 0.38 |
 | Anchor | E19 re-run | 44.6% | 20.1% | 19.6% | 15.7% | 178.43 | historical mean 81.0 | |
 
-![The four picks (stars) and the E19 anchor against the 24 historical blends, projected onto DMEM and X-VIVO 15. Colour is observed viability. The projection hides RPMI-10 and AR5.](figures/08_next_batch.png){width=50%}
-
 *Intervals are for one newly measured recipe mean, conditional on the model. P(above E19) compares the model's underlying responses for each blend and E19 and excludes unmodelled shifts between batches.*
 
 Every new blend costs no more per litre than E19 at base prices, and meets that rule in at least 7 of 9 price scenarios. The batch has a job beyond finding a better blend. It tests the two assumptions the model leans on hardest: that the round-3 results reproduce on a new plate, and that AR5 volume can move to the other media at no cost to viability.
 
 ## The problem
+
+<figure class="float"><img src="figures/09_memo_batch_map.png" alt="Batch map"><figcaption>The four picks (stars) and the E19 anchor against the 24 historical blends, on the two components the model responds to. Colour is observed viability.</figcaption></figure>
 
 The job is to choose the next 3 to 5 formulations under slow, noisy, small-batch experiments, not to win a prediction contest. A good choice teaches the lab something whatever the result.
 
@@ -68,6 +68,8 @@ The forward-round test is the honest one. Each model was trained on earlier roun
 2. **Cheaper alternative.** Highest prediction at least 2.5% below the cost ceiling.
 3. **Explore.** The recipe whose measurement most reduces total predicted-response uncertainty across the recipes the model says could still be the best.
 4. **Expected improvement.** Highest expected gain over the current best, with slots 1 to 3 already pending.
+
+<figure class="float"><img src="figures/10_memo_paired_wins.png" alt="Paired wins over random"><figcaption>How often each policy beat random sampling across 30 paired campaigns, in four synthetic settings. Below 15 is worse than a coin flip.</figcaption></figure>
 
 **Simulation.** There is no real replay of a policy, because only one sequence of experiments was ever run. Instead I ran 30 paired campaigns (6 random blends, then three batches of 4) against two smooth synthetic truths, a GP fit and a Scheffe fit, at two noise levels. Always picking the current best was no better than random, and was worse on the Scheffe truth. The four-role policy beat random in 19 to 23 of 30 seeds in every setting, the most consistent result in the comparison. At realistic noise, plain UCB and EI beat random in only 12 to 16 of 30 seeds. The simulation supports mixing roles. It does not prove that one exploration slot in four is the best split, and it says nothing about E14-style failures or round-to-round shifts.
 
