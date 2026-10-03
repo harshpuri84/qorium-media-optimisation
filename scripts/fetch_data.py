@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 from pathlib import Path
 import urllib.request
 
@@ -26,6 +27,10 @@ def main():
         manifest = json.loads(MANIFEST.read_text())
         for item in manifest['files']:
             path = ROOT / item['path']
+            # Reference files from the Cosenza repository are not redistributed and no analysis reads them;
+            # download them only when asked (FETCH_REFERENCE=1).
+            if 'cosenza_2022' in item['path'] and not path.exists() and not os.environ.get('FETCH_REFERENCE'):
+                continue
             if path.exists():
                 if sha(path.read_bytes()) != item['sha256']:
                     raise ValueError(f'Raw file changed: {path}')
@@ -35,7 +40,7 @@ def main():
                     raise ValueError(f'Remote source changed: {item["url"]}')
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(data)
-        print(f'Verified {len(manifest["files"])} retained source files.')
+        print('Verified retained source files (Cosenza reference files skipped unless FETCH_REFERENCE=1).')
         return
 
     metadata_bytes = get('https://api.figshare.com/v2/articles/27715134')

@@ -1,21 +1,61 @@
-well,position,role,replicate
-B3,slot 3,Explore,4
-B4,anchor,PBMC-E19 re-run (historical 81.0%),3
-B6,slot 4,Expected improvement,4
-B7,slot 2,Cheaper alternative,1
-B11,slot 3,Explore,3
-C5,slot 1,Exploit,1
-C7,slot 1,Exploit,4
-D4,slot 2,Cheaper alternative,3
-D11,slot 4,Expected improvement,3
-E5,slot 1,Exploit,2
-E7,anchor,PBMC-E19 re-run (historical 81.0%),1
-E8,slot 4,Expected improvement,2
-E9,slot 2,Cheaper alternative,2
-F2,slot 1,Exploit,3
-F5,anchor,PBMC-E19 re-run (historical 81.0%),4
-F7,slot 4,Expected improvement,1
-F8,slot 3,Explore,1
-G5,anchor,PBMC-E19 re-run (historical 81.0%),2
-G9,slot 2,Cheaper alternative,4
-G11,slot 3,Explore,2
+well,well_type,position,role,replicate
+A1,PBS edge,edge,PBS against evaporation,
+A2,PBS edge,edge,PBS against evaporation,
+A3,PBS edge,edge,PBS against evaporation,
+A4,PBS edge,edge,PBS against evaporation,
+A5,PBS edge,edge,PBS against evaporation,
+A6,PBS edge,edge,PBS against evaporation,
+A7,PBS edge,edge,PBS against evaporation,
+A8,PBS edge,edge,PBS against evaporation,
+A9,PBS edge,edge,PBS against evaporation,
+A10,PBS edge,edge,PBS against evaporation,
+A11,PBS edge,edge,PBS against evaporation,
+A12,PBS edge,edge,PBS against evaporation,
+B1,PBS edge,edge,PBS against evaporation,
+B6,formulation,slot 1,Exploit,2
+B7,formulation,slot 3,Explore,3
+B8,formulation,slot 1,Exploit,3
+B11,formulation,slot 1,Exploit,4
+B12,PBS edge,edge,PBS against evaporation,
+C1,PBS edge,edge,PBS against evaporation,
+C2,formulation,slot 3,Explore,1
+C3,formulation,slot 2,Cheaper alternative,1
+C5,formulation,slot 2,Cheaper alternative,2
+C7,formulation,anchor,PBMC-E19 re-run (historical 81.0%),3
+C8,formulation,slot 2,Cheaper alternative,3
+C10,control,no-cell blank,no-cell blank,1
+C11,formulation,anchor,PBMC-E19 re-run (historical 81.0%),4
+C12,PBS edge,edge,PBS against evaporation,
+D1,PBS edge,edge,PBS against evaporation,
+D12,PBS edge,edge,PBS against evaporation,
+E1,PBS edge,edge,PBS against evaporation,
+E4,control,no-cell blank,no-cell blank,2
+E5,formulation,slot 4,Expected improvement,2
+E7,formulation,slot 4,Expected improvement,3
+E9,formulation,slot 3,Explore,4
+E10,formulation,slot 4,Expected improvement,4
+E12,PBS edge,edge,PBS against evaporation,
+F1,PBS edge,edge,PBS against evaporation,
+F2,formulation,slot 4,Expected improvement,1
+F9,formulation,slot 2,Cheaper alternative,4
+F11,control,dead-cell control (heat-killed),dead-cell control (heat-killed),2
+F12,PBS edge,edge,PBS against evaporation,
+G1,PBS edge,edge,PBS against evaporation,
+G2,formulation,anchor,PBMC-E19 re-run (historical 81.0%),1
+G3,formulation,slot 1,Exploit,1
+G4,control,dead-cell control (heat-killed),dead-cell control (heat-killed),1
+G5,formulation,slot 3,Explore,2
+G6,formulation,anchor,PBMC-E19 re-run (historical 81.0%),2
+G12,PBS edge,edge,PBS against evaporation,
+H1,PBS edge,edge,PBS against evaporation,
+H2,PBS edge,edge,PBS against evaporation,
+H3,PBS edge,edge,PBS against evaporation,
+H4,PBS edge,edge,PBS against evaporation,
+H5,PBS edge,edge,PBS against evaporation,
+H6,PBS edge,edge,PBS against evaporation,
+H7,PBS edge,edge,PBS against evaporation,
+H8,PBS edge,edge,PBS against evaporation,
+H9,PBS edge,edge,PBS against evaporation,
+H10,PBS edge,edge,PBS against evaporation,
+H11,PBS edge,edge,PBS against evaporation,
+H12,PBS edge,edge,PBS against evaporation,

@@ -54,23 +54,22 @@ def finalist_regret():
     policies = ['Random (feasible)', 'GP greedy (exploit only)', 'GP-UCB, kappa 2 (batch)', 'GP-EI (batch)',
                 'Four-role policy (deployed)']
     names = ['Random', 'Exploit only', 'UCB', 'EI', 'Four-role (ours)']
-    settings = [('GP fit to all 24', 'low (SEM 4.97)', 'GP truth, noise 5', 'o', True),
-                ('Scheffe fit to all 24', 'low (SEM 4.97)', 'Scheffe truth, noise 5', '^', True),
-                ('GP fit to all 24', 'high (fitted 11.83)', 'GP truth, noise 12', 'o', False),
-                ('Scheffe fit to all 24', 'high (fitted 11.83)', 'Scheffe truth, noise 12', '^', False)]
+    settings = [('GP fit to all 24', 'low', 'GP truth, noise 5', 'o', True),
+                ('Scheffe fit to all 24', 'low', 'Scheffe truth, noise 5', '^', True),
+                ('GP fit to all 24', 'high', 'GP truth, noise 12', 'o', False),
+                ('Scheffe fit to all 24', 'high', 'Scheffe truth, noise 12', '^', False)]
     fig, ax = plt.subplots(figsize=(3.4, 2.5))
     for j, (truth, noise, label, marker, filled) in enumerate(settings):
         for i, pol in enumerate(policies):
-            r = next(r for r in rows if r['truth'] == truth and r['noise'] == noise and r['policy'] == pol)
+            r = next((r for r in rows if r['truth'] == truth and r['noise'].startswith(noise) and r['policy'] == pol), None)
+            if r is None:
+                raise ValueError(f'No simulation summary row for {truth}, {noise}, {pol}')
             c = ACCENT if pol.startswith('Four-role') else INK
             ax.scatter(float(r['median_finalist_regret']), i + (j - 1.5) * 0.12, marker=marker, s=16, zorder=3,
                        facecolor=c if filled else 'white', edgecolor=c, lw=0.9, label=label if i == 0 else None)
-    ax.axvspan(0, 5, color='#F4F2EC', zorder=0)
-    ax.text(0.2, 4.55, 'low noise', fontsize=6, color=MUTED)
-    ax.text(5.2, 4.55, 'realistic noise', fontsize=6, color=MUTED)
     ax.set_yticks(range(len(names)), names)
     ax.set_xlim(0, 11)
-    ax.set_ylim(-0.5, 4.85)
+    ax.set_ylim(-0.5, 4.5)
     ax.set_xlabel('Final pick: points below the best blend available (median)')
     leg = ax.legend(fontsize=5.6, frameon=False, loc='upper center', bbox_to_anchor=(0.42, -0.24), ncol=2,
                     handletextpad=0.2, columnspacing=1.0)

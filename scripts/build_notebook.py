@@ -85,7 +85,7 @@ Each row reruns the full selection with one change. Cells are the volume (%) sep
 pd.read_csv(ROOT / 'reports/tables/batch_threshold_stress.csv').iloc[:, :5]"""),
     md("""## 9. The plate
 
-Five formulations, four randomised wells each, interior wells only. The screen passes a blend that is no more than 5 points below the same-plate E19 at equal or lower cost. The screen only filters: four wells give about plus or minus 11 points on the difference. One finalist then goes to a paired confirmation against concurrent E19 across independent cell and medium preparations, sized from the variance this pilot measures."""),
+Five formulations, four wells each spread across four column blocks, a PBS edge ring, two blanks and two heat-killed controls. The screen passes a blend that is no more than 5 points below the same-plate E19 at equal or lower cost. The screen only filters: four wells give about plus or minus 13 points on the difference. One finalist then goes to a paired confirmation against concurrent E19 across independent cell and medium preparations, sized from the variance this pilot measures."""),
     code("""display(pd.read_csv(ROOT / 'outputs/plate_formulations.csv'))
 pd.read_csv(ROOT / 'outputs/plate_layout.csv').head(8)"""),
 ]

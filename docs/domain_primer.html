@@ -217,7 +217,7 @@ details p{margin:10px 0 2px}
 <tr><td>Two near-identical recipes disagree hugely</td><td class="num">E10 48.15% vs E14 7.52%</td><td>Only 2.60% of volume differs. Either the biology has a cliff, or E14 failed as a whole run. Readings within E14 agree (SD 2.70), so it is not read noise.</td></tr>
 <tr><td>Readings are noisy</td><td class="num">pooled SD 9.51 pts</td><td>A 5-point gap between two recipes is within noise. The model must allow for this.</td></tr>
 <tr><td>No pure-media corners tested</td><td class="num">0 of 24</td><td>The model is guessing at the edges of the recipe space.</td></tr>
-<tr><td>Costs are missing</td><td class="num">0 of 4 prices</td><td>We must source catalogue prices or use a labelled scenario.</td></tr>
+<tr><td>The source data has no costs</td><td class="num">0 of 4 prices</td><td>We sourced catalogue prices (FBS and AR5 provisional) and ran 9 price scenarios.</td></tr>
 </tbody></table></div>
 <p class="src">Figures from reports/exploratory_analysis.md and reports/tables/eda_summary.json.</p>
 </section>
@@ -314,7 +314,7 @@ details p{margin:10px 0 2px}
 <thead><tr><th>Slot</th><th>Role</th><th>DMEM / RPMI-10 / X-VIVO / AR5</th><th>EUR/L</th><th>Predicted</th><th>What it tests</th></tr></thead>
 <tbody>
 <tr><td class="num">1</td><td>Exploit</td><td class="num">44 / 26 / 19 / 11</td><td class="num">177.69</td><td class="num">70.2%</td><td>Can some AR5 move to RPMI-10 with no loss? Level with E19, EUR 0.74/L cheaper</td></tr>
-<tr><td class="num">2</td><td>Cheaper</td><td class="num">43 / 56 / 1 / 0</td><td class="num">173.92</td><td class="num">65.9%</td><td>Does a blend with almost no serum-free medium hold up? The models disagree (51.9 to 69.9%)</td></tr>
+<tr><td class="num">2</td><td>Cheaper</td><td class="num">43 / 56 / 1 / 0</td><td class="num">173.92</td><td class="num">65.9%</td><td>Does a blend with almost no serum-free medium hold up? The models disagree (51.9 to 68.5%)</td></tr>
 <tr><td class="num">3</td><td>Explore</td><td class="num">37 / 33 / 30 / 0</td><td class="num">176.82</td><td class="num">60.1%</td><td>Is the 44% DMEM band really special, or does good viability extend further?</td></tr>
 <tr><td class="num">4</td><td>Expected improvement</td><td class="num">45 / 21 / 27 / 7</td><td class="num">178.31</td><td class="num">69.1%</td><td>Does swapping AR5 for X-VIVO 15 beat E19? Biggest upside</td></tr>
 <tr><td>Anchor</td><td>E19 re-run</td><td class="num">44.6 / 20.1 / 19.6 / 15.7</td><td class="num">178.43</td><td class="num">81.0% (historical)</td><td>Did round 3 reproduce, or was it a good lab day?</td></tr>

@@ -96,3 +96,15 @@ Earlier log entries that cite the without-E02/E14 RMSE as the reason for choosin
 - **New simulation score.** Finalist regret: the true shortfall of the recipe with the highest noisy observed mean. Memo figure 10 now shows it.
 - **Handoff files.** `outputs/recipe_manifest.csv` (approvable run list with status and approver fields) and `outputs/results_template.csv` (one row per well with preparation, sample, protocol, QC and exclusion fields).
 - **Layout.** The slot-rule list no longer splits across a page.
+
+## 2026 10 03 Changes after the Sonnet 5.5 audit swarm
+
+Five read-only audits (numbers, statistics, biology, hiring panel, code). Applied:
+
+- **Simulation now uses common random numbers.** Each recipe's measurement error is fixed per seed, random picks use their own generator, and paired wins carry a sign-test p-value. Only UCB beats random reliably, and only at low noise (p = 0.016 and 0.001). At the fitted noise of 11.83 no policy differs from random; the finalist sits 4.7 to 7.9 points below the best. The four-role policy is kept as a readable design, not a proven optimum.
+- **Ranking claim corrected.** The GP's leave-one-out Spearman of 0.61 falls to 0.11 on rounds 0 to 2. It finds the 44% DMEM band and cannot rank within it.
+- **Screen statistics.** t-based interval (about plus or minus 13 points at 4 wells per arm) and pass rates (77%, 50%, 23%, 7% for true differences 0, -5, -10, -15).
+- **New sensitivity variants.** Noise scaled by reading count (picks move at most 2%). Three-coordinate fits: without X-VIVO 15 (at most 13%), without DMEM (all four picks move, 16 to 72%). Coordinate choice is flagged as a modelling choice.
+- **Plate.** PBS edge ring, four column blocks per formulation, 2 no-cell blanks, 2 heat-killed controls. Results template adds donor, thaw, seeding, well volume, pH, osmolality and total and viable cells per mL.
+- **Lab plan.** `reports/lab_plan.md`: protocol fields, validity checks, screen and confirmation figures, the Qorium version of the plate, questions for the CSO.
+- **Repo.** MIT LICENSE, data licence note, AI-assistance note, optional reference download (`FETCH_REFERENCE=1`), sturdier figure labels, README corrections, diff summary at the end of `run_all.sh`.

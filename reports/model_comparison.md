@@ -54,7 +54,7 @@ The full table is in `reports/tables/model_loo.csv`. Mean-only has no ranking ab
 What this shows:
 
 1. **On all 24 recipes, no model clearly beats the mean.** The GP and the random forest have the lowest RMSE (16.77 and 16.32). The mean-only model has the best NLPD (4.44 against 5.93 for the GP). So the GP's uncertainty is less honest than a flat average's.
-2. **The GP ranks recipes better than chance.** Its Spearman is 0.61 on all 24. The Scheffe model is at -0.01. Ranking is the property the batch selection relies on.
+2. **The GP's ranking is between rounds, not within them.** Its leave-one-out Spearman of 0.61 on all 24 falls to 0.11 on rounds 0 to 2, and sits between -0.09 and 0.37 within each round (`reports/tables/model_loo_ranking_by_round.csv`). It separates the round-3 cluster at 44% DMEM from the rest but cannot rank blends inside it. The Scheffe model ranks no better than chance overall. With n = 24, a coverage of 0.79 against 0.80 has a standard error near 0.08 and supports nothing either way.
 3. **E02 and E14 dominate the error.** They are unexplained low outcomes. Their readings agree with each other, and the data cannot tell a failed run from a sharp biological response. The GP's predictions for E10 are pulled down by E14, which sits 2.60% of volume away from it. Removing both drops the GP RMSE to 7.56. That is a sensitivity result, not grounds to delete them. Both stay in the primary fit.
 
 ## Forward-round check
@@ -89,10 +89,10 @@ There is no real way to replay a policy, because only one sequence of experiment
 
 | Truth, noise | Random | Exploit only | GP-UCB | GP-EI | Four-role (deployed) |
 | --- | --- | --- | --- | --- | --- |
-| GP fit, 4.97 | 3.74 / 4.92 | 1.33 / 4.25 | 1.09 / 3.73 | 1.10 / **1.69** | **1.08** / 2.02 |
-| GP fit, 11.83 | 3.74 / 8.63 | 2.97 / **5.77** | 3.03 / 9.86 | **2.42** / 7.13 | 3.80 / 8.41 |
-| Scheffe fit, 4.97 | 1.54 / 2.95 | 1.67 / 3.10 | **0.01** / 2.38 | 0.14 / **1.98** | 0.56 / 2.32 |
-| Scheffe fit, 11.83 | 1.54 / 8.09 | 2.69 / 6.40 | **0.65** / 7.12 | 1.51 / 5.73 | 1.90 / **5.20** |
+| GP fit, 4.97 | 2.12 / 2.12 | 1.64 / 4.41 (16/30, p=0.572) | 1.08 / 2.66 (22/30, p=0.016) | 1.35 / 2.47 (16/30, p=0.711) | 1.20 / 2.06 (19/30, p=0.136) |
+| GP fit, 11.83 | 2.12 / 7.61 | 3.84 / 7.94 (14/30, p=1.000) | 2.94 / 7.63 (13/30, p=1.000) | 1.34 / 6.19 (14/30, p=1.000) | 1.61 / 5.73 (15/30, p=0.557) |
+| Scheffe fit, 4.97 | 1.56 / 4.67 | 1.55 / 3.02 (12/30, p=0.845) | 0.01 / 1.51 (24/30, p=0.001) | 0.07 / 1.75 (20/30, p=0.061) | 0.52 / 1.96 (17/30, p=0.248) |
+| Scheffe fit, 11.83 | 1.56 / 5.54 | 1.79 / 5.71 (10/30, p=0.424) | 0.37 / 5.64 (16/30, p=0.442) | 0.80 / 5.42 (13/30, p=1.000) | 1.36 / 4.67 (12/30, p=0.701) |
 
 Each cell gives two medians after 18 runs, in viability points. The first is discovery regret: the best achievable viability minus the true viability of the best blend sampled. The second is finalist regret: the best achievable minus the true viability of the blend the lab would pick, the one with the highest noisy observed mean. Every policy faces the same eligibility rules: the cost rule in at least 6 of 9 price scenarios, a 5% minimum gap from measured recipes, single media and the policy's own other picks. Paired wins over random are in `reports/tables/policy_simulation_summary.csv`.
 
@@ -100,17 +100,19 @@ Each cell gives two medians after 18 runs, in viability points. The first is dis
 
 What this shows:
 
-1. **The eligibility rules do much of the work.** Random sampling inside them has a median discovery regret of 3.74 on the GP truth. An earlier run without these rules, on the wider base-feasible grid, gave 7.82. The grids differ, so the comparison is indicative, but most of the four-role policy's earlier advantage came from the rules, not from the acquisition logic.
-2. **At low noise the GP policies help.** UCB, EI and the four-role policy beat random on discovery in 20 to 24 of 30 paired seeds. Exploit-only beats it in 19 on the GP truth and 12 on the Scheffe truth.
-3. **At realistic noise, no policy stands out.** At 11.83 every policy beats random in only 9 to 17 of 30 seeds. The finalist the lab would pick sits 5.2 to 9.9 points below the best available, whichever policy produced the data.
-4. **So the bottleneck is confirmation.** With noise near 12 points, choosing and confirming a winner limits the outcome more than choosing candidates does. That supports spending capacity on an anchor, replicate wells and a confirmation run.
+1. **The eligibility rules do much of the work.** Random sampling inside them ends a median 2.12 (GP truth) and 1.56 (Scheffe truth) points from the best blend. An earlier run without these rules, on a wider grid, gave 7.82.
+2. **Only UCB beats random reliably, and only at low noise:** 22 and 24 of 30 paired seeds, sign test p = 0.016 and 0.001. EI, exploit-only and the four-role policy do not reach p < 0.05 in any setting.
+3. **At realistic noise, no policy differs from random.** At 11.83 every policy beats random in 10 to 16 of 30 seeds (p ≥ 0.42), and the finalist the lab would pick sits 4.7 to 7.9 points below the best available.
+4. **So the bottleneck is confirmation.** With noise near 12 points, choosing and confirming a winner limits the outcome more than choosing candidates. That supports spending capacity on an anchor, replicate wells and a confirmation run.
+
+Common random numbers: within a seed, every policy that measures a given recipe sees the same measurement error, and random picks draw from their own generator, so paired differences reflect the policies, not the noise draws.
 
 **Limits:**
 
 - Both truths are smooth fits to the same 24 points. Neither contains a failure mechanism like E14 or a batch shift like round 3.
 - The finalist is chosen from single noisy observations. Replicate wells would narrow the finalist gap; the simulation does not model them.
 - The simulated campaigns run no anchor.
-- The four-role policy includes a cheaper-alternative slot, which costs it some viability by design.
+- The four-role policy includes a cheaper-alternative slot, which costs it some viability by design. In the simulation it uses 1 optimiser restart and a 2% grid; the deployed selection uses 10 restarts and a 1% grid.
 
 ## Decision for batch selection
 

@@ -30,7 +30,7 @@ The walkthrough is a screen share of the repo. Each block lists what is on scree
 
 **Screen.** `reports/figures/06_loo_parity.png`, then the forward-round table in `reports/model_comparison.md`.
 
-"I compared a GP, a random forest, the classical Scheffe mixture model and a plain average. On all 24 points no model clearly beats the average. In leave-one-out the GP ranks blends better than chance, with a rank correlation of 0.61. Scheffe does not. I chose the GP because it gives a usable uncertainty-based selection rule."
+"I compared a GP, a random forest, the classical Scheffe mixture model and a plain average. On all 24 points no model clearly beats the average. The GP's leave-one-out rank correlation is 0.61, but that is it separating round 3 from the rest; within the earlier rounds it is 0.11. It finds the 44% DMEM band and can't rank inside it. I chose the GP because it gives a usable uncertainty-based selection rule, not because it ranks well."
 
 "Then the honest test. Train on earlier rounds, predict the next. Every model missed round 3 by 22 to 29 points, and the GP's forward rank correlations were 0.26, minus 0.31 and 0.26. So neither its predictions nor its rankings are validated prospectively. I use it to propose a diverse batch. The decision rests on the same-plate comparison with E19 and on confirmation before anything is adopted."
 
@@ -40,21 +40,21 @@ The walkthrough is a screen share of the repo. Each block lists what is on scree
 
 "I pick one slot at a time. After each pick, the model treats that blend as pending. That shrinks uncertainty around it, so the exploring slots look elsewhere, and a 5% volume gap keeps the picks apart. Slot 1 is the highest prediction. Slot 2 is the best blend at least 2.5% cheaper, and it has almost no serum-free medium. Slot 3 is the blend whose result would most shrink the model's uncertainty across the recipes that could still be the best. It moves DMEM down to 37% to test whether the round-3 band is really special. Slot 4 has the biggest expected gain once the other three are pending. It swaps AR5 for X-VIVO 15."
 
-"Why not just pick the top four predictions? I simulated 30 paired campaigns with the same rules for every policy. Two things came out. The rules themselves, the cost check and the minimum gap, did a lot of the work. And at the noise level in this data, no policy stood out: the blend you'd pick from noisy single readings ended 5 to 10 points below the best available, whatever chose the candidates. So the real bottleneck is confirming a winner, not proposing candidates. That's why the plate carries an anchor and the plan ends in confirmation. The four roles are a readable way to cover cost and exploration, not something the simulation proved best."
+"Why not just pick the top four predictions? I simulated 30 paired campaigns with the same rules and the same measurement errors for every policy. Two things came out. The rules themselves, the cost check and the minimum gap, did most of the work: random picks inside them got within about 2 points of the best. And at the noise level in this data, no policy beat random; the blend you'd pick from noisy single readings ended 5 to 8 points below the best, whatever chose the candidates. So the bottleneck is confirming a winner, not proposing candidates. That's why the plate carries an anchor and the plan ends in confirmation. The four roles are a readable way to cover cost and exploration, not something the simulation proved best."
 
 ## 6:00 to 7:15. What could make me wrong
 
 **Screen.** The robustness and threshold tables in `reports/batch_selection.md`.
 
-"I reran the whole selection 15 times, changing the noise model, the kernel limits, the two low results, the prices, and whether the anchor counts as pending. Slot 1 is unchanged in 9 of 15, but moves 26% of volume under a different noise model. Slot 4 moves by a median 7%. So these are recurring directions, not uniquely established recipes. Slot 2 moves with prices. Slot 3 moves with the model, which is expected, because exploration follows uncertainty."
+"I reran the whole selection 18 times, changing the noise model, the kernel limits, the coordinates the model sees, the two low results, the prices, and whether the anchor counts as pending. Slot 1 is unchanged in 10 of 18, but moves 26% of volume under a different noise model. Slot 4 moves by a median 7%. So these are recurring directions, not uniquely established recipes. Slot 2 moves with prices. Slot 3 moves with the model, which is expected, because exploration follows uncertainty."
 
 "The biggest caveat: the fitted model is close to two-dimensional. It treats RPMI-10 and AR5 as interchangeable. So slot 1's 54% chance of beating E19 means the model can't tell them apart, not that slot 1 is better. All four picks hold less AR5 than E19, so this batch tests that assumption directly."
 
 ## 7:15 to 8:00. What happens after the plate
 
-**Screen.** Memo, "How the result changes the next decision" table.
+**Screen.** Memo, "From plate to decision" section, then `reports/lab_plan.md` section 4.
 
-"If the E19 re-run lands near 80%, the round-3 region holds and we push further from AR5. If it lands near 55%, we investigate reproducibility before the next round, and judge everything against 55, not 81. First the assay owner checks the plate is valid, against criteria set in advance; an invalid plate is repeated. Then the screen: a blend passes if it is no more than 5 points below the same-plate E19, at equal or lower cost. Four wells give about plus or minus 11 points on that difference, so the screen only filters. One finalist goes to a paired confirmation against E19 across independent cell and medium preparations, sized from the variance the pilot measures. Accept if the lower bound on the difference clears minus 5 points. For Qorium, the same loop runs on bovine fibroblast expansion and collagen output, with real supplier quotes and a cheap and an expensive assay paired, which the schema already supports."
+"If the E19 re-run lands near 80%, the round-3 region holds and we push further from AR5. If it lands near 55%, we investigate reproducibility before the next round, and judge everything against 55, not 81. First the assay owner checks the plate is valid, against criteria set in advance; an invalid plate is repeated. Then the screen: a blend passes if it is no more than 5 points below the same-plate E19, at equal or lower cost. Four wells give about plus or minus 13 points on that difference, so the screen only filters. One finalist goes to a paired confirmation against E19 across independent cell and medium preparations, sized from the variance the pilot measures. Accept if the lower bound on the difference clears minus 5 points. For Qorium, the same loop runs on bovine fibroblast expansion and collagen output, with real supplier quotes and a cheap and an expensive assay paired, which the schema already supports."
 
 ## Likely questions
 
@@ -69,3 +69,16 @@ The walkthrough is a screen share of the repo. Each block lists what is on scree
 | Why not BoTorch? | 24 points and four components. scikit-learn's GP with explicit conditioning is enough and easier to check, and `check_gp.py` verifies it |
 | What changes with 10 to 20 prior experiments? | More space-filling picks and wider intervals. With 6 random points, the GP here was confidently wrong |
 | How would this work at Qorium? | Same loop, Qorium's cells and assays. Pair a cheap screen with an expensive confirmatory assay, keep cost as a constraint with real quotes, and re-run an anchor every batch |
+| If you had budget for one more plate, would you run this batch or fix the noise first? | Run it. The anchor and four wells per arm are the noise measurement. If E19 lands near 81% and the within-plate SD stays near 9.5, the screen is usable; if not, the next plate is replicates only |
+| How would you build the team around this loop? | Two people to start: a modeller-engineer and a lab-data owner embedded with R&D. First deliverable is the schema and a frozen dataset per round, not a model. Add model complexity only when the forward test beats the mean. The assay owner holds the veto on plate validity |
+| Why believe a Bayesian method helps at all, if it did not beat the mean? | It does not yet, and the memo says so. Its value today is the batch structure: diverse picks, an explicit uncertainty rule, an anchor and pass criteria set in advance. The model earns trust after forward rounds beat the mean |
+
+## Questions for a cell biologist on the panel
+
+| Question | Short answer |
+|---|---|
+| Which donor and which thaw? | The historical data do not record them. The next plate uses one donor and one thaw for every well; donor effects belong in the confirmation run |
+| Why viability and not cell count? | It is the only endpoint in the public data. The next plate records total and viable cells per mL from the same read, because viability can stay high while cells are lost |
+| How do you know 81% is real and not debris? | I don't. The plate adds heat-killed controls to set the dead-cell gate and blanks for background |
+| Does a PBMC blend tell you anything about bovine fibroblasts? | Only the method. Fibroblasts are adherent, serum-free growth runs below serum controls (Kolkmann, Post et al. 2020), and animal-free excludes animal-derived proteins, not only FBS |
+| What would your first Qorium plate be? | Four blends of approved animal-free ingredients, one fibroblast line, the current production medium as anchor, four wells per arm, a growth readout mid-culture and collagen at the end |

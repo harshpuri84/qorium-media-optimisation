@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from scipy.stats import norm, spearmanr
+from scipy.stats import binomtest, norm, spearmanr
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.gaussian_process import GaussianProcessRegressor
@@ -31,6 +31,19 @@ LOW_IDS = ['PBMC-E02', 'PBMC-E14']
 
 
 # ---------- surrogates: fit(X, y, sem) then predict(X) -> (mean, sd of a new observed mean) ----------
+class _Sub:
+    """Apply a fitted kernel to a subset of mixture columns."""
+
+    def __init__(self, k, cols):
+        self.k, self.cols = k, cols
+
+    def __call__(self, A, B=None):
+        return self.k(A[:, self.cols], None if B is None else B[:, self.cols])
+
+    def diag(self, A):
+        return self.k.diag(A[:, self.cols])
+
+
 class GP:
     """Matern 5/2 with per-component length scales floored at ls_floor (default 0.1).
 
@@ -39,26 +52,38 @@ class GP:
     pending (fantasy) points keeps the scaling and every historical noise term fixed.
     """
 
-    def __init__(self, noise='pooled', restarts=3, ls_floor=0.1, ls_upper=10.0):
+    def __init__(self, noise='pooled', restarts=3, ls_floor=0.1, ls_upper=10.0, cols=(0, 1, 2, 3), n_readings=None,
+                 pooled_sd=9.51, new_wells=4):
+        """noise: 'pooled' (one learned noise level), 'sem' (each recipe's SEM as known noise) or 'pooled_n'
+        (learned excess noise plus pooled_sd**2 / n_readings, so a 2-reading mean is noisier than a 5-reading one).
+        cols: mixture coordinates the kernel sees; fractions sum to 1, so three of four carry the full recipe."""
         self.noise, self.restarts, self.ls_floor, self.ls_upper = noise, restarts, ls_floor, ls_upper
+        self.cols, self.n_readings, self.pooled_sd, self.new_wells = list(cols), n_readings, pooled_sd, new_wells
 
     def fit(self, X, y, sem):
-        kernel = ConstantKernel(1.0, (1e-2, 1e2)) * Matern([0.3] * 4, (self.ls_floor, self.ls_upper), nu=2.5)
+        d = len(self.cols)
+        kernel = ConstantKernel(1.0, (1e-2, 1e2)) * Matern([0.3] * d, (self.ls_floor, self.ls_upper), nu=2.5)
         alpha = 1e-6
-        if self.noise == 'pooled':
+        if self.noise in ('pooled', 'pooled_n'):
             kernel = kernel + WhiteKernel(0.1, (1e-3, 1.0))
-        else:  # per-recipe SEM as known noise, in normalised units
+        if self.noise == 'sem':  # per-recipe SEM as known noise, in normalised units
             alpha = (sem / y.std()) ** 2 + 1e-6
+        if self.noise == 'pooled_n':
+            alpha = (self.pooled_sd ** 2 / np.asarray(self.n_readings, float)) / y.std() ** 2 + 1e-6
         self.m = GaussianProcessRegressor(kernel, alpha=alpha, normalize_y=True,
-                                          n_restarts_optimizer=self.restarts, random_state=SEED).fit(X, y)
+                                          n_restarts_optimizer=self.restarts, random_state=SEED).fit(X[:, self.cols], y)
         k = self.m.kernel_
         self.ym, self.ys = float(self.m._y_train_mean), float(self.m._y_train_std)
         if self.noise == 'pooled':
-            self.kf = k.k1
+            self.kf = _Sub(k.k1, self.cols)
             self.noise_new = k.k2.noise_level + 1e-6   # normalised noise variance of one new recipe mean
             noise_vec = np.full(len(y), self.noise_new)
+        elif self.noise == 'pooled_n':
+            self.kf = _Sub(k.k1, self.cols)
+            self.noise_new = k.k2.noise_level + self.pooled_sd ** 2 / self.new_wells / self.ys ** 2 + 1e-6
+            noise_vec = k.k2.noise_level + np.asarray(alpha, float)
         else:
-            self.kf = k
+            self.kf = _Sub(k, self.cols)
             self.noise_new = float(np.mean(sem ** 2)) / self.ys ** 2 + 1e-6
             noise_vec = np.asarray(alpha, float)
         self._condition(X, (y - self.ym) / self.ys, noise_vec)
@@ -227,19 +252,21 @@ POLICIES = {'Random (feasible)': None, 'GP greedy (exploit only)': greedy,
             'GP-UCB, kappa 2 (batch)': ucb, 'GP-EI (batch)': ei, 'Four-role policy (deployed)': four_role}
 
 
-def campaign(truth, cand, noise_sd, rng, policy, init_idx, rounds=3, q=4):
+def campaign(truth, cand, noise_sd, noise_field, pick_rng, policy, init_idx, rounds=3, q=4):
     """Every policy faces the same eligibility: the robust-cost grid, at least MIN_GAP_PCT from every measured
     recipe and the single media, and from its own other picks. Returns best true value sampled after each round,
-    and the true value of the finalist the lab would pick: the recipe with the highest observed (noisy) mean."""
+    and the true value of the finalist the lab would pick: the recipe with the highest observed (noisy) mean.
+    Common random numbers: each candidate's measurement error is fixed per seed (noise_field), so every policy that
+    measures a recipe sees the same error; random picks use their own generator."""
     idx = list(init_idx)
-    yobs = truth[idx] + rng.normal(0, noise_sd, len(idx))
+    yobs = truth[idx] + noise_sd * noise_field[idx]
     best = [truth[idx].max()]
     for _ in range(rounds):
         ok = gap_pct(cand, np.vstack([cand[idx], np.eye(4)])).min(1) >= MIN_GAP_PCT
         if POLICIES[policy] is None:
             new = []
             for _ in range(q):
-                k = int(rng.choice(np.flatnonzero(ok)))
+                k = int(pick_rng.choice(np.flatnonzero(ok)))
                 new.append(k)
                 ok &= gap_pct(cand, cand[[k]])[:, 0] >= MIN_GAP_PCT
         else:
@@ -249,7 +276,7 @@ def campaign(truth, cand, noise_sd, rng, policy, init_idx, rounds=3, q=4):
             else:
                 new = kriging_believer(gp, cand, q, POLICIES[policy], ok)
         idx += new
-        yobs = np.append(yobs, truth[new] + rng.normal(0, noise_sd, q))
+        yobs = np.append(yobs, truth[new] + noise_sd * noise_field[new])
         best.append(truth[idx].max())
     finalist = truth[idx[int(np.argmax(yobs))]]
     return best, finalist
@@ -272,8 +299,10 @@ def simulate(X, y, sem, seeds=30):
         for nname, noise_sd in noises.items():
             for s in range(seeds):
                 init = np.random.default_rng(SEED + s).choice(len(cand), 6, replace=False)
+                field = np.random.default_rng(SEED + 1000 + s).standard_normal(len(cand))
                 for pname in POLICIES:
-                    best, finalist = campaign(truth, cand, noise_sd, np.random.default_rng(SEED + 1000 + s), pname, init)
+                    best, finalist = campaign(truth, cand, noise_sd, field, np.random.default_rng(SEED + 2000 + s),
+                                              pname, init)
                     for r, b in enumerate(best):
                         rows.append(dict(truth=tname, noise=nname, policy=pname, seed=s, round=r, experiments=6 + 4 * r,
                                          best_true_viability=round(float(b), 3),
@@ -298,6 +327,16 @@ def main():
         preds = preds or p
         loo_rows += [dict(training=label, **r) for r in rows]
     write('model_loo.csv', loo_rows)
+    # Ranking skill by round: does the LOO ranking hold within rounds, or only between them?
+    rank_rows = []
+    for name in [list(MODELS)[i] for i in (0, 3)]:
+        mu = preds[name][0]
+        groups = [('all 24', np.ones(len(y), bool)), ('rounds 0-2', rounds < 3)] + \
+                 [(f'round {r}', rounds == r) for r in range(4)]
+        for label, g in groups:
+            rank_rows.append(dict(model=name, subset=label, n=int(g.sum()),
+                                  spearman=round(float(spearmanr(y[g], mu[g]).statistic), 3)))
+    write('model_loo_ranking_by_round.csv', rank_rows)
     write('model_forward_round.csv', forward(rounds, X, y, sem))
 
     fig, axes = plt.subplots(1, 4, figsize=(15, 4), sharex=True, sharey=True)
@@ -335,6 +374,8 @@ def main():
                                     q25=round(float(np.percentile(reg, 25)), 2), q75=round(float(np.percentile(reg, 75)), 2),
                                     median_paired_diff_vs_random=round(float(np.median(d)), 2),
                                     seeds_better_than_random=f'{int((d < 0).sum())}/30',
+                                    sign_test_p=round(float(binomtest(int((d < 0).sum()), int((d != 0).sum())).pvalue), 3)
+                                    if (d != 0).any() else '',
                                     median_finalist_regret=round(float(np.median(f)), 2),
                                     finalist_seeds_better_than_random=f'{int((fd < 0).sum())}/30'))
     write('policy_simulation_summary.csv', summary)

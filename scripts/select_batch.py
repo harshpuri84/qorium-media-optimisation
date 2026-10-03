@@ -109,6 +109,11 @@ def to_tenths(f):
     return base / 10
 
 
+def read_rows(path):
+    with path.open(newline='') as handle:
+        return list(csv.DictReader(handle))
+
+
 def recipe(f):
     return '/'.join(str(int(round(x * 100))) for x in f)
 
@@ -122,6 +127,7 @@ def write(path, rows):
 
 def main():
     ids, _, X, y, sem = load_data()
+    n_read = np.array([int(r['n_readings']) for r in read_rows(ROOT / 'data/processed/pbmc_analysis.csv')])
     cand = simplex_grid(1)
     prices = base_prices()
     model = GP('pooled', restarts=10).fit(X, y, sem)
@@ -147,6 +153,9 @@ def main():
         'gp_ls_floor_0.05': (GP('pooled', restarts=10, ls_floor=0.05).fit(X, y, sem), X),
         'gp_ls_floor_0.2': (GP('pooled', restarts=10, ls_floor=0.2).fit(X, y, sem), X),
         'gp_ls_upper_3': (GP('pooled', restarts=10, ls_upper=3.0).fit(X, y, sem), X),
+        'gp_noise_s2_over_n': (GP('pooled_n', restarts=10, n_readings=n_read).fit(X, y, sem), X),
+        'gp_3coord_without_dmem': (GP('pooled', restarts=10, cols=(1, 2, 3)).fit(X, y, sem), X),
+        'gp_3coord_without_xvivo': (GP('pooled', restarts=10, cols=(0, 1, 3)).fit(X, y, sem), X),
         'gp_without_e02': drop(LOW_IDS[0]),
         'gp_without_e14': drop(LOW_IDS[1]),
     }
@@ -193,17 +202,33 @@ def main():
 
     plate = [dict(position=f'slot {r["slot"]}', role=r['role'],
                   **{f'{c}_ml_per_100ml': r[f'{c}_ml_per_100ml'] for c in COMPONENTS}) for r in rows]
-    plate.append(dict(position='anchor', role=f'{REFERENCE_ID} re-run (historical 81.0%)',
+    plate.append(dict(position='anchor', role=f'{REFERENCE_ID} re-run (historical {y[ids.index(REFERENCE_ID)]:.1f}%)',
                       **{f'{c}_ml_per_100ml': v for c, v in zip(COMPONENTS, to_tenths(ref))}))
     write(ROOT / 'outputs/plate_formulations.csv', plate)
 
-    # Plate map: REPLICATES independent wells per formulation, randomised over interior wells of a 96-well
-    # plate (rows B-G, columns 2-11) to avoid edge effects. Replicate count is an assumption, see DECISIONS.md.
-    interior = [f'{r}{c}' for r in 'BCDEFG' for c in range(2, 12)]
-    wells = np.random.default_rng(SEED).choice(interior, len(plate) * REPLICATES, replace=False)
-    layout = [dict(well=w, position=plate[i // REPLICATES]['position'], role=plate[i // REPLICATES]['role'],
-                   replicate=i % REPLICATES + 1) for i, w in enumerate(wells)]
-    write(ROOT / 'outputs/plate_layout.csv', sorted(layout, key=lambda r: (r['well'][0], int(r['well'][1:]))))
+    # Plate map on a 96-well plate. Outer ring (rows A and H, columns 1 and 12) holds PBS against evaporation.
+    # Interior columns 2-11 form four column blocks; replicate r of every formulation goes to a random well in
+    # block r, so each formulation spans the plate. Two no-cell blanks and two dead-cell (heat-killed) controls
+    # for AOPI gating take random remaining interior wells. Replicate count is an assumption, see DECISIONS.md.
+    rng = np.random.default_rng(SEED)
+    blocks = [range(2, 4), range(4, 7), range(7, 9), range(9, 12)]
+    free = {f'{r}{c}' for r in 'BCDEFG' for c in range(2, 12)}
+    layout = []
+    for q in plate:
+        for rep in range(REPLICATES):
+            options = sorted(w for w in free if int(w[1:]) in blocks[rep])
+            w = str(rng.choice(options))
+            free.discard(w)
+            layout.append(dict(well=w, well_type='formulation', position=q['position'], role=q['role'], replicate=rep + 1))
+    for kind, n in [('no-cell blank', 2), ('dead-cell control (heat-killed)', 2)]:
+        for rep in range(n):
+            w = str(rng.choice(sorted(free)))
+            free.discard(w)
+            layout.append(dict(well=w, well_type='control', position=kind, role=kind, replicate=rep + 1))
+    for w in [f'{r}{c}' for r in 'AH' for c in range(1, 13)] + [f'{r}{c}' for r in 'BCDEFG' for c in (1, 12)]:
+        layout.append(dict(well=w, well_type='PBS edge', position='edge', role='PBS against evaporation', replicate=''))
+    layout = sorted(layout, key=lambda r: (r['well'][0], int(r['well'][1:])))
+    write(ROOT / 'outputs/plate_layout.csv', layout)
 
     # Handoff for a supervised next round: an approvable recipe manifest and a per-well results template.
     rec_id = 'REC-PBMC-R4'
@@ -215,10 +240,12 @@ def main():
     write(ROOT / 'outputs/recipe_manifest.csv', manifest)
     run_of = {m['position']: m['run_id'] for m in manifest}
     write(ROOT / 'outputs/results_template.csv',
-          [dict(run_id=run_of[r['position']], well=r['well'], replicate=r['replicate'], plate_id='', cell_prep_id='',
-                medium_prep_id='', sample_id='', assay_protocol_version='', timepoint_hours=72, viability_pct='',
-                raw_file_ref='', qc_status='pending', exclusion_reason='', operator='', run_date='')
-           for r in sorted(layout, key=lambda r: (r['well'][0], int(r['well'][1:])))])
+          [dict(run_id=run_of.get(r['position'], ''), well=r['well'], well_type=r['well_type'], replicate=r['replicate'],
+                plate_id='', donor_id='', cell_prep_id='', fresh_or_thawed='', seed_cells_per_well='', well_volume_ul='',
+                medium_prep_id='', medium_ph='', medium_osmolality_mosm_kg='', sample_id='', assay_protocol_version='',
+                timepoint_hours=72, total_cells_per_ml='', viable_cells_per_ml='', viability_pct='', raw_file_ref='',
+                qc_status='pending', exclusion_reason='', operator='', run_date='')
+           for r in layout if r['well_type'] != 'PBS edge'])
 
     write(ROOT / 'reports/tables/batch_stability.csv',
           [dict(variant=k, **{f'slot_{i + 1}_shift_pct': round(float(v[i]), 1) for i in range(4)},

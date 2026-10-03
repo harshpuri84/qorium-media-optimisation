@@ -16,11 +16,11 @@ data/
   interim/         Faithful flat exports of workbook sheets
   processed/       Formulations, measurements, analysis table and quality issues
   inputs/          Price sources, prepared-media prices and price scenarios
-docs/              Plan, schema, data dictionary, decisions, data audit and external reviews
+docs/              Schema, data dictionary, decisions log, data audit, plan, review records and a domain primer (domain_primer.html)
 scripts/           Data preparation, cost rule, model comparison, batch selection and GP checks
 notebooks/         Narrated walkthrough notebook, executed with outputs (renders on GitHub)
-reports/           Memo (md, pdf), walkthrough script, exploratory, model and batch reports
-reports/figures/   Figures 01 to 08
+reports/           Memo (md, rendered html and pdf, css), walkthrough script, exploratory, model and batch reports
+reports/figures/   Figures 01 to 10 (09 and 10 are the memo figures)
 reports/tables/    Generated evidence tables
 outputs/           Recommended blends, plate formulations, randomised plate layout, recipe manifest and per-well results template
 ```
@@ -29,14 +29,14 @@ Start with `reports/memo.pdf`, or `notebooks/walkthrough.ipynb` for the same sto
 
 ## Reproduce everything
 
-Python 3.12 or newer and the pinned dependencies in `requirements.txt`. One command rebuilds every table, figure and the recommendation (seed 20261002). A run from a fresh environment took 5 minutes 7 seconds on an Apple-silicon laptop:
+Python 3.12 or newer and the pinned dependencies in `requirements.txt`. One command rebuilds every table, figure and the recommendation (seed 20261002). It regenerates the tracked outputs in place and finishes by listing any files that differ from the committed version. A fresh clone into a fresh environment took 4 to 5 minutes on an Apple-silicon laptop, and its outputs matched the committed files byte for byte. Other platforms may differ in the last decimals of optimiser output.
 
 ```sh
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 ./run_all.sh
 ```
 
-Render the memo (needs pandoc and Google Chrome):
+Render the memo (optional; needs pandoc and Google Chrome, path shown for macOS):
 
 ```sh
 cd reports && pandoc memo.md -s --css memo.css --embed-resources -o memo.html \
@@ -46,23 +46,26 @@ cd reports && pandoc memo.md -s --css memo.css --embed-resources -o memo.html \
 Rebuild the notebook after `run_all.sh` (needs `pip install -r requirements-notebook.txt`):
 
 ```sh
-python scripts/build_notebook.py
+.venv/bin/pip install -r requirements-notebook.txt
+.venv/bin/python scripts/build_notebook.py
 ```
 
 The individual steps, in order:
 
 ```sh
-python scripts/fetch_data.py
-python scripts/build_costs.py
-python scripts/prepare_data.py
-python scripts/explore_data.py
-python scripts/design_space.py
-python scripts/check_gp.py
-python scripts/compare_models.py
-python scripts/select_batch.py
+PY=.venv/bin/python
+$PY scripts/fetch_data.py
+$PY scripts/build_costs.py
+$PY scripts/prepare_data.py
+$PY scripts/explore_data.py
+$PY scripts/design_space.py
+$PY scripts/check_gp.py
+$PY scripts/compare_models.py
+$PY scripts/select_batch.py
+$PY scripts/memo_figures.py
 ```
 
-Fetching skips already verified files. A changed or damaged file raises an error instead of overwriting an existing source. Processing recomputes all generated data tables and `docs/data_audit.md`.
+Fetching skips already verified files. The Cosenza reference files are not redistributed and no script reads them; set `FETCH_REFERENCE=1` to download them. A changed or damaged file raises an error instead of overwriting an existing source. Processing recomputes all generated data tables and `docs/data_audit.md`.
 
 Start analysis with `data/processed/pbmc_analysis.csv`. There is one row per historical experiment. The `*_fraction` columns are proportional corrections of the rounded published percentages and sum to one. Original percentages remain in `pbmc_formulations.csv` and the interim exports. Measurement detail is in `pbmc_measurements.csv`.
 
@@ -86,3 +89,11 @@ Base prices (2026-10-02): DMEM-10 EUR 180.89, RPMI-10 EUR 168.45, X-VIVO 15 EUR 
 See [project plan](docs/PLAN.md), [data dictionary](docs/DATA_DICTIONARY.md), [decisions](docs/DECISIONS.md) and [data audit](docs/data_audit.md).
 
 See the [exploratory report](reports/exploratory_analysis.md) for the findings and modelling implications. PNG figures support review; PDF versions support reuse in the technical memo.
+
+## Licences
+
+Code: MIT (`LICENSE`). Data: the PBMC and K. phaffii workbooks in `data/raw/narayanan_2025/` are from Narayanan et al. (2025), Nature Communications 16:6055, figshare doi:10.6084/m9.figshare.27715134, released under the MIT licence; their notice applies to those files. The Cosenza et al. (2022) reference files are not included; `fetch_data.py` downloads them on request from the original repository.
+
+## How this was built
+
+I used AI assistants to draft code and text and as adversarial reviewers. Their review records are in `docs/` with dates, and every change they prompted is logged in `docs/DECISIONS.md`. Every number in the memo is reproduced by `run_all.sh`. The judgement calls are mine.

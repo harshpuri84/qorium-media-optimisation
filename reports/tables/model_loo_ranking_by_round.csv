@@ -1,0 +1,13 @@
+model,subset,n,spearman
+"GP, pooled noise",all 24,24,0.606
+"GP, pooled noise",rounds 0-2,18,0.106
+"GP, pooled noise",round 0,6,-0.086
+"GP, pooled noise",round 1,6,0.371
+"GP, pooled noise",round 2,6,0.029
+"GP, pooled noise",round 3,6,0.086
+Random forest,all 24,24,0.554
+Random forest,rounds 0-2,18,0.179
+Random forest,round 0,6,0.143
+Random forest,round 1,6,0.314
+Random forest,round 2,6,0.029
+Random forest,round 3,6,0.486
