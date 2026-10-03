@@ -2,491 +2,835 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one reading column (~68ch) with full-width figure rows; a sticky contents strip on wide screens. */
+/* Layout: sticky contents rail on the left, one reading column; every section opens with a visual, then a two-card pair (memo wording / plain words). */
 :root{
-  --bg:#FAF9F5; --surface:#FFFFFF; --fg:#262521; --muted:#6B6960; --line:#E5E4DF;
+  --bg:#FAF9F5; --surface:#FFFFFF; --sunk:#F4F2EC; --fg:#262521; --muted:#6B6960; --line:#E5E4DF;
   --accent:#C15F3C; --accent-soft:#F6E7E0;
+  --s1:#C15F3C; --s2:#E29A7A; --s3:#5B7FA6; --s4:#3F7D58; --anchor:#262521;
   --m1:#5B7FA6; --m2:#8AA67A; --m3:#C9A04E; --m4:#A3739B;
-  --good:#3F7D58; --bad:#B4483A;
+  --r0:#A9A59A; --r1:#7FA0C4; --r2:#C9A04E; --r3:#C15F3C;
+  --good:#3F7D58; --warn:#B98A2E; --bad:#B4483A;
   --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#1C1B18; --surface:#25241F; --fg:#ECEAE3; --muted:#A3A097; --line:#3A3832;
-  --accent:#E07A55; --accent-soft:#3A2A22;
-  --m1:#7FA0C4; --m2:#A3BE93; --m3:#D9B66A; --m4:#BE90B6; --good:#6FB38A; --bad:#E07A6A; color-scheme:dark}}
+  --bg:#1C1B18; --surface:#25241F; --sunk:#2C2B26; --fg:#ECEAE3; --muted:#A3A097; --line:#3A3832;
+  --accent:#E07A55; --accent-soft:#3A2A22; --s1:#E07A55; --s2:#EBAA8C; --s3:#7FA0C4; --s4:#6FB38A; --anchor:#ECEAE3;
+  --m1:#7FA0C4; --m2:#A3BE93; --m3:#D9B66A; --m4:#BE90B6; --r0:#8C887E; --r1:#7FA0C4; --r2:#D9B66A; --r3:#E07A55;
+  --good:#6FB38A; --warn:#D9B66A; --bad:#E07A6A; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#1C1B18; --surface:#25241F; --fg:#ECEAE3; --muted:#A3A097; --line:#3A3832;
-  --accent:#E07A55; --accent-soft:#3A2A22;
-  --m1:#7FA0C4; --m2:#A3BE93; --m3:#D9B66A; --m4:#BE90B6; --good:#6FB38A; --bad:#E07A6A; color-scheme:dark}
+  --bg:#1C1B18; --surface:#25241F; --sunk:#2C2B26; --fg:#ECEAE3; --muted:#A3A097; --line:#3A3832;
+  --accent:#E07A55; --accent-soft:#3A2A22; --s1:#E07A55; --s2:#EBAA8C; --s3:#7FA0C4; --s4:#6FB38A; --anchor:#ECEAE3;
+  --m1:#7FA0C4; --m2:#A3BE93; --m3:#D9B66A; --m4:#BE90B6; --r0:#8C887E; --r1:#7FA0C4; --r2:#D9B66A; --r3:#E07A55;
+  --good:#6FB38A; --warn:#D9B66A; --bad:#E07A6A; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--fg);font:16px/1.6 var(--sans);padding-inline:16px;padding-block:32px 80px}
-.wrap{max-width:1040px;margin:0 auto;display:grid;grid-template-columns:200px minmax(0,1fr);gap:48px}
-@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr)} nav.toc{display:none}}
-nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start;font-size:13px}
-nav.toc a{display:block;color:var(--muted);text-decoration:none;padding:4px 0;border-left:2px solid transparent;padding-left:10px}
-nav.toc a:hover{color:var(--fg);border-left-color:var(--accent)}
+body{background:var(--bg);color:var(--fg);font:15.5px/1.6 var(--sans);padding-inline:16px;padding-block:28px 96px;margin:0}
+.wrap{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:44px}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)} nav.toc{display:none}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;max-height:calc(100vh - 40px);overflow:auto}
+nav.toc .grp{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+nav.toc a{display:block;color:var(--muted);text-decoration:none;padding:3px 0 3px 10px;border-left:2px solid transparent}
+nav.toc a:hover,nav.toc a.on{color:var(--fg);border-left-color:var(--accent)}
 main{min-width:0}
-header{padding-bottom:24px;border-bottom:1px solid var(--line);margin-bottom:8px}
+header.top{padding-bottom:22px;border-bottom:1px solid var(--line)}
 .eyebrow{font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
-h1{font-size:clamp(28px,4vw,40px);line-height:1.15;margin:12px 0 12px;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
-h2{font-size:24px;margin:56px 0 12px;letter-spacing:-.01em;text-wrap:balance}
-h3{font-size:17px;margin:28px 0 8px}
-p,li{max-width:68ch}
-.lede{font-size:18px;color:var(--muted)}
-.mono{font-family:var(--mono)}
+h1{font-size:clamp(28px,4vw,40px);line-height:1.12;margin:12px 0 10px;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+h2{font-size:24px;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+h3{font-size:16px;margin:22px 0 8px}
+section{padding-top:56px}
+.kicker{font:500 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.lede{font-size:17px;color:var(--muted);max-width:70ch}
+p,li{max-width:72ch}
 a{color:var(--accent)}
-.callout{background:var(--accent-soft);border-radius:10px;padding:16px 20px;margin:20px 0;max-width:68ch}
-.callout p{margin:0}
-.tbl{overflow-x:auto;margin:16px 0}
-table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.thesis{font-size:18px;line-height:1.5;border-left:3px solid var(--accent);padding:4px 0 4px 14px;margin:18px 0;max-width:70ch}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:18px 0}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.tile b{display:block;font:500 22px/1.2 var(--mono);font-variant-numeric:tabular-nums}
+.tile span{font-size:12.5px;color:var(--muted)}
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin:16px 0}
+.fig h4{margin:0 0 2px;font-size:15px}
+.fig .cap{font-size:12.5px;color:var(--muted);margin:0 0 12px}
+.scroll{overflow-x:auto}
+svg{display:block;max-width:100%;height:auto}
+svg text{fill:var(--muted);font-family:var(--mono);font-size:11px}
+svg text.ink{fill:var(--fg)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+@media (max-width:760px){.pair{grid-template-columns:1fr}}
+.card{border-radius:10px;padding:14px 16px;min-width:0}
+.card .lab{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.card p{margin:6px 0;font-size:14.5px}
+.card ul{margin:6px 0;padding-left:18px;font-size:14.5px}
+.memo{background:var(--surface);border:1px solid var(--line)}
+.memo .lab{color:var(--muted)}
+.plain{background:var(--accent-soft)}
+.plain .lab{color:var(--accent)}
+.tbl{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;background:var(--sunk)}
 tr:last-child td{border-bottom:none}
 td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
-.fig{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;margin:20px 0}
-.fig h4{margin:0 0 4px;font-size:15px}
-.fig .cap{font-size:13px;color:var(--muted);margin:0 0 12px}
-.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;margin-bottom:10px}
+.chip{display:inline-block;font:500 11.5px/1.6 var(--mono);padding:0 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.chip.ok{color:var(--good);border-color:var(--good)} .chip.no{color:var(--bad);border-color:var(--bad)} .chip.mid{color:var(--warn);border-color:var(--warn)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;margin:4px 0 10px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
-.sw{width:12px;height:12px;border-radius:3px;display:inline-block}
-svg text{fill:var(--muted);font-family:var(--mono);font-size:11px}
-.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:12px;font-size:14px}
-button{font:500 14px var(--sans);background:var(--fg);color:var(--bg);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+.sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+@media (max-width:760px){.flow{grid-template-columns:1fr}}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;position:relative}
+.step .n{font:500 11px/1 var(--mono);color:var(--accent);letter-spacing:.06em}
+.step h5{margin:6px 0 4px;font-size:14.5px}
+.step p{margin:0;font-size:13.5px;color:var(--muted)}
+.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:10px;font-size:13.5px}
+button{font:500 13.5px var(--sans);background:var(--fg);color:var(--bg);border:0;border-radius:8px;padding:7px 13px;cursor:pointer}
 button.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
-button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-input[type=range]{accent-color:var(--accent);width:160px}
-.readout{font-family:var(--mono);font-size:13px;color:var(--muted)}
-.row-card{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
-.kv{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
-.kv b{display:block;font:500 20px var(--mono);font-variant-numeric:tabular-nums}
-.kv small{color:var(--muted);font-size:12px}
-details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;max-width:68ch}
-summary{cursor:pointer;font-weight:600}
-details p{margin:10px 0 2px}
-.tip{position:fixed;pointer-events:none;background:var(--fg);color:var(--bg);font:12px/1.4 var(--mono);padding:8px 10px;border-radius:6px;opacity:0;transition:opacity .1s;z-index:10;max-width:260px}
-.src{font-size:13px;color:var(--muted)}
+button.pill{background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:12.5px}
+button.pill.on{background:var(--fg);color:var(--bg)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=range]{accent-color:var(--accent);width:180px}
+.readout{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;max-width:80ch}
+summary{cursor:pointer;font-weight:600;font-size:14.5px}
+details p{margin:8px 0 2px;font-size:14.5px}
+.timeline{border-left:2px solid var(--line);margin:14px 0 0 6px;padding-left:18px}
+.tl{position:relative;margin:0 0 16px}
+.tl:before{content:"";position:absolute;left:-25px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.tl .when{font:500 11.5px/1 var(--mono);color:var(--muted)}
+.tl h5{margin:4px 0 2px;font-size:14.5px}
+.tl p{margin:2px 0;font-size:14px}
+.tip{position:fixed;pointer-events:none;background:var(--fg);color:var(--bg);font:12px/1.4 var(--mono);padding:8px 10px;border-radius:6px;opacity:0;transition:opacity .1s;z-index:10;max-width:280px}
+.src{font-size:12.5px;color:var(--muted)}
+.note{font-size:13px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
-
 <div class="wrap">
 <nav class="toc" aria-label="Contents">
-  <a href="#brief">The brief, simply</a>
-  <a href="#qorium">Who Qorium is</a>
-  <a href="#translate">Logistics translation</a>
-  <a href="#biology">Biology you need</a>
-  <a href="#study">The study we use</a>
-  <a href="#data">Our 24 experiments</a>
-  <a href="#findings">What the data says</a>
-  <a href="#bo">How BO picks experiments</a>
-  <a href="#papers">The two papers</a>
-  <a href="#scenarios">The six "what ifs"</a>
-  <a href="#approach">Our approach</a>
-  <a href="#picks">The recommendation</a>
-  <a href="#reviews">What reviewers changed</a>
-  <a href="#notes">Notes to own in the interview</a>
-  <a href="#plan">Reading plan</a>
-  <a href="#quiz">Check yourself</a>
+  <div class="grp">The decision</div>
+  <a href="#answer">The answer</a>
+  <a href="#method">The method in one picture</a>
+  <div class="grp">The problem</div>
+  <a href="#brief">The brief and Qorium</a>
+  <a href="#biology">Biology in logistics terms</a>
+  <div class="grp">The evidence</div>
+  <a href="#data">What the data says</a>
+  <a href="#cost">Prices and the cost rule</a>
+  <a href="#models">How far to trust the model</a>
+  <a href="#bo">How BO picks (demo)</a>
+  <div class="grp">The batch</div>
+  <a href="#batch">Why these four</a>
+  <a href="#robust">What could move them</a>
+  <a href="#sim">The simulation</a>
+  <a href="#plate">The plate and the decision</a>
+  <div class="grp">Beyond the case</div>
+  <a href="#qorium">What changes for Qorium</a>
+  <a href="#ai">How AI was used</a>
+  <a href="#prep">Interview prep</a>
+  <a href="#glossary">Glossary</a>
 </nav>
 
 <main>
-<header>
-  <div class="eyebrow">Head of Data Science case · due Wed 14 Oct 2026</div>
-  <h1>Picking the next four cell-culture recipes</h1>
-  <p class="lede">A primer for someone who knows logistics and data, but not biotech. Read this before the papers. The finished analysis, memo and code are in the <a href="https://github.com/harshpuri84/qorium-media-optimisation">public repo</a>.</p>
+<header class="top">
+  <div class="eyebrow">Head of Data Science case · Qorium · due Wednesday 14 October 2026</div>
+  <h1>Next media batch: test the DMEM peak, not just chase it</h1>
+  <p class="lede">The full analysis in pictures. Every section shows the evidence first, then the wording a reviewer reads in the memo, then what it means in plain words. Every number on this page is read from the repository's outputs.</p>
+  <p class="note">Code and documents: <a href="https://github.com/harshpuri84/qorium-media-optimisation">github.com/harshpuri84/qorium-media-optimisation</a> · memo: <a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/reports/memo.pdf">reports/memo.pdf</a> (4 pages) · I am not a cell biologist; AI assistants wrote code and drafts and reviewed the work, and I set the questions and made the calls.</p>
 </header>
 
+<section id="answer">
+  <div class="kicker">01 · The decision</div>
+  <h2>The answer</h2>
+  <p class="thesis">The data cannot tell us which blend is best. They point to one signal, DMEM near 44%, and a model that is confident about it without having earned that confidence. The next plate tests that signal directly, at no more than E19's cost, with enough replicates to read the result.</p>
+  <div class="tiles">
+    <div class="tile"><b>5</b><span>formulations: 2 designed, 2 from the model, 1 anchor</span></div>
+    <div class="tile"><b>11</b><span>wells per formulation, 55 in total</span></div>
+    <div class="tile"><b>≤ EUR 178.43</b><span>per litre for model picks, E19's cost</span></div>
+    <div class="tile"><b>± 7 pts</b><span>90% interval on each blend-versus-E19 comparison</span></div>
+  </div>
+  <div class="fig">
+    <h4>The five formulations</h4>
+    <p class="cap">Bars show the blend of the four media. On the right: the model's estimate with its 80% range for one measured mean. E19's estimate is 70.1, shrunk from the 81.0 it scored.</p>
+    <div class="legend"><span><i class="sw" style="background:var(--m1)"></i>DMEM</span><span><i class="sw" style="background:var(--m2)"></i>RPMI-10</span><span><i class="sw" style="background:var(--m3)"></i>X-VIVO 15</span><span><i class="sw" style="background:var(--m4)"></i>AR5</span></div>
+    <div class="scroll"><svg id="answerChart" role="img" aria-label="Five recommended formulations"></svg></div>
+  </div>
+  <div class="pair">
+    <div class="card memo"><div class="lab">Memo wording</div>
+      <p>Five formulations, 11 randomised wells each: two designed DMEM steps around the best blend, two model picks, and a same-plate re-run of the best historical blend (E19).</p>
+      <p>Slots 1 and 2 test the model's belief in a sharp DMEM peak on one line through E19. Slot 3 asks whether RPMI-10 can replace both serum-free media; slot 4 whether X-VIVO 15 can replace AR5, the medium with no public price.</p>
+    </div>
+    <div class="card plain"><div class="lab">In plain words</div>
+      <p>Think of it as a pilot on four lanes plus a control lane. Two lanes test the one thing the data hint at (how much DMEM). One lane tests a cheaper mix. One tests dropping the ingredient we cannot price. The control lane is our best blend run again on the same day, so we compare like with like.</p>
+      <p>We run each lane 11 times because single results are noisy: about 10 points either way.</p>
+    </div>
+  </div>
+</section>
+
+<section id="method">
+  <div class="kicker">02 · The decision</div>
+  <h2>The method in one picture</h2>
+  <p class="lede">Nine steps from a public spreadsheet to a plate a scientist can run. Click a step to jump to it.</p>
+  <div class="fig"><div class="scroll"><svg id="flowChart" role="img" aria-label="Method flow"></svg></div></div>
+  <div class="pair">
+    <div class="card memo"><div class="lab">Memo wording</div>
+      <p>The GP proposes candidates and the plate decides. Designed contrasts test the model's sharpest assumption; model picks cover cost and the most promising change. A validity gate, a non-inferiority screen and an independent confirmation turn plate results into a decision.</p>
+    </div>
+    <div class="card plain"><div class="lab">In plain words</div>
+      <p>Clean the data, price the ingredients, check how much the model can be trusted, pick candidates, stress-test the picks, then plan the experiment so its result is readable. The model is a forecaster that has been wrong before, so the plan does not depend on it being right.</p>
+    </div>
+  </div>
+</section>
+
 <section id="brief">
-<h2>The brief, simply</h2>
-<p>A lab grows living cells in a liquid food called <b>culture media</b>. Media is a recipe. Change the recipe and the cells grow better or worse. Some ingredients are expensive.</p>
-<p>Each recipe test takes days, costs money, and gives a noisy answer. The lab can test only 3 to 5 new recipes in the next batch.</p>
-<p>You get the recipes that were already tested and their results. Your job is to choose the next 3 to 5 recipes and explain why. The choice must balance four things:</p>
-<ul>
-  <li><b>Performance</b>: recipes the model expects to do well.</li>
-  <li><b>Cost</b>: cheaper recipes are worth more at production scale.</li>
-  <li><b>Uncertainty</b>: some recipes are worth testing only because you know little about that area.</li>
-  <li><b>Feasibility</b>: the lab must be able to mix it (fractions add to 100%, pipettes have a minimum step).</li>
-</ul>
-<div class="callout"><p>The panel does not want the best model. They want a sensible bet under limited, noisy data, and a clear reason for each of the four picks.</p></div>
-</section>
-
-<section id="qorium">
-<h2>Who Qorium is</h2>
-<p>Qorium is a Maastricht biotech company. It takes a small sample of skin cells from a living cow, grows them in the lab, and turns them into collagen-based leather. It raised €22 million in November 2025 and is installing new bioreactors (large stainless tanks where cells grow) to scale up.</p>
-<p>Why this case matters to them: at production scale, media is one of the largest running costs. A recipe that keeps the cells healthy at lower cost per litre changes the unit economics. Their real outcome is probably cell growth and collagen output, not the PBMC viability in our dataset. Say this openly in the memo.</p>
-<p class="src">Sources: <a href="https://pulse2.com/qorium-e22-million-secured-to-advance-cultivated-leather-commercialization">Pulse 2.0 on the €22M round</a>, <a href="https://siliconcanals.com/qorium-raises-2-6m/">Silicon Canals</a>, <a href="https://businesswire.com/news/home/20241015009073/en/Bio-Engineering-Scale-Up-Qorium-Showcases-Cultivated-Leather-Breakthrough-Signalling-a-Key-Step-Towards-Commercialisation">Business Wire, Oct 2024</a>.</p>
-</section>
-
-<section id="translate">
-<h2>Logistics translation</h2>
-<div class="tbl"><table>
-<thead><tr><th>Biotech term</th><th>Plain meaning</th><th>Logistics equivalent</th></tr></thead>
-<tbody>
-<tr><td>Media formulation</td><td>The recipe the cells live in</td><td>A blend recipe, like a fuel blend</td></tr>
-<tr><td>Component</td><td>One ingredient</td><td>One product in the blend</td></tr>
-<tr><td>Mixture constraint</td><td>Fractions must add to 100%</td><td>Container fill: more of one means less of another</td></tr>
-<tr><td>Assay</td><td>A measurement method</td><td>A scan event or a weigh-in</td></tr>
-<tr><td>Viability %</td><td>Share of cells still alive</td><td>OTIF: share of units that arrived right</td></tr>
-<tr><td>Replicate / reading</td><td>Measuring the same recipe again</td><td>Re-measuring a lane to see how much is noise</td></tr>
-<tr><td>Assay noise</td><td>Readings vary with no change in recipe</td><td>A KPI that jumps week to week for no visible reason</td></tr>
-<tr><td>Low vs high fidelity</td><td>Cheap rough test vs slow accurate test</td><td>Carrier ETA vs POD scan</td></tr>
-<tr><td>Batch of 3 to 5</td><td>Lab capacity per round</td><td>You can pilot only 4 lanes this month</td></tr>
-<tr><td>Surrogate model (GP)</td><td>A model that predicts a result <i>and</i> how unsure it is</td><td>A forecast with a confidence band</td></tr>
-<tr><td>Bayesian optimisation (BO)</td><td>Choose the next tests using that model</td><td>Choosing pilots by "likely good" plus "we know little here"</td></tr>
-<tr><td>Exploit vs explore</td><td>Test near the best so far, or test the unknown</td><td>Tweak your best lane, or try a new corridor</td></tr>
-</tbody></table></div>
+  <div class="kicker">03 · The problem</div>
+  <h2>The brief and Qorium</h2>
+  <div class="pair">
+    <div class="card memo"><div class="lab">The brief</div>
+      <p>A lab wants better cell growth at lower media cost. Experiments are slow, noisy and run 3 to 5 at a time. Recommend the next 3 to 5 formulations, balancing performance, cost, uncertainty, assay noise, feasibility and batch size; compare at least two approaches; explain how the strategy changes in six scenarios.</p>
+      <p>It is an experiment-recommendation problem, not a prediction contest.</p>
+    </div>
+    <div class="card plain"><div class="lab">Qorium</div>
+      <p>Maastricht company growing leather from cow skin cells (fibroblasts) in bioreactors. They take a small biopsy from a live cow, grow the cells into collagen sheets, and tan them like hide. The process uses no animal products beyond the cells. Raised EUR 22M in November 2025. Co-founder and CSO: Prof. Mark Post, who made the first cultured beef burger in 2013.</p>
+      <p>Media is one of the biggest running costs at production scale, which is why this case exists.</p>
+    </div>
+  </div>
+  <p class="src">Sources: <a href="https://www.qorium.com/">qorium.com</a>; <a href="https://pulse2.com/qorium-e22-million-secured-to-advance-cultivated-leather-commercialization">Pulse 2.0</a>.</p>
 </section>
 
 <section id="biology">
-<h2>Biology you need (and no more)</h2>
-<h3>Cells and media</h3>
-<ul>
-  <li><b>Cell culture</b>: keeping cells alive and growing outside the body, in plastic plates or tanks, at body temperature.</li>
-  <li><b>Basal medium</b>: the base liquid with sugars, salts, amino acids and vitamins. DMEM and RPMI 1640 are two classic ones, sold by many suppliers.</li>
-  <li><b>FBS (fetal bovine serum)</b>: a blood-derived additive that helps cells grow. It is expensive, varies batch to batch, and is a problem for animal-free products. Cutting it is a major goal in cultivated meat and leather.</li>
-  <li><b>Serum-free medium</b>: a ready-made commercial medium that does not need FBS. X-VIVO 15 (Lonza) and AR5 (CellGenix) are two. They cost more per litre than basal media.</li>
-</ul>
-<h3>Outcomes</h3>
-<ul>
-  <li><b>Viability</b>: percentage of cells alive. A cell can be alive and still not grow.</li>
-  <li><b>Proliferation</b>: how much the cell count increases. This is closer to what a production company cares about.</li>
-  <li><b>AOPI staining</b>: two dyes that mark live cells green and dead cells red. A machine then counts each colour. That is how our viability numbers were made.</li>
-</ul>
-<h3>The cells in our dataset</h3>
-<p><b>PBMCs</b> (peripheral blood mononuclear cells) are white blood cells taken from human blood. They are used in drug testing and cell therapy. They are hard to keep alive outside the body: standard media lose viability and change which cell types survive. They have nothing to do with leather. They are only a stand-in dataset, chosen because it is small, public, and has a clean recipe structure.</p>
+  <div class="kicker">04 · The problem</div>
+  <h2>Biology in logistics terms</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Term</th><th>What it is</th><th>Logistics equivalent</th></tr></thead>
+    <tbody>
+      <tr><td>Culture medium</td><td>The liquid food cells live in; a recipe of nutrients</td><td>A fuel blend</td></tr>
+      <tr><td>DMEM, RPMI-10</td><td>Classic base media; here with 10% FBS (calf serum) added</td><td>Standard grades</td></tr>
+      <tr><td>X-VIVO 15, AR5</td><td>Ready-made serum-free media, pricier per litre</td><td>Premium blends</td></tr>
+      <tr><td>FBS</td><td>Serum from calf blood; helps cells grow, costly, varies lot to lot, not animal-free</td><td>An additive you are trying to phase out</td></tr>
+      <tr><td>PBMC</td><td>Human white blood cells; the cells in our public dataset</td><td>A proxy lane, not your real network</td></tr>
+      <tr><td>Fibroblast</td><td>Skin cells that make collagen; Qorium's cells. They attach to surfaces</td><td>The real network</td></tr>
+      <tr><td>Viability %</td><td>Share of cells alive at 72 hours (AOPI stain: live green, dead red)</td><td>OTIF</td></tr>
+      <tr><td>Well, plate</td><td>A 96-well plate is a tray of 96 small cups; one condition per cup</td><td>Pilot slots in one month</td></tr>
+      <tr><td>Replicate</td><td>The same recipe in several wells</td><td>Running a lane several times to average out noise</td></tr>
+      <tr><td>Anchor</td><td>A known recipe re-run on the same plate</td><td>A control lane measured in the same week</td></tr>
+    </tbody></table></div>
 </section>
-
-<section id="study">
-<h2>The study we use</h2>
-<p>Narayanan et al. (2025), Nature Communications, from the Love lab at MIT. They used Bayesian optimisation to blend four commercial media for PBMCs.</p>
-<div class="tbl"><table>
-<thead><tr><th>Item</th><th>What they did</th></tr></thead>
-<tbody>
-<tr><td>Ingredients</td><td>DMEM (Gibco 11965092), RPMI 1640 (Gibco 11875093), X-VIVO 15 (Lonza 04-418Q), AR5 (CellGenix 20807). DMEM and RPMI had 10% FBS and 1% antibiotics added.</td></tr>
-<tr><td>Outcome</td><td>Viability at 72 hours, AOPI stain, Nexcelom Cellaca plate reader</td></tr>
-<tr><td>Design</td><td class="num">4 rounds × 6 recipes = 24</td></tr>
-<tr><td>Round 0</td><td>Random recipes that add to 100%</td></tr>
-<tr><td>Model</td><td>Gaussian process, Matérn kernel (ν = 1.5)</td></tr>
-<tr><td>Picking rule</td><td>Upper confidence bound (UCB); batch of 6 via "constant liar"</td></tr>
-<tr><td>Result</td><td>Best blend reached 75 to 80% viability; single media about 60%</td></tr>
-<tr><td>Cost</td><td>Not part of the PBMC study. That is the gap we must fill.</td></tr>
-</tbody></table></div>
-<p class="src">Source: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12218302/">Narayanan et al. 2025, open access on PMC</a>. Data: <a href="https://doi.org/10.6084/m9.figshare.27715134">figshare</a>.</p>
-<p><b>UCB</b> and <b>constant liar</b> are explained in the <a href="#bo">BO section</a> below.</p>
-</section>
-
 <section id="data">
-<h2>Our 24 experiments</h2>
-<p>Each row is one recipe. The coloured bar shows the blend. The dot on the right shows mean viability, with a line for ± one standard deviation across readings. Hover or tap a row for detail.</p>
-<div class="fig">
-  <h4>Recipe and result, by experiment</h4>
-  <p class="cap">Source: data/processed/pbmc_analysis.csv (Narayanan 2025 workbook, MediaBlendingStudies sheet)</p>
-  <div class="legend">
-    <span><i class="sw" style="background:var(--m1)"></i>DMEM</span>
-    <span><i class="sw" style="background:var(--m2)"></i>RPMI-10</span>
-    <span><i class="sw" style="background:var(--m3)"></i>X-VIVO 15</span>
-    <span><i class="sw" style="background:var(--m4)"></i>AR5</span>
+  <div class="kicker">05 · The evidence</div>
+  <h2>What the data says</h2>
+  <p class="lede">24 blends of four commercial media from Narayanan et al. (2025), four rounds of six, 103 viability readings at 72 hours.</p>
+  <div class="fig">
+    <h4>DMEM is the only signal</h4>
+    <p class="cap">Each dot is one historical blend: viability against its DMEM share, coloured by round, with ± 1 SD of its readings. Hollow diamonds are the two designed steps at the model's estimate, with 80% ranges. Hover for detail.</p>
+    <div class="legend"><span><i class="sw" style="background:var(--r0)"></i>Round 0 (random)</span><span><i class="sw" style="background:var(--r1)"></i>Round 1</span><span><i class="sw" style="background:var(--r2)"></i>Round 2</span><span><i class="sw" style="background:var(--r3)"></i>Round 3</span></div>
+    <div class="scroll"><svg id="dmemChart" role="img" aria-label="Viability against DMEM share"></svg></div>
   </div>
-  <div class="tbl" style="margin:0"><svg id="compChart" role="img" aria-label="Recipe composition and viability for 24 experiments"></svg></div>
-</div>
-
-<h3>How to read one row</h3>
-<p>Take <span class="mono">PBMC-E19</span>, the best result so far.</p>
-<div class="row-card">
-  <div class="kv"><small>DMEM</small><b>44.7%</b></div>
-  <div class="kv"><small>RPMI-10</small><b>20.1%</b></div>
-  <div class="kv"><small>X-VIVO 15</small><b>19.6%</b></div>
-  <div class="kv"><small>AR5</small><b>15.7%</b></div>
-  <div class="kv"><small>Mean viability, 72 h</small><b>81.0%</b></div>
-  <div class="kv"><small>SD across 5 readings</small><b>8.09 pts</b></div>
-</div>
-<p>In words: the lab mixed these four media in these proportions, cultured PBMCs for 72 hours, and measured 5 times. On average 81% of cells were alive. Single readings spread about 8 points either side.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Finding</th><th>Number</th><th>So what</th></tr></thead>
+    <tbody>
+      <tr><td>Round 3 beat every earlier round</td><td class="num">72.65% vs 39.98 to 50.65%</td><td>Recipe and lab day are confounded within the main data</td></tr>
+      <tr><td>E19's recipe was re-run in a separate comparison in the same paper</td><td class="num">80.2% (n = 6, SD 7.5)</td><td>Round 3 partly reproduces; the anchor measures what is left</td></tr>
+      <tr><td>Two near-identical blends disagree</td><td class="num">E10 48.15% vs E14 7.52%</td><td>E14 is most likely a failed run; kept in the fit, because dropping data by outcome biases the model</td></tr>
+      <tr><td>Readings are noisy</td><td class="num">pooled SD 9.51 pts</td><td>A 5-point gap is inside the noise of a few readings</td></tr>
+    </tbody></table></div>
+  <div class="fig">
+    <h4>All 24 recipes</h4>
+    <p class="cap">Blend on the left, mean viability on the right with ± 1 SD. Dashed lines separate rounds.</p>
+    <div class="scroll"><svg id="compChart" role="img" aria-label="Recipe composition and viability"></svg></div>
+  </div>
+  <div class="pair">
+    <div class="card memo"><div class="lab">Memo wording</div>
+      <p>DMEM is the only component with a clear signal. Across rounds 1 and 2, blends at 29 to 33% DMEM scored 48 to 49%, E12 at 44.5% scored 68.1%, and blends at 60 to 77% scored 43 to 56%. All six round-3 blends sit at 44 to 45% DMEM and score 67 to 81% while their other three components vary widely.</p>
+    </div>
+    <div class="card plain"><div class="lab">In plain words</div>
+      <p>One dial seems to matter: how much DMEM is in the mix. Around 44% works; much less or much more does worse. The other three ingredients swing a lot in the best round without changing the result much.</p>
+      <p>The catch: all the good results came on the same "day" (round 3). That could be a good recipe or a good day. The paper re-ran the best recipe separately and got 80%, so it is probably mostly the recipe.</p>
+    </div>
+  </div>
 </section>
 
-<section id="findings">
-<h2>What the data says</h2>
-<div class="fig">
-  <h4>Mean viability by round</h4>
-  <p class="cap">Each dot is one recipe. Lines show ± 1 SD of its readings. Round 0 was random; rounds 1 to 3 were chosen by the authors' optimiser.</p>
-  <div class="tbl" style="margin:0"><svg id="roundChart" role="img" aria-label="Viability by round"></svg></div>
-</div>
-<div class="tbl"><table>
-<thead><tr><th>Finding</th><th>Number</th><th>Why it matters</th></tr></thead>
-<tbody>
-<tr><td>Round 3 is much better than earlier rounds</td><td class="num">72.65% vs 39.98 to 50.65%</td><td>But all of round 3 has DMEM near 44%. We cannot tell a recipe effect from a "better day in the lab" effect.</td></tr>
-<tr><td>Two near-identical recipes disagree hugely</td><td class="num">E10 48.15% vs E14 7.52%</td><td>Only 2.60% of volume differs. Either the biology has a cliff, or E14 failed as a whole run. Readings within E14 agree (SD 2.70), so it is not read noise.</td></tr>
-<tr><td>Readings are noisy</td><td class="num">pooled SD 9.51 pts</td><td>A 5-point gap between two recipes is within noise. The model must allow for this.</td></tr>
-<tr><td>No pure-media corners tested</td><td class="num">0 of 24</td><td>The model is guessing at the edges of the recipe space.</td></tr>
-<tr><td>The source data has no costs</td><td class="num">0 of 4 prices</td><td>We sourced catalogue prices (FBS and AR5 provisional) and ran 9 price scenarios.</td></tr>
-</tbody></table></div>
-<p class="src">Figures from reports/exploratory_analysis.md and reports/tables/eda_summary.json.</p>
+<section id="cost">
+  <div class="kicker">06 · The evidence</div>
+  <h2>Prices and the cost rule</h2>
+  <div class="fig">
+    <h4>Price per litre of prepared medium</h4>
+    <p class="cap">Supplier list prices, 2 October 2026. DMEM and RPMI-10 include 10% FBS and 1% antibiotics, as in the paper. AR5 has no public price and is set equal to X-VIVO 15.</p>
+    <div class="legend"><span><i class="sw" style="background:var(--m1)"></i>Base medium</span><span><i class="sw" style="background:var(--accent)"></i>FBS share</span><span><i class="sw" style="background:var(--muted)"></i>Antibiotics</span><span><i class="sw" style="background:var(--m3)"></i>Complete serum-free medium</span></div>
+    <div class="scroll"><svg id="costChart" role="img" aria-label="Medium prices"></svg></div>
+  </div>
+  <div class="pair">
+    <div class="card memo"><div class="lab">Memo wording</div>
+      <p>Model picks cost no more per litre than E19 in at least 6 of 9 FBS and AR5 price scenarios. The designed steps may cost up to 1% more: 50% DMEM is EUR 0.26/L over E19, a gap smaller than the uncertainty in the FBS price itself. Savings against E19 are small (up to 2.53%), so this ceiling screens candidates; it is not a business case.</p>
+    </div>
+    <div class="card plain"><div class="lab">In plain words</div>
+      <p>All four media cost about the same once serum is added, EUR 168 to 181 per litre. Serum is three quarters of the cost of the two classic media. So the rule is simple: do not pay more than for our best blend. The real business test, cost per unit of good output, needs Qorium's own numbers.</p>
+      <p>The serum price came from a search snippet and AR5 has no price at all, so I tested nine price scenarios.</p>
+    </div>
+  </div>
+</section>
+
+<section id="models">
+  <div class="kicker">07 · The evidence</div>
+  <h2>How far to trust the model</h2>
+  <div class="fig">
+    <h4>The forward test</h4>
+    <p class="cap">Train on earlier rounds, predict the next round's average. Open dot: the GP's prediction. Filled dot: what happened.</p>
+    <div class="scroll"><svg id="forwardChart" role="img" aria-label="Forward test"></svg></div>
+  </div>
+  <div class="fig">
+    <h4>Ranking skill lives between rounds, not within them</h4>
+    <p class="cap">Leave-one-out rank correlation between predicted and observed viability, GP with pooled noise. 1 is perfect ranking, 0 is chance.</p>
+    <div class="scroll"><svg id="rankChart" role="img" aria-label="Ranking by round"></svg></div>
+  </div>
+  <div class="pair">
+    <div class="card memo"><div class="lab">Memo wording</div>
+      <p>On all 24 blends no model beats the mean on honest uncertainty (NLPD 4.44 for the mean against 5.93 for the GP). The GP's leave-one-out rank correlation of 0.61 comes from separating round 3 from the rest; within rounds 0 to 2 it is 0.11. Every model under-predicted round 3 by 22 to 29 points. So the GP proposes candidates and the plate decides.</p>
+      <p>The model shrinks E19's observed 81.0 to 70.1, because the top of six noisy results is partly luck. Its DMEM length scale sits at its floor: it believes viability changes sharply with DMEM.</p>
+    </div>
+    <div class="card plain"><div class="lab">In plain words</div>
+      <p>The model (a Gaussian process, GP) is a forecaster that also says how unsure it is. Tested honestly, it was wrong by 27 points on the round that mattered. It can tell "round-3 style" from "earlier style", but not which round-3 blend is best.</p>
+      <p>So I use it to suggest where to look and to show where it is overconfident, not to promise results.</p>
+    </div>
+  </div>
 </section>
 
 <section id="bo">
-<h2>How Bayesian optimisation picks experiments</h2>
-<p>The idea in four steps:</p>
-<ol>
-  <li>Fit a model to the results so far. A <b>Gaussian process (GP)</b> gives two things for any untested recipe: a best guess, and how unsure it is.</li>
-  <li>Score every possible recipe with an <b>acquisition function</b>. UCB is the simplest: <span class="mono">score = guess + κ × uncertainty</span>. Large κ favours exploring; small κ favours exploiting.</li>
-  <li>Run the highest-scoring recipe in the lab.</li>
-  <li>Add the result, refit, repeat.</li>
-</ol>
-<p>The toy below uses one ingredient on a 0 to 100% axis, so you can see it. The real problem has three free dimensions (four fractions that add to 100%), but the logic is the same.</p>
-<div class="fig">
-  <h4>Toy demo: one ingredient, hidden true curve</h4>
-  <p class="cap">Toy example with a made-up curve, not our data. Click anywhere on the chart to run an experiment there, or press the button to run the model's pick.</p>
-  <div class="tbl" style="margin:0"><svg id="boChart" role="img" aria-label="Interactive Gaussian process demo" style="cursor:crosshair"></svg></div>
-  <div class="controls">
-    <button id="boNext" type="button">Run the suggested experiment</button>
-    <button id="boReset" class="ghost" type="button">Reset</button>
-    <label for="boKappa">κ (explore) <input id="boKappa" type="range" min="0" max="4" step="0.1" value="2"></label>
-    <label><input id="boTruth" type="checkbox"> Show hidden truth</label>
-    <span class="readout" id="boRead"></span>
+  <div class="kicker">08 · The evidence</div>
+  <h2>How Bayesian optimisation picks experiments</h2>
+  <p class="lede">A toy with one ingredient so the logic is visible. Click anywhere to run an experiment there, or let the model pick. Made-up curve, not our data.</p>
+  <div class="fig">
+    <div class="scroll"><svg id="boChart" role="img" aria-label="Interactive Gaussian process demo" style="cursor:crosshair"></svg></div>
+    <div class="controls">
+      <button id="boNext" type="button">Run the suggested experiment</button>
+      <button id="boReset" class="ghost" type="button">Reset</button>
+      <label for="boKappa">κ (explore) <input id="boKappa" type="range" min="0" max="4" step="0.1" value="2"></label>
+      <label><input id="boTruth" type="checkbox"> Show hidden truth</label>
+      <span class="readout" id="boRead"></span>
+    </div>
   </div>
-</div>
-<h3>Three ideas to notice in the demo</h3>
-<ul>
-  <li><b>The band shrinks where you have tested.</b> Away from data the model admits it does not know.</li>
-  <li><b>κ = 0 gets stuck.</b> It keeps testing next to the current best and can miss a better peak. Raise κ and it explores.</li>
-  <li><b>Noise matters.</b> Each result in the demo has random noise added, as in a real assay. The curve does not pass through every point.</li>
-</ul>
-<h3>Picking a batch, not one at a time</h3>
-<p>The lab runs 4 recipes in parallel, so you cannot wait for each result. <b>Constant liar</b> (or "kriging believer") solves this. Pick the best recipe, pretend its result is already known (use the model's guess), refit, and pick again. The pretend result shrinks uncertainty there, so the next pick moves elsewhere. Repeat four times.</p>
-<h3>Adding cost</h3>
-<p>Two common ways. <b>Constraint</b>: only allow recipes below a cost ceiling, then maximise viability. <b>Desirability</b>: combine viability and cost into one score, as Cosenza 2022 did. The first is easier to explain to a lab manager.</p>
+  <div class="pair">
+    <div class="card memo"><div class="lab">Key ideas</div>
+      <ul>
+        <li><b>The band</b> is the model's uncertainty. It shrinks where you have tested.</li>
+        <li><b>κ = 0</b> only exploits and can get stuck next to a mediocre peak.</li>
+        <li><b>Batches:</b> pick one, pretend its result equals the forecast, pick again. The pretend result narrows the band there, so the next pick goes elsewhere. That is pending-point conditioning.</li>
+      </ul>
+    </div>
+    <div class="card plain"><div class="lab">In plain words</div>
+      <p>Choosing pilot lanes when each pilot is expensive: try lanes the forecast likes, and some it is unsure about, because one test in a blind spot can change every later decision.</p>
+    </div>
+  </div>
+</section>
+<section id="batch">
+  <div class="kicker">09 · The batch</div>
+  <h2>Why these four, and what was rejected</h2>
+  <div class="fig">
+    <h4>The batch against the history</h4>
+    <p class="cap">Historical blends on the two components the model responds to, coloured by viability. Stars are the picks; the ring is E19. The dashed line is the DMEM titration through E19.</p>
+    <div class="scroll"><svg id="mapChart" role="img" aria-label="Batch map"></svg></div>
+  </div>
+  <div class="fig">
+    <h4>How close each candidate is to E19, in the model's eyes</h4>
+    <p class="cap">Correlation with E19 under the model. Near 1 means the model already thinks it knows the answer: a well spent there teaches little.</p>
+    <div class="scroll"><svg id="altChart" role="img" aria-label="Correlation with E19 by batch"></svg></div>
+  </div>
+  <div class="pair">
+    <div class="card memo"><div class="lab">Memo wording</div>
+      <p>An earlier version used four model picks. One of them, 44/26/19/11, was 0.981 correlated with E19 under the model and predicted at 70.2 against E19's 70.1: a well the model priced at nothing and the assay could not resolve. Independent reviewers flagged it, and I replaced it and the exploration pick with the two DMEM steps.</p>
+      <p>A reviewer also proposed re-running E10 and E14. I rejected it: E14's readings agree closely, which points to a failed run, so re-running it tests the lab on that day rather than the medium.</p>
+    </div>
+    <div class="card plain"><div class="lab">In plain words</div>
+      <p>If the forecaster already rates a lane the same as the control lane, piloting it tells you almost nothing. Better to pilot where the forecaster is confident but nobody has checked: 40% and 50% DMEM.</p>
+      <p>This is the clearest place where I overrode the model's own pick, and one place where I overrode a reviewer.</p>
+    </div>
+  </div>
 </section>
 
-<section id="papers">
-<h2>The two reference papers</h2>
-<div class="tbl"><table>
-<thead><tr><th></th><th>Cosenza 2022 (primary)</th><th>Narayanan 2025 (ours)</th></tr></thead>
-<tbody>
-<tr><td>Cells</td><td>C2C12 mouse muscle cells (cultivated meat)</td><td>Human PBMCs (immune cells)</td></tr>
-<tr><td>Recipe</td><td>14 supplements on top of DMEM</td><td>Blend of 4 complete media</td></tr>
-<tr><td>Assays</td><td>Cheap: AlamarBlue, LIVE stain (3 days). Expensive: cell counts over 2 passages (6 days)</td><td>One: AOPI viability at 72 h</td></tr>
-<tr><td>Cost</td><td>In the objective, via a desirability score</td><td>Not modelled</td></tr>
-<tr><td>Method</td><td>Multi-information-source BO, batches of ~10 (3 expensive + 7 cheap)</td><td>GP + UCB, batches of 6</td></tr>
-<tr><td>Result</td><td class="num">181% more cells than DMEM control, +1.6% cost, 38% fewer experiments than DoE</td><td class="num">75 to 80% viability vs ~60% for single media</td></tr>
-<tr><td>Usable data</td><td>Repo arrays have no column labels; supplement not yet checked</td><td>Clean public workbook</td></tr>
-</tbody></table></div>
-<p><b>DoE</b> (design of experiments) is the classic statistical way to plan lab tests: a fixed grid or fraction of a grid, chosen up front. BO is adaptive: each round uses the last round's results.</p>
-<p class="src">Sources: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9541924/">Cosenza et al. 2022 on PMC</a>; <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12218302/">Narayanan et al. 2025 on PMC</a>.</p>
+<section id="robust">
+  <div class="kicker">10 · The batch</div>
+  <h2>What could move the picks</h2>
+  <div class="fig">
+    <h4>Sensitivity heatmap</h4>
+    <p class="cap">Each row reruns the selection with one change. Each cell is how far (in % of volume) that slot's pick moved. The designed steps never move, so only the model slots vary.</p>
+    <div class="scroll"><svg id="heatChart" role="img" aria-label="Sensitivity heatmap"></svg></div>
+  </div>
+  <div class="pair">
+    <div class="card memo"><div class="lab">Memo wording</div>
+      <p>The DMEM steps are fixed by design. Slot 3 moved by a median 16% of volume, mainly with prices; slot 4 by a median 6%, and by 72% only in the fit without DMEM as a coordinate. Four fractions summing to one carry one redundant coordinate; dropping DMEM hides the signal inside the other three. I keep all four with a floor on the length scales; log-ratio coordinates are the standard alternative for the next round.</p>
+    </div>
+    <div class="card plain"><div class="lab">In plain words</div>
+      <p>I changed one assumption at a time and watched whether the picks moved. The cheap pick moves when serum prices move, which is what a cost pick should do. The AR5 swap holds in almost every test.</p>
+    </div>
+  </div>
 </section>
 
-<section id="scenarios">
-<h2>The six "what ifs" the brief asks about</h2>
-<p>The final versions are in the <a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/reports/memo.md">memo</a>, section "How the strategy changes". The short form is below.</p>
-<div class="tbl"><table>
-<thead><tr><th>If…</th><th>Then the strategy changes like this</th></tr></thead>
-<tbody>
-<tr><td>Only 10 to 20 prior experiments</td><td>Use a simpler model (a few parameters), favour exploring, and spend part of the batch on space-filling picks. Do not trust tight uncertainty bands.</td></tr>
-<tr><td>Cheap assays are noisy</td><td>Use them to screen many recipes. Model noise explicitly and repeat readings on promising ones.</td></tr>
-<tr><td>Expensive assays are reliable</td><td>Spend them only on finalists. A multi-fidelity model learns how the cheap assay maps to the expensive one (Cosenza's approach).</td></tr>
-<tr><td>Cost data is incomplete</td><td>Use catalogue prices, labelled as estimates, plus a sensitivity sweep. Show which picks change if a price doubles.</td></tr>
-<tr><td>Some components are categorical or constrained</td><td>Handle categories (e.g. which sugar to use) with a separate kernel or one model per category. Encode limits as hard rules in the candidate generator. The K. phaffii data in the same paper has a categorical carbon source.</td></tr>
-<tr><td>Experiments run in parallel batches</td><td>Pick the batch jointly (constant liar, or q-acquisition functions). Force diversity so four picks are not near-copies.</td></tr>
-</tbody></table></div>
+<section id="sim">
+  <div class="kicker">11 · The batch</div>
+  <h2>The simulation</h2>
+  <div class="fig">
+    <h4>How far below the best does the final pick land?</h4>
+    <p class="cap">30 paired campaigns of 18 blends on two made-up "true" response surfaces, same rules and same measurement errors for every policy. The lab picks the blend with the highest noisy result; the dot is how far that is below the best available. Filled: low noise. Open: realistic noise (11.8 points).</p>
+    <div class="scroll"><svg id="simChart" role="img" aria-label="Simulation results"></svg></div>
+  </div>
+  <div class="pair">
+    <div class="card memo"><div class="lab">Memo wording</div>
+      <p>Random picks inside the rules ended 1.6 to 2.1 points from the best blend. Only UCB beat random reliably, and only at low noise (sign test p = 0.016 and 0.001, out of 16 exploratory comparisons). At the fitted noise of 11.8 points I detected no advantage for any policy, and the blend picked from single noisy readings sat 4.7 to 7.9 points below the best. That is why this plate spends wells on replicates and two slots on designed contrasts rather than four model picks.</p>
+    </div>
+    <div class="card plain"><div class="lab">In plain words</div>
+      <p>I played the experiment 30 times on fake data where I know the right answer. With this much noise, clever picking barely beats random picking. What hurts is choosing the winner from one noisy result. So the plate measures each blend 11 times instead of chasing more candidates.</p>
+    </div>
+  </div>
 </section>
 
-<section id="approach">
-<h2>Our approach, step by step</h2>
-<p>This is what the repo actually does, in the order it runs. Each step names the file that holds the result.</p>
-<div class="tbl"><table>
-<thead><tr><th>Step</th><th>What we did</th><th>Why</th><th>Result</th></tr></thead>
-<tbody>
-<tr><td class="num">1</td><td>Cleaned the PBMC workbook: 24 recipes, 103 readings, fractions scaled to sum to 100%</td><td>Every later number traces back to one checked table</td><td><a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/docs/data_audit.md">data_audit.md</a></td></tr>
-<tr><td class="num">2</td><td>Looked at the data before modelling</td><td>Found the round-3 cluster at 44% DMEM and the E10/E14 pair (2.60% apart, 40.63 points apart)</td><td><a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/reports/exploratory_analysis.md">exploratory_analysis.md</a></td></tr>
-<tr><td class="num">3</td><td>Priced each medium per litre, with 10% FBS and 1% antibiotics added to DMEM and RPMI</td><td>The brief needs cost. FBS is a search-snippet price and AR5 has no price, so we ran 9 price scenarios</td><td>EUR 168.45 to 181.00 per litre at base prices</td></tr>
-<tr><td class="num">4</td><td>Set the cost rule: a new blend may cost no more per litre than E19</td><td>"Beat our best blend without paying more." A lab manager can check it by hand</td><td>50.3% of 176,851 recipes pass at base prices</td></tr>
-<tr><td class="num">5</td><td>Compared 5 models: GP (two noise versions), random forest, Scheffe mixture model, plain average</td><td>The brief asks for at least two approaches</td><td>No model clearly beats the average. The GP ranks better than chance in leave-one-out (0.61)</td></tr>
-<tr><td class="num">6</td><td>Forward test: trained on earlier rounds, predicted the next</td><td>The closest the data gets to a real forecast</td><td>Every model missed round 3 by 22 to 29 points. GP forward ranking 0.26, -0.31, 0.26</td></tr>
-<tr><td class="num">7</td><td>Simulated 30 paired campaigns against two made-up "true" surfaces, at two noise levels</td><td>Real data cannot replay a policy, because the lab only ran one sequence</td><td>With the same rules for every policy: GP policies help at low noise, but at realistic noise none stands out, and the final pick lands 5 to 10 points below the best. Confirmation is the bottleneck</td></tr>
-<tr><td class="num">8</td><td>Picked 4 blends one slot at a time, plus an E19 re-run</td><td>Each slot has a job. After each pick the model marks it as pending, so the next pick looks elsewhere</td><td><a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/outputs/next_experiments.csv">next_experiments.csv</a></td></tr>
-<tr><td class="num">9</td><td>Re-ran the selection 15 times, plus 7 threshold changes</td><td>Shows which picks depend on our choices</td><td><a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/reports/batch_selection.md">batch_selection.md</a></td></tr>
-</tbody></table></div>
-<p>Why a GP if it fails the forward test? Because it gives a usable rule for choosing a diverse batch that weighs "likely good" against "we know little here". It is not used as a forecast. The decision rests on comparing each new blend with E19 on the same plate.</p>
+<section id="plate">
+  <div class="kicker">12 · The batch</div>
+  <h2>The plate and the decision</h2>
+  <div class="fig">
+    <h4>The 96-well plate</h4>
+    <p class="cap">Rows are blocks: each formulation appears twice in five rows and once in the sixth, at random positions. The edge ring holds PBS so the inner wells do not dry out. Click a formulation to highlight its wells.</p>
+    <div class="controls" id="plateBtns"></div>
+    <div class="scroll"><svg id="plateChart" role="img" aria-label="Plate map"></svg></div>
+  </div>
+  <div class="flow">
+    <div class="step"><div class="n">STEP 1</div><h5>Is the plate valid?</h5><p>Blanks, heat-killed controls, missing wells and spread are checked against rules set before the run. Invalid plates are repeated, not interpreted.</p></div>
+    <div class="step"><div class="n">STEP 2</div><h5>Screen</h5><p>A blend passes if its mean is no more than 5 points below the same-plate E19, at equal or lower cost. A pass means "not excluded".</p></div>
+    <div class="step"><div class="n">STEP 3</div><h5>Confirm, then decide</h5><p>One finalist against E19 on independent cell and medium preparations, on different days. Accept if the lower bound stays above minus 5 points.</p></div>
+  </div>
+  <div class="fig">
+    <h4>How sharp is the screen?</h4>
+    <p class="cap">Chance a blend passes the 5-point screen, by its true difference from E19. Move the slider to see what replicates buy.</p>
+    <div class="scroll"><svg id="passChart" role="img" aria-label="Pass probability"></svg></div>
+    <div class="controls"><label for="nWells">Wells per arm <input id="nWells" type="range" min="2" max="16" step="1" value="11"></label><span class="readout" id="passRead"></span></div>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>A valid plate shows</th><th>Next step</th></tr></thead>
+    <tbody>
+      <tr><td>Viability falls off at 40% or 50% DMEM</td><td>The sharp DMEM peak is real; search near 44% and relax the other three</td></tr>
+      <tr><td>40% and 50% close to E19</td><td>The peak is broader than the model thinks; widen the DMEM range</td></tr>
+      <tr><td>Slot 3 not excluded</td><td>Candidate for confirmation; it raises FBS to 9.9%, so it does not help an animal-free medium</td></tr>
+      <tr><td>Slot 4 not excluded</td><td>AR5 may be replaceable by X-VIVO 15; confirm before acting</td></tr>
+      <tr><td>E19 far below 80</td><td>Review preparation and assay conditions before the next round</td></tr>
+    </tbody></table></div>
+  <div class="pair">
+    <div class="card memo"><div class="lab">Memo wording</div>
+      <p>With 11 wells per arm the 90% interval on the difference is about plus or minus 7 points: a blend equal to E19 passes 89% of the time, one 10 points worse 11%. A lead needs a mean above E19 by more than the interval. This plate estimates variation within one preparation only; independent repeats come first and size the confirmation.</p>
+    </div>
+    <div class="card plain"><div class="lab">In plain words</div>
+      <p>The plate is a filter, not a verdict. It throws out clear losers. Anything that survives gets a proper trial on fresh cells and fresh media on different days, because all 55 wells on this plate share one batch of cells, so they cannot tell you how much results move between batches.</p>
+    </div>
+  </div>
 </section>
 
-<section id="picks">
-<h2>The recommendation</h2>
-<p>Five formulations, the most the brief allows. Four wells each, 20 wells in total, in random positions on the inner part of a 96-well plate.</p>
-<div class="tbl"><table>
-<thead><tr><th>Slot</th><th>Role</th><th>DMEM / RPMI-10 / X-VIVO / AR5</th><th>EUR/L</th><th>Predicted</th><th>What it tests</th></tr></thead>
-<tbody>
-<tr><td class="num">1</td><td>Exploit</td><td class="num">44 / 26 / 19 / 11</td><td class="num">177.69</td><td class="num">70.2%</td><td>Can some AR5 move to RPMI-10 with no loss? Level with E19, EUR 0.74/L cheaper</td></tr>
-<tr><td class="num">2</td><td>Cheaper</td><td class="num">43 / 56 / 1 / 0</td><td class="num">173.92</td><td class="num">65.9%</td><td>Does a blend with almost no serum-free medium hold up? The models disagree (51.9 to 68.5%)</td></tr>
-<tr><td class="num">3</td><td>Explore</td><td class="num">37 / 33 / 30 / 0</td><td class="num">176.82</td><td class="num">60.1%</td><td>Is the 44% DMEM band really special, or does good viability extend further?</td></tr>
-<tr><td class="num">4</td><td>Expected improvement</td><td class="num">45 / 21 / 27 / 7</td><td class="num">178.31</td><td class="num">69.1%</td><td>Does swapping AR5 for X-VIVO 15 beat E19? Biggest upside</td></tr>
-<tr><td>Anchor</td><td>E19 re-run</td><td class="num">44.6 / 20.1 / 19.6 / 15.7</td><td class="num">178.43</td><td class="num">81.0% (historical)</td><td>Did round 3 reproduce, or was it a good lab day?</td></tr>
-</tbody></table></div>
-<div class="callout"><p><b>Decision rule, set before the plate runs.</b> A blend passes the screen if its mean is no more than 5 points below the same-plate E19, at equal or lower cost. Four wells cannot prove two blends are equal: the uncertainty on the difference is about ±11 points, so the screen only filters. First the assay owner checks the plate is valid; an invalid plate is repeated. One finalist then goes to a paired confirmation against E19 across independent cell and medium preparations, sized from the variance this pilot measures. It passes if the one-sided lower bound on the difference stays above −5 points. For scale: 20 wells per arm would give only about 51% power, and about 45 would give 80%.</p></div>
-<div class="callout"><p><b>The Qorium catch.</b> These media carry FBS (serum from calves). E19 is 6.5% FBS by volume, and every pick raises that; the "cheaper" pick reaches 9.9%. Qorium says it uses no animal products beyond the cells. So the recipes do not transfer. A real Qorium campaign starts from an animal-product-free ingredient list. Only the method transfers.</p></div>
-<p>In logistics terms: this plate is a pilot on four lanes plus a control lane. A pilot that looks good gets a proper trial before anyone changes the network.</p>
+<section id="qorium">
+  <div class="kicker">13 · Beyond the case</div>
+  <h2>What changes for Qorium</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>PBMC case study</th><th>Qorium version</th></tr></thead>
+    <tbody>
+      <tr><td>Suspension immune cells, viability at 72 h</td><td>Adherent bovine fibroblasts, growth to confluence and collagen over weeks. Dead cells detach, so viability says little; growth rate and collagen are the endpoints</td></tr>
+      <tr><td>Two media carry 10% FBS</td><td>Animal-free list: no FBS, no animal-derived insulin, transferrin, albumin or trypsin. Fibroblasts are among the easier cells to grow serum-free; the published gap is for bovine myoblasts (Kolkmann, Post et al. 2020). The open question is collagen output per cell</td></tr>
+      <tr><td>Four complete media on a simplex</td><td>8 to 15 defined components in a box; needs priors or a screening design first</td></tr>
+      <tr><td>Cost per litre against E19</td><td>Medium cost per gram of acceptable collagen or per square metre of sheet</td></tr>
+      <tr><td>A round takes days</td><td>A round takes weeks, so each round must carry more information</td></tr>
+    </tbody></table></div>
+  <div class="pair">
+    <div class="card memo"><div class="lab">What carries over, what changes</div>
+      <p><b>Carries over:</b> anchor every round, pending-point conditioning, designed contrasts where the model is overconfident, validity gate, screen then confirm, cost as a constraint across price scenarios.</p>
+      <p><b>Changes:</b> candidate generator (box, not simplex), kernel inputs and priors, endpoints and their noise, cost denominator, decision rules.</p>
+    </div>
+    <div class="card plain"><div class="lab">Questions for the CSO</div>
+      <ul>
+        <li>Which endpoint decides a medium change: growth, collagen per cell, sheet properties or cost per square metre?</li>
+        <li>What loss is acceptable for what saving, and who signs it off?</li>
+        <li>Which ingredients are already ruled in or out?</li>
+        <li>How well do plate results predict the bioreactor?</li>
+        <li>How much do cell batches and biopsies vary, and is it recorded?</li>
+      </ul>
+    </div>
+  </div>
+</section>
+<section id="ai">
+  <div class="kicker">14 · Beyond the case</div>
+  <h2>How AI was used</h2>
+  <p class="lede">The work ran as a loop: AI drafts, independent AI reviewers attack, I decide what to accept, every change logged with its before and after values. Each review below changed something real.</p>
+  <div class="timeline">
+    <div class="tl"><div class="when">2 Oct</div><h5>Framing and first draft</h5><p>ChatGPT prepared the data and first exploration. Claude audited the plan, built a domain primer for me, sourced prices and built the models and first batch.</p></div>
+    <div class="tl"><div class="when">2 Oct · GPT-6 Astra</div><h5>First review: 11 findings</h5><p>Found a bug where the batch step dropped measurement noise, and that the batch had 6 formulations against a limit of 5. Fixed both, with a test script for the maths.</p></div>
+    <div class="tl"><div class="when">2 Oct · Claude Fable 5.1</div><h5>Second review</h5><p>Found the exploration pick searched only 19% of candidates, and that the model treats RPMI-10 and AR5 as interchangeable. Fixed and stated in the memo.</p></div>
+    <div class="tl"><div class="when">3 Oct · GPT-6 Astra</div><h5>Memo and workflow reviews</h5><p>"Ranking aid" overclaimed; the confirmation size had only 51% power; every pick raised FBS against Qorium's animal-free process; no plate-validity gate. Rewrote the decision path and added a lab plan.</p></div>
+    <div class="tl"><div class="when">3 Oct · five Sonnet 5.5 auditors</div><h5>Audit swarm: numbers, statistics, biology, panel, code</h5><p>Most important: the simulation did not give every policy the same noise. Fixed, and the result reversed: at realistic noise no policy beat random. Also added plate controls, viable cell counts, a licence and the 3-coordinate checks.</p></div>
+    <div class="tl"><div class="when">3 Oct · Astra and Fable, adversarial</div><h5>Two reviewers told to break it</h5><p>Both showed the exploit pick was the same as E19 in the model's eyes. I chose the DMEM titration and 11 wells per arm. I rejected re-running E10 and E14, and logged why.</p></div>
+  </div>
+  <div class="pair">
+    <div class="card memo"><div class="lab">How I describe it</div>
+      <p>I am not a microbiologist and I do not present this as my research. What I want to show is that I can understand a scientific problem well enough to frame the right question, direct AI to build and attack the solution, and make the calls: which findings to accept, which to reject, and what to recommend.</p>
+    </div>
+    <div class="card plain"><div class="lab">Calls I made myself</div>
+      <ul>
+        <li>Chose the public PBMC data over the primary paper's unlabelled arrays.</li>
+        <li>Chose a cost constraint over a weighted score, because a lab manager can check it.</li>
+        <li>Picked the DMEM titration over the reviewer's E10/E14 re-run.</li>
+        <li>Spent idle wells on replicates instead of more formulations.</li>
+        <li>Kept E14 in the fit and stated why.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="src">Full review texts and the decision log are in <a href="https://github.com/harshpuri84/qorium-media-optimisation/tree/main/docs">docs/</a>.</p>
 </section>
 
-<section id="reviews">
-<h2>What the reviewers changed</h2>
-<p>Three independent reviews ran on the work, each read-only: GPT-6 Astra twice and Claude Fable 5.1 once. Each one changed something real.</p>
-<div class="tbl"><table>
-<thead><tr><th>Review</th><th>Biggest finding</th><th>What changed</th></tr></thead>
-<tbody>
-<tr><td>Astra, analysis (2 Oct)</td><td>The "pretend result" step dropped measurement noise. The batch had 6 formulations, over the brief's limit of 5</td><td>Rewrote the GP maths with a test script. Slot 4 moved. Dropped the second control. Rewrote overclaims</td></tr>
-<tr><td>Fable 5.1, fixes (2 Oct)</td><td>The model treats RPMI-10 and AR5 as interchangeable, so slot 1's "54% better than E19" means the model cannot tell them apart. The explore pick searched only a 19% sample</td><td>Explore now searches every candidate, which moved slot 3. Added a test that limits the model; picks moved by 2% at most</td></tr>
-<tr><td>Astra, workflow (3 Oct)</td><td>The 20-well confirmation was not justified (51% power). The FBS share rises in every pick, which clashes with Qorium's animal-free process. No plate-validity gate. The schema could not represent pooling, lots or preparations</td><td>Three-step plate-to-decision flow with a validity gate and non-inferiority confirmation. Animal-free transfer stated. Schema fixed. Anchor tested as pending: slot 4 moves 1%</td></tr>
-<tr><td>Astra, memo (3 Oct)</td><td>The GP's forward ranking is weak too, so "ranking aid" overclaims. "Within noise" is not a decision rule</td><td>Memo now says the GP proposes, it does not forecast. Added the 5-point screening rule and the confirmation run</td></tr>
-</tbody></table></div>
-<p class="src">Full texts: <a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/docs/review_gpt6_astra_2026-10-02.md">Astra 1</a>, <a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/docs/review_fable51_2026-10-02.md">Fable 5.1</a>, <a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/docs/review_gpt6_astra_memo_2026-10-03.md">Astra 2</a>. Every change is logged in <a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/docs/DECISIONS.md">DECISIONS.md</a>.</p>
+<section id="prep">
+  <div class="kicker">15 · Beyond the case</div>
+  <h2>Interview prep</h2>
+  <h3>Seven ideas I must explain in my own words</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Idea</th><th>One sentence</th></tr></thead>
+    <tbody>
+      <tr><td>Confounding</td><td>All the good recipes ran on one day, so "good recipe" and "good day" cannot be separated without re-running a recipe on another day; the anchor does that.</td></tr>
+      <tr><td>Shrinkage</td><td>With 12 points of noise, the model pulls E19's 81 down to 70, because the best of several noisy results is partly luck.</td></tr>
+      <tr><td>Length scale at a bound</td><td>At the floor, the model believes viability changes sharply with DMEM; at the ceiling, it sees no effect of RPMI-10 or AR5 and treats them as interchangeable.</td></tr>
+      <tr><td>Pending-point conditioning</td><td>Pretending a pick already returned its forecast narrows uncertainty there so the next pick goes elsewhere; it changes the uncertainty, never the forecast.</td></tr>
+      <tr><td>Experimental unit</td><td>Eleven wells from one cell preparation tell you about that preparation; how results vary between preparations needs independent repeats.</td></tr>
+      <tr><td>Mixture geometry</td><td>Four fractions that sum to 100% have only three free directions, so which three the model sees changes its assumptions.</td></tr>
+      <tr><td>Non-inferiority</td><td>Failing to find a difference does not prove two blends are equal; "not excluded" is the most a screen can say.</td></tr>
+    </tbody></table></div>
+  <h3>Likely questions</h3>
+  <details><summary>Why trust a GP that missed round 3 by 27 points?</summary><p>I don't, as a forecast. I use it to propose candidates and to show where it is overconfident. The DMEM steps test that overconfidence directly.</p></details>
+  <details><summary>Why designed points instead of the model's picks?</summary><p>The simulation found no reliable advantage for any policy at this noise level, and the model's sharpest assumption is untested. A designed contrast answers a clear question whatever the model believes.</p></details>
+  <details><summary>What does P(above E19) = 0.39 mean?</summary><p>Under the model, a 39% chance slot 4's true viability beats E19's. It ignores batch effects, which is why E19 runs on the same plate.</p></details>
+  <details><summary>Why 11 wells?</summary><p>The plate had 36 idle interior wells. Eleven per arm cut the interval on each comparison from about 13 to about 7 points without adding formulations.</p></details>
+  <details><summary>Why is 50% DMEM allowed above the cost ceiling?</summary><p>It is EUR 0.26/L over, smaller than the uncertainty in the FBS price. Designed points may be 1% over; model picks must stay under.</p></details>
+  <details><summary>Does a PBMC blend tell you anything about bovine fibroblasts?</summary><p>Only the method. Fibroblasts attach to surfaces and are among the easier cells to grow serum-free. Your 2020 work showed the gap for bovine myoblasts; for fibroblasts the open question is collagen output per cell.</p></details>
+  <details><summary>How do you know 81% is real and not debris?</summary><p>I don't. The plate adds heat-killed controls to set the dead-cell gate and blanks for background, and records viable cells per mL as well as viability.</p></details>
+  <details><summary>How would you build the team around this loop?</summary><p>Start with a modeller-engineer and a lab-data owner embedded with R&amp;D. First deliverable: the schema and a frozen dataset per round, not a model. The assay owner holds the veto on plate validity.</p></details>
+  <details><summary>Why believe a Bayesian method helps at all?</summary><p>It has not beaten the plain average yet, and the memo says so. Its value today is structure: an explicit uncertainty rule, an anchor and pass criteria set in advance. It earns trust when forward rounds beat the average.</p></details>
 </section>
 
-<section id="notes">
-<h2>Notes to own in the interview</h2>
-<p>Say these before the panel does. Each one is a weakness that turns into evidence of judgement once you name it.</p>
-<details><summary>"The model fails the forward test."</summary><p>Yes. Every model missed round 3 by 22 to 29 points, and the GP's forward ranking was weak. That is why I use it only to propose a diverse batch, and why E19 is on the plate. The decision is a same-plate comparison, not a forecast.</p></details>
-<details><summary>"The model only really sees two ingredients."</summary><p>Its RPMI-10 and AR5 settings sit at the upper limit, so it treats them as interchangeable. All four picks hold less AR5 than E19, so the plate tests that assumption directly. Limiting the model moved the picks by 2% at most.</p></details>
-<details><summary>"Your prices are guesses."</summary><p>Partly. Basal media and X-VIVO 15 come from supplier pages. FBS is a search snippet, and FBS is 74 to 80% of the supplemented cost. AR5 has no public price. So cost is a constraint checked across 9 scenarios, and real quotes are the first thing I would buy.</p></details>
-<details><summary>"Why not just pick the top four predictions?"</summary><p>In simulation with matched rules, no policy stood out at realistic noise, and the blend picked from noisy results ended 5 to 10 points below the best whatever chose the candidates. So the bottleneck is confirmation. The four roles are a readable way to cover cost and exploration, not a proven optimum.</p></details>
-<details><summary>"What does this mean for Qorium?"</summary><p>PBMC viability is a stand-in. The same loop would run on bovine skin-cell growth and collagen output, with a cheap screening assay paired with an expensive confirmatory one, and real supplier quotes. The schema already supports that without changes.</p></details>
-<details><summary>"How did you work?" (suggested answer, adjust to your own view)</summary><p>I used AI agents for the analysis and code, and ran three independent model reviews against my own work. Each review found real problems, and each fix is logged with the before and after values. That is how I would run a data science team: fast drafts, adversarial review, every change traceable.</p></details>
-</section>
-
-<section id="plan">
-<h2>Reading plan</h2>
-<div class="tbl"><table>
-<thead><tr><th>#</th><th>What</th><th>Time</th><th>Focus on</th></tr></thead>
-<tbody>
-<tr><td class="num">1</td><td>This page</td><td class="num">45 min</td><td>Play with the demo until κ makes sense</td></tr>
-<tr><td class="num">2</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12218302/">Narayanan 2025</a>: abstract, Fig. 1, PBMC results</td><td class="num">90 min</td><td>How they set up the blend and the batch</td></tr>
-<tr><td class="num">3</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9541924/">Cosenza 2022</a>: abstract, Fig. 1, results</td><td class="num">60 min</td><td>How cost and two assay types enter the model</td></tr>
-<tr><td class="num">4</td><td><a href="https://distill.pub/2019/visual-exploration-gaussian-processes/">Distill: A Visual Exploration of Gaussian Processes</a></td><td class="num">60 min</td><td>Kernels and length scales, by picture</td></tr>
-<tr><td class="num">5</td><td><a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/reports/exploratory_analysis.md">Exploratory analysis</a></td><td class="num">30 min</td><td>Can you explain each figure out loud?</td></tr>
-<tr><td class="num">6</td><td><a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/reports/memo.pdf">The memo</a> (4 pages)</td><td class="num">40 min</td><td>Could you defend every number in it?</td></tr>
-<tr><td class="num">7</td><td><a href="https://github.com/harshpuri84/qorium-media-optimisation/blob/main/reports/walkthrough.md">Walkthrough script</a> and likely questions</td><td class="num">60 min</td><td>Say it out loud twice, timed at 8 minutes</td></tr>
-</tbody></table></div>
-</section>
-
-<section id="quiz">
-<h2>Check yourself</h2>
-<details><summary>Why can you not treat the four fractions as four independent inputs?</summary><p>They add to 100%. Fix three and the fourth is set. There are only three free dimensions, and changing one fraction always changes another.</p></details>
-<details><summary>Round 3 scored much higher. Does that prove the optimiser worked?</summary><p>Not alone. Round 3 recipes are all similar, and they were run at a different time. A better batch of cells or a better day in the lab would look the same. Re-running E19 next to new recipes would help separate the two.</p></details>
-<details><summary>E14 scored 7.52%, next to a recipe that scored 48.15%. What do you do with it?</summary><p>Keep it, and show results with and without it. Its readings agree with each other, so the whole run probably failed or the biology has a sharp drop. The data cannot tell which.</p></details>
-<details><summary>Why would you pick a recipe the model expects to be mediocre?</summary><p>Because the model is very unsure there. One test can remove a large blind spot, which improves every later decision. That is the explore part of the batch.</p></details>
-<details><summary>How does viability relate to Qorium's business?</summary><p>Loosely. Qorium needs skin cells to grow and make collagen at low cost per litre. Viability is a necessary first step, not the goal. The method transfers. The numbers do not.</p></details>
+<section id="glossary">
+  <div class="kicker">16 · Reference</div>
+  <h2>Glossary</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td>Gaussian process (GP)</td><td>A model that predicts a value and how unsure it is, assuming similar recipes give similar results</td></tr>
+      <tr><td>Posterior mean</td><td>The model's best estimate after seeing the data</td></tr>
+      <tr><td>Length scale</td><td>How far you can move along an ingredient before the model expects a different result</td></tr>
+      <tr><td>Expected improvement (EI)</td><td>A pick rule: how much a recipe is expected to beat the current best, counting uncertainty</td></tr>
+      <tr><td>UCB</td><td>A pick rule: forecast plus κ times uncertainty</td></tr>
+      <tr><td>Leave-one-out</td><td>Predict each recipe from all the others, then check the error</td></tr>
+      <tr><td>Forward test</td><td>Train on earlier rounds, predict the next: the closest to real use</td></tr>
+      <tr><td>NLPD</td><td>A score for predictions and their uncertainty together; lower is better</td></tr>
+      <tr><td>Spearman</td><td>Rank correlation: 1 means the model orders recipes perfectly</td></tr>
+      <tr><td>Non-inferiority</td><td>Showing a new option is not worse than a reference by more than a set margin</td></tr>
+      <tr><td>Power</td><td>The chance a test detects a real effect of a given size</td></tr>
+      <tr><td>Sign test</td><td>Counts how often one policy beats another across paired runs</td></tr>
+      <tr><td>Common random numbers</td><td>Giving every policy the same noise so differences come from the policy, not luck</td></tr>
+      <tr><td>Simplex</td><td>The space of mixtures whose fractions sum to 100%</td></tr>
+    </tbody></table></div>
+  <p class="src">Data: Narayanan et al. (2025), Nature Communications 16, 6055; figshare doi:10.6084/m9.figshare.27715134. Method reference: Cosenza et al. (2022), Biotechnology and Bioengineering 119(9), 2447-2458. Kolkmann, Post et al. (2020), Cytotechnology 72(1), 111-120.</p>
 </section>
 </main>
 </div>
 <div class="tip" id="tip" role="status"></div>
-
 <script>
-const DATA = [{"id":"E01","round":0,"f":[0.0027,0.3851,0.1761,0.4362],"v":60.58,"sd":9.4,"n":5},{"id":"E02","round":0,"f":[0.0511,0.233,0.3804,0.3355],"v":6.54,"sd":1.48,"n":4},{"id":"E03","round":0,"f":[0.1712,0.1988,0.0005,0.6295],"v":40.4,"sd":12.74,"n":5},{"id":"E04","round":0,"f":[0.0807,0.0011,0.5216,0.3966],"v":40.27,"sd":3.4,"n":5},{"id":"E05","round":0,"f":[0.545,0.193,0.0075,0.2544],"v":41.73,"sd":11.31,"n":5},{"id":"E06","round":0,"f":[0.0011,0.6779,0.2103,0.1107],"v":50.38,"sd":6.55,"n":5},{"id":"E07","round":1,"f":[0.2913,0.3183,0.3383,0.0521],"v":48.03,"sd":12.71,"n":3},{"id":"E08","round":1,"f":[0.3293,0.2813,0.0841,0.3053],"v":48.64,"sd":3.95,"n":3},{"id":"E09","round":1,"f":[0.6046,0.1982,0.1431,0.0541],"v":46.9,"sd":12.91,"n":5},{"id":"E10","round":1,"f":[0.244,0.393,0.002,0.361],"v":48.15,"sd":5.56,"n":5},{"id":"E11","round":1,"f":[0.091,0.262,0.381,0.266],"v":44.12,"sd":6.4,"n":4},{"id":"E12","round":1,"f":[0.445,0.356,0.001,0.198],"v":68.05,"sd":11.14,"n":5},{"id":"E13","round":2,"f":[0.208,0.222,0.38,0.19],"v":45.42,"sd":6.64,"n":4},{"id":"E14","round":2,"f":[0.266,0.368,0.001,0.365],"v":7.52,"sd":2.7,"n":4},{"id":"E15","round":2,"f":[0.4895,0.3904,0.001,0.1191],"v":55.32,"sd":5.14,"n":5},{"id":"E16","round":2,"f":[0.7728,0.1502,0.042,0.035],"v":46.15,"sd":7.71,"n":4},{"id":"E17","round":2,"f":[0.771,0.009,0.017,0.203],"v":42.88,"sd":6.28,"n":4},{"id":"E18","round":2,"f":[0.774,0.112,0.094,0.02],"v":56.46,"sd":14.48,"n":4},{"id":"E19","round":3,"f":[0.4466,0.2008,0.1958,0.1568],"v":81.0,"sd":8.09,"n":5},{"id":"E20","round":3,"f":[0.443,0.181,0.175,0.201],"v":76.5,"sd":14.85,"n":2},{"id":"E21","round":3,"f":[0.445,0.0,0.0,0.555],"v":71.25,"sd":13.23,"n":4},{"id":"E22","round":3,"f":[0.444,0.328,0.001,0.227],"v":67.4,"sd":9.63,"n":5},{"id":"E23","round":3,"f":[0.4494,0.2122,0.1762,0.1622],"v":71.5,"sd":17.02,"n":4},{"id":"E24","round":3,"f":[0.4396,0.2747,0.1319,0.1538],"v":68.25,"sd":8.42,"n":4}];
-const NAMES=["DMEM","RPMI-10","X-VIVO 15","AR5"];
-const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-const NS="http://www.w3.org/2000/svg";
-const el=(t,a={},p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
-const tip=document.getElementById("tip");
-function showTip(ev,html){tip.innerHTML=html;tip.style.opacity=1;const x=Math.min(ev.clientX+14,innerWidth-270);tip.style.left=x+"px";tip.style.top=(ev.clientY+14)+"px"}
-function hideTip(){tip.style.opacity=0}
+const D = {"experiments":[{"id":"E01","round":0,"f":[0.0027,0.3851,0.1761,0.4362],"v":60.58,"sd":9.4,"n":5,"cost":176.17},{"id":"E02","round":0,"f":[0.0511,0.233,0.3804,0.3355],"v":6.54,"sd":1.48,"n":4,"cost":178.07},{"id":"E03","round":0,"f":[0.1712,0.1988,0.0005,0.6295],"v":40.4,"sd":12.74,"n":5,"cost":178.49},{"id":"E04","round":0,"f":[0.0807,0.0011,0.5216,0.3966],"v":40.27,"sd":3.4,"n":5,"cost":180.98},{"id":"E05","round":0,"f":[0.545,0.193,0.0075,0.2544],"v":41.73,"sd":11.31,"n":5,"cost":178.52},{"id":"E06","round":0,"f":[0.0011,0.6779,0.2103,0.1107],"v":50.38,"sd":6.55,"n":5,"cost":172.49},{"id":"E07","round":1,"f":[0.2913,0.3183,0.3383,0.0521],"v":48.03,"sd":12.71,"n":3,"cost":176.97},{"id":"E08","round":1,"f":[0.3293,0.2813,0.0841,0.3053],"v":48.64,"sd":3.95,"n":3,"cost":177.43},{"id":"E09","round":1,"f":[0.6046,0.1982,0.1431,0.0541],"v":46.9,"sd":12.91,"n":5,"cost":178.45},{"id":"E10","round":1,"f":[0.244,0.393,0.002,0.361],"v":48.15,"sd":5.56,"n":5,"cost":176.04},{"id":"E11","round":1,"f":[0.091,0.262,0.381,0.266],"v":44.12,"sd":6.4,"n":4,"cost":177.7},{"id":"E12","round":1,"f":[0.445,0.356,0.001,0.198],"v":68.05,"sd":11.14,"n":5,"cost":176.48},{"id":"E13","round":2,"f":[0.208,0.222,0.38,0.19],"v":45.42,"sd":6.64,"n":4,"cost":178.19},{"id":"E14","round":2,"f":[0.266,0.368,0.001,0.365],"v":7.52,"sd":2.7,"n":4,"cost":176.35},{"id":"E15","round":2,"f":[0.4895,0.3904,0.001,0.1191],"v":55.32,"sd":5.14,"n":5,"cost":176.05},{"id":"E16","round":2,"f":[0.7728,0.1502,0.042,0.035],"v":46.15,"sd":7.71,"n":4,"cost":179.03},{"id":"E17","round":2,"f":[0.771,0.009,0.017,0.203],"v":42.88,"sd":6.28,"n":4,"cost":180.8},{"id":"E18","round":2,"f":[0.774,0.112,0.094,0.02],"v":56.46,"sd":14.48,"n":4,"cost":179.51},{"id":"E19","round":3,"f":[0.4466,0.2008,0.1958,0.1568],"v":81.0,"sd":8.09,"n":5,"cost":178.43},{"id":"E20","round":3,"f":[0.443,0.181,0.175,0.201],"v":76.5,"sd":14.85,"n":2,"cost":178.68},{"id":"E21","round":3,"f":[0.445,0.0,0.0,0.555],"v":71.25,"sd":13.23,"n":4,"cost":180.95},{"id":"E22","round":3,"f":[0.444,0.328,0.001,0.227],"v":67.4,"sd":9.63,"n":5,"cost":176.83},{"id":"E23","round":3,"f":[0.4494,0.2122,0.1762,0.1622],"v":71.5,"sd":17.02,"n":4,"cost":178.29},{"id":"E24","round":3,"f":[0.4396,0.2747,0.1319,0.1538],"v":68.25,"sd":8.42,"n":4,"cost":177.5}],"picks":[{"slot":1,"role":"DMEM titration, 40%","selection_rule":"E19's RPMI-10 : X-VIVO 15 : AR5 ratios with DMEM at 40%","dmem_pct":40,"rpmi_10_pct":22,"xvivo_pct":21,"ar5_pct":17,"dmem_ml_per_100ml":40.0,"rpmi_10_ml_per_100ml":22.0,"xvivo_ml_per_100ml":21.0,"ar5_ml_per_100ml":17.0,"cost_eur_per_litre_base":178.19,"cost_eur_per_litre_min":136.53,"cost_eur_per_litre_max":251.24,"within_ceiling_scenarios":"3/9","predicted_viability_pct":66.3,"latent_sd_pct_points":7.3,"measured_mean_80pct_low":48.4,"measured_mean_80pct_high":84.1,"prob_true_viability_above_e19":0.26,"predicted_gp_sem_noise":80.4,"predicted_gp_ls_floor_0.05":64.0,"predicted_gp_ls_floor_0.2":61.5,"predicted_gp_ls_upper_3":66.2,"predicted_gp_noise_s2_over_n":66.1,"predicted_gp_3coord_without_dmem":62.5,"predicted_gp_3coord_without_xvivo":64.4,"predicted_gp_without_e02":67.4,"predicted_gp_without_e14":80.0,"nearest_historical":"PBMC-E19","nearest_gap_pct":4.7,"nearest_observed_viability_pct":81.0,"reruns_unchanged":"19/19","median_shift_pct_across_reruns":0.0,"max_shift_pct_across_reruns":0.0},{"slot":2,"role":"DMEM titration, 50%","selection_rule":"E19's RPMI-10 : X-VIVO 15 : AR5 ratios with DMEM at 50%","dmem_pct":50,"rpmi_10_pct":18,"xvivo_pct":18,"ar5_pct":14,"dmem_ml_per_100ml":50.0,"rpmi_10_ml_per_100ml":18.0,"xvivo_ml_per_100ml":18.0,"ar5_ml_per_100ml":14.0,"cost_eur_per_litre_base":178.69,"cost_eur_per_litre_min":132.99,"cost_eur_per_litre_max":250.23,"within_ceiling_scenarios":"6/9","predicted_viability_pct":62.5,"latent_sd_pct_points":7.4,"measured_mean_80pct_low":44.6,"measured_mean_80pct_high":80.4,"prob_true_viability_above_e19":0.12,"predicted_gp_sem_noise":61.8,"predicted_gp_ls_floor_0.05":56.2,"predicted_gp_ls_floor_0.2":62.0,"predicted_gp_ls_upper_3":62.4,"predicted_gp_noise_s2_over_n":62.3,"predicted_gp_3coord_without_dmem":61.4,"predicted_gp_3coord_without_xvivo":59.4,"predicted_gp_without_e02":60.3,"predicted_gp_without_e14":61.1,"nearest_historical":"PBMC-E19","nearest_gap_pct":5.3,"nearest_observed_viability_pct":81.0,"reruns_unchanged":"19/19","median_shift_pct_across_reruns":0.0,"max_shift_pct_across_reruns":0.0},{"slot":3,"role":"Cheaper alternative","selection_rule":"highest posterior mean at least 2.5% below E19 cost","dmem_pct":43,"rpmi_10_pct":56,"xvivo_pct":1,"ar5_pct":0,"dmem_ml_per_100ml":43.0,"rpmi_10_ml_per_100ml":56.0,"xvivo_ml_per_100ml":1.0,"ar5_ml_per_100ml":0.0,"cost_eur_per_litre_base":173.92,"cost_eur_per_litre_min":107.4,"cost_eur_per_litre_max":240.45,"within_ceiling_scenarios":"7/9","predicted_viability_pct":65.9,"latent_sd_pct_points":5.5,"measured_mean_80pct_low":49.2,"measured_mean_80pct_high":82.6,"prob_true_viability_above_e19":0.27,"predicted_gp_sem_noise":51.9,"predicted_gp_ls_floor_0.05":67.9,"predicted_gp_ls_floor_0.2":63.5,"predicted_gp_ls_upper_3":65.5,"predicted_gp_noise_s2_over_n":65.9,"predicted_gp_3coord_without_dmem":50.1,"predicted_gp_3coord_without_xvivo":67.5,"predicted_gp_without_e02":68.2,"predicted_gp_without_e14":68.5,"nearest_historical":"PBMC-E15","nearest_gap_pct":17.9,"nearest_observed_viability_pct":55.3,"reruns_unchanged":"5/19","median_shift_pct_across_reruns":16.0,"max_shift_pct_across_reruns":46.0},{"slot":4,"role":"Expected improvement","selection_rule":"highest expected improvement over the incumbent posterior mean, earlier slots pending","dmem_pct":44,"rpmi_10_pct":21,"xvivo_pct":28,"ar5_pct":7,"dmem_ml_per_100ml":44.0,"rpmi_10_ml_per_100ml":21.0,"xvivo_ml_per_100ml":28.0,"ar5_ml_per_100ml":7.0,"cost_eur_per_litre_base":178.32,"cost_eur_per_litre_min":134.64,"cost_eur_per_litre_max":234.92,"within_ceiling_scenarios":"8/9","predicted_viability_pct":69.1,"latent_sd_pct_points":7.2,"measured_mean_80pct_low":51.3,"measured_mean_80pct_high":86.8,"prob_true_viability_above_e19":0.39,"predicted_gp_sem_noise":79.5,"predicted_gp_ls_floor_0.05":71.4,"predicted_gp_ls_floor_0.2":63.9,"predicted_gp_ls_upper_3":69.0,"predicted_gp_noise_s2_over_n":68.9,"predicted_gp_3coord_without_dmem":52.6,"predicted_gp_3coord_without_xvivo":67.7,"predicted_gp_without_e02":71.1,"predicted_gp_without_e14":87.0,"nearest_historical":"PBMC-E19","nearest_gap_pct":9.3,"nearest_observed_viability_pct":81.0,"reruns_unchanged":"2/19","median_shift_pct_across_reruns":6.0,"max_shift_pct_across_reruns":72.0}],"plate":[{"position":"slot 1","role":"DMEM titration, 40%","dmem_ml_per_100ml":40.0,"rpmi_10_ml_per_100ml":22.0,"xvivo_ml_per_100ml":21.0,"ar5_ml_per_100ml":17.0},{"position":"slot 2","role":"DMEM titration, 50%","dmem_ml_per_100ml":50.0,"rpmi_10_ml_per_100ml":18.0,"xvivo_ml_per_100ml":18.0,"ar5_ml_per_100ml":14.0},{"position":"slot 3","role":"Cheaper alternative","dmem_ml_per_100ml":43.0,"rpmi_10_ml_per_100ml":56.0,"xvivo_ml_per_100ml":1.0,"ar5_ml_per_100ml":0.0},{"position":"slot 4","role":"Expected improvement","dmem_ml_per_100ml":44.0,"rpmi_10_ml_per_100ml":21.0,"xvivo_ml_per_100ml":28.0,"ar5_ml_per_100ml":7.0},{"position":"anchor","role":"PBMC-E19 re-run (historical 81.0%)","dmem_ml_per_100ml":44.6,"rpmi_10_ml_per_100ml":20.1,"xvivo_ml_per_100ml":19.6,"ar5_ml_per_100ml":15.7}],"layout":[{"well":"A1","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"A2","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"A3","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"A4","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"A5","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"A6","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"A7","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"A8","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"A9","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"A10","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"A11","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"A12","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"B1","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"B2","well_type":"formulation","position":"slot 3","role":"Cheaper alternative","replicate":5},{"well":"B3","well_type":"formulation","position":"slot 2","role":"DMEM titration, 50%","replicate":6},{"well":"B4","well_type":"formulation","position":"slot 3","role":"Cheaper alternative","replicate":6},{"well":"B5","well_type":"formulation","position":"slot 1","role":"DMEM titration, 40%","replicate":5},{"well":"B6","well_type":"formulation","position":"slot 1","role":"DMEM titration, 40%","replicate":6},{"well":"B7","well_type":"formulation","position":"slot 4","role":"Expected improvement","replicate":6},{"well":"B8","well_type":"formulation","position":"anchor","role":"PBMC-E19 re-run (historical 81.0%)","replicate":5},{"well":"B9","well_type":"formulation","position":"slot 2","role":"DMEM titration, 50%","replicate":5},{"well":"B10","well_type":"formulation","position":"anchor","role":"PBMC-E19 re-run (historical 81.0%)","replicate":6},{"well":"B11","well_type":"formulation","position":"slot 4","role":"Expected improvement","replicate":5},{"well":"B12","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"C1","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"C2","well_type":"control","position":"dead-cell control (heat-killed)","role":"dead-cell control (heat-killed)","replicate":""},{"well":"C3","well_type":"control","position":"no-cell blank","role":"no-cell blank","replicate":""},{"well":"C4","well_type":"formulation","position":"slot 4","role":"Expected improvement","replicate":11},{"well":"C5","well_type":"formulation","position":"slot 2","role":"DMEM titration, 50%","replicate":11},{"well":"C6","well_type":"formulation","position":"slot 3","role":"Cheaper alternative","replicate":11},{"well":"C7","well_type":"control","position":"no-cell blank","role":"no-cell blank","replicate":""},{"well":"C8","well_type":"control","position":"dead-cell control (heat-killed)","role":"dead-cell control (heat-killed)","replicate":""},{"well":"C9","well_type":"formulation","position":"slot 1","role":"DMEM titration, 40%","replicate":11},{"well":"C11","well_type":"formulation","position":"anchor","role":"PBMC-E19 re-run (historical 81.0%)","replicate":11},{"well":"C12","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"D1","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"D2","well_type":"formulation","position":"slot 4","role":"Expected improvement","replicate":2},{"well":"D3","well_type":"formulation","position":"slot 4","role":"Expected improvement","replicate":1},{"well":"D4","well_type":"formulation","position":"slot 2","role":"DMEM titration, 50%","replicate":1},{"well":"D5","well_type":"formulation","position":"anchor","role":"PBMC-E19 re-run (historical 81.0%)","replicate":1},{"well":"D6","well_type":"formulation","position":"slot 3","role":"Cheaper alternative","replicate":1},{"well":"D7","well_type":"formulation","position":"slot 2","role":"DMEM titration, 50%","replicate":2},{"well":"D8","well_type":"formulation","position":"slot 1","role":"DMEM titration, 40%","replicate":1},{"well":"D9","well_type":"formulation","position":"slot 3","role":"Cheaper alternative","replicate":2},{"well":"D10","well_type":"formulation","position":"slot 1","role":"DMEM titration, 40%","replicate":2},{"well":"D11","well_type":"formulation","position":"anchor","role":"PBMC-E19 re-run (historical 81.0%)","replicate":2},{"well":"D12","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"E1","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"E2","well_type":"formulation","position":"slot 3","role":"Cheaper alternative","replicate":7},{"well":"E3","well_type":"formulation","position":"slot 1","role":"DMEM titration, 40%","replicate":8},{"well":"E4","well_type":"formulation","position":"anchor","role":"PBMC-E19 re-run (historical 81.0%)","replicate":7},{"well":"E5","well_type":"formulation","position":"slot 1","role":"DMEM titration, 40%","replicate":7},{"well":"E6","well_type":"formulation","position":"slot 2","role":"DMEM titration, 50%","replicate":8},{"well":"E7","well_type":"formulation","position":"slot 4","role":"Expected improvement","replicate":8},{"well":"E8","well_type":"formulation","position":"slot 2","role":"DMEM titration, 50%","replicate":7},{"well":"E9","well_type":"formulation","position":"slot 3","role":"Cheaper alternative","replicate":8},{"well":"E10","well_type":"formulation","position":"anchor","role":"PBMC-E19 re-run (historical 81.0%)","replicate":8},{"well":"E11","well_type":"formulation","position":"slot 4","role":"Expected improvement","replicate":7},{"well":"E12","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"F1","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"F2","well_type":"formulation","position":"anchor","role":"PBMC-E19 re-run (historical 81.0%)","replicate":9},{"well":"F3","well_type":"formulation","position":"slot 3","role":"Cheaper alternative","replicate":10},{"well":"F4","well_type":"formulation","position":"slot 1","role":"DMEM titration, 40%","replicate":9},{"well":"F5","well_type":"formulation","position":"slot 4","role":"Expected improvement","replicate":10},{"well":"F6","well_type":"formulation","position":"slot 4","role":"Expected improvement","replicate":9},{"well":"F7","well_type":"formulation","position":"slot 1","role":"DMEM titration, 40%","replicate":10},{"well":"F8","well_type":"formulation","position":"slot 2","role":"DMEM titration, 50%","replicate":10},{"well":"F9","well_type":"formulation","position":"slot 2","role":"DMEM titration, 50%","replicate":9},{"well":"F10","well_type":"formulation","position":"anchor","role":"PBMC-E19 re-run (historical 81.0%)","replicate":10},{"well":"F11","well_type":"formulation","position":"slot 3","role":"Cheaper alternative","replicate":9},{"well":"F12","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"G1","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"G2","well_type":"formulation","position":"slot 4","role":"Expected improvement","replicate":4},{"well":"G3","well_type":"formulation","position":"anchor","role":"PBMC-E19 re-run (historical 81.0%)","replicate":3},{"well":"G4","well_type":"formulation","position":"slot 1","role":"DMEM titration, 40%","replicate":3},{"well":"G5","well_type":"formulation","position":"slot 2","role":"DMEM titration, 50%","replicate":3},{"well":"G6","well_type":"formulation","position":"slot 4","role":"Expected improvement","replicate":3},{"well":"G7","well_type":"formulation","position":"slot 1","role":"DMEM titration, 40%","replicate":4},{"well":"G8","well_type":"formulation","position":"slot 2","role":"DMEM titration, 50%","replicate":4},{"well":"G9","well_type":"formulation","position":"slot 3","role":"Cheaper alternative","replicate":3},{"well":"G10","well_type":"formulation","position":"anchor","role":"PBMC-E19 re-run (historical 81.0%)","replicate":4},{"well":"G11","well_type":"formulation","position":"slot 3","role":"Cheaper alternative","replicate":4},{"well":"G12","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"H1","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"H2","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"H3","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"H4","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"H5","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"H6","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"H7","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"H8","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"H9","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"H10","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"H11","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""},{"well":"H12","well_type":"PBS edge","position":"edge","role":"PBS against evaporation","replicate":""}],"prices":[{"component_id":"dmem","price_per_litre":180.89,"price_basis":"estimate"},{"component_id":"rpmi_10","price_per_litre":168.45,"price_basis":"estimate"},{"component_id":"xvivo","price_per_litre":181.0,"price_basis":"observed"},{"component_id":"ar5","price_per_litre":181.0,"price_basis":"hypothetical"}],"scenarios":[{"scenario":"base","ceiling_eur_per_litre":178.43,"grid_points":176851,"feasible_grid_share":0.503,"historical_feasible":15,"min_rpmi_share_on_feasible_grid":0.2},{"scenario":"fbs_x0.5_ar5_x1.0","ceiling_eur_per_litre":134.93,"grid_points":176851,"feasible_grid_share":0.316,"historical_feasible":14,"min_rpmi_share_on_feasible_grid":0.0},{"scenario":"fbs_x0.5_ar5_x1.5","ceiling_eur_per_litre":149.12,"grid_points":176851,"feasible_grid_share":0.317,"historical_feasible":12,"min_rpmi_share_on_feasible_grid":0.0},{"scenario":"fbs_x0.5_ar5_x2.02","ceiling_eur_per_litre":163.89,"grid_points":176851,"feasible_grid_share":0.342,"historical_feasible":10,"min_rpmi_share_on_feasible_grid":0.0},{"scenario":"fbs_x1.0_ar5_x1.0","ceiling_eur_per_litre":178.43,"grid_points":176851,"feasible_grid_share":0.503,"historical_feasible":15,"min_rpmi_share_on_feasible_grid":0.2},{"scenario":"fbs_x1.0_ar5_x1.5","ceiling_eur_per_litre":192.63,"grid_points":176851,"feasible_grid_share":0.423,"historical_feasible":8,"min_rpmi_share_on_feasible_grid":0.0},{"scenario":"fbs_x1.0_ar5_x2.02","ceiling_eur_per_litre":207.39,"grid_points":176851,"feasible_grid_share":0.414,"historical_feasible":8,"min_rpmi_share_on_feasible_grid":0.0},{"scenario":"fbs_x1.5_ar5_x1.0","ceiling_eur_per_litre":221.93,"grid_points":176851,"feasible_grid_share":0.745,"historical_feasible":14,"min_rpmi_share_on_feasible_grid":0.0},{"scenario":"fbs_x1.5_ar5_x1.5","ceiling_eur_per_litre":236.13,"grid_points":176851,"feasible_grid_share":0.504,"historical_feasible":7,"min_rpmi_share_on_feasible_grid":0.0},{"scenario":"fbs_x1.5_ar5_x2.02","ceiling_eur_per_litre":250.89,"grid_points":176851,"feasible_grid_share":0.466,"historical_feasible":8,"min_rpmi_share_on_feasible_grid":0.0}],"loo":[{"training":"all 24","model":"GP, pooled noise","n":24,"rmse":16.766,"mae":11.125,"bias":0.902,"spearman":0.606,"coverage_80":0.792,"nlpd":5.934},{"training":"all 24","model":"GP, per-recipe SEM noise","n":24,"rmse":20.112,"mae":15.151,"bias":1.64,"spearman":0.542,"coverage_80":0.75,"nlpd":5.607},{"training":"all 24","model":"Scheffe quadratic (Bayesian ridge)","n":24,"rmse":19.718,"mae":14.89,"bias":1.253,"spearman":-0.012,"coverage_80":0.75,"nlpd":4.485},{"training":"all 24","model":"Random forest","n":24,"rmse":16.323,"mae":12.276,"bias":1.215,"spearman":0.554,"coverage_80":0.792,"nlpd":5.13},{"training":"all 24","model":"Mean only (baseline)","n":24,"rmse":18.766,"mae":14.12,"bias":-0.0,"spearman":NaN,"coverage_80":0.833,"nlpd":4.435},{"training":"without E02","model":"GP, pooled noise","n":23,"rmse":13.37,"mae":8.668,"bias":0.547,"spearman":0.661,"coverage_80":0.87,"nlpd":5.752},{"training":"without E02","model":"GP, per-recipe SEM noise","n":23,"rmse":25.6,"mae":17.349,"bias":-0.184,"spearman":0.399,"coverage_80":0.783,"nlpd":6.23},{"training":"without E02","model":"Scheffe quadratic (Bayesian ridge)","n":23,"rmse":17.921,"mae":14.161,"bias":0.793,"spearman":-0.237,"coverage_80":0.826,"nlpd":4.427},{"training":"without E02","model":"Random forest","n":23,"rmse":13.772,"mae":9.406,"bias":0.293,"spearman":0.457,"coverage_80":0.826,"nlpd":4.564},{"training":"without E02","model":"Mean only (baseline)","n":23,"rmse":16.405,"mae":12.989,"bias":-0.0,"spearman":NaN,"coverage_80":0.87,"nlpd":4.332},{"training":"without E14","model":"GP, pooled noise","n":23,"rmse":15.283,"mae":11.082,"bias":-0.337,"spearman":0.597,"coverage_80":0.739,"nlpd":4.969},{"training":"without E14","model":"GP, per-recipe SEM noise","n":23,"rmse":15.222,"mae":11.26,"bias":-0.772,"spearman":0.557,"coverage_80":0.826,"nlpd":4.904},{"training":"without E14","model":"Scheffe quadratic (Bayesian ridge)","n":23,"rmse":16.851,"mae":13.576,"bias":0.823,"spearman":-0.04,"coverage_80":0.783,"nlpd":4.317},{"training":"without E14","model":"Random forest","n":23,"rmse":12.391,"mae":9.124,"bias":0.04,"spearman":0.591,"coverage_80":0.826,"nlpd":4.938},{"training":"without E14","model":"Mean only (baseline)","n":23,"rmse":16.536,"mae":13.028,"bias":-0.0,"spearman":NaN,"coverage_80":0.87,"nlpd":4.347},{"training":"without E02, E14","model":"GP, pooled noise","n":22,"rmse":7.557,"mae":6.648,"bias":-1.894,"spearman":0.722,"coverage_80":0.636,"nlpd":3.9},{"training":"without E02, E14","model":"GP, per-recipe SEM noise","n":22,"rmse":7.805,"mae":6.46,"bias":-1.002,"spearman":0.674,"coverage_80":0.818,"nlpd":3.534},{"training":"without E02, E14","model":"Scheffe quadratic (Bayesian ridge)","n":22,"rmse":14.48,"mae":12.809,"bias":0.144,"spearman":-0.336,"coverage_80":0.818,"nlpd":4.128},{"training":"without E02, E14","model":"Random forest","n":22,"rmse":9.557,"mae":7.976,"bias":-0.912,"spearman":0.519,"coverage_80":0.864,"nlpd":3.637},{"training":"without E02, E14","model":"Mean only (baseline)","n":22,"rmse":13.154,"mae":11.634,"bias":-0.0,"spearman":NaN,"coverage_80":0.818,"nlpd":4.023}],"ranking":[{"model":"GP, pooled noise","subset":"all 24","n":24,"spearman":0.606},{"model":"GP, pooled noise","subset":"rounds 0-2","n":18,"spearman":0.106},{"model":"GP, pooled noise","subset":"round 0","n":6,"spearman":-0.086},{"model":"GP, pooled noise","subset":"round 1","n":6,"spearman":0.371},{"model":"GP, pooled noise","subset":"round 2","n":6,"spearman":0.029},{"model":"GP, pooled noise","subset":"round 3","n":6,"spearman":0.086},{"model":"Random forest","subset":"all 24","n":24,"spearman":0.554},{"model":"Random forest","subset":"rounds 0-2","n":18,"spearman":0.179},{"model":"Random forest","subset":"round 0","n":6,"spearman":0.143},{"model":"Random forest","subset":"round 1","n":6,"spearman":0.314},{"model":"Random forest","subset":"round 2","n":6,"spearman":0.029},{"model":"Random forest","subset":"round 3","n":6,"spearman":0.486}],"forward":[{"model":"GP, pooled noise","train_rounds":"0-0","test_round":1,"n":6,"rmse":25.564,"mae":22.166,"bias":14.366,"spearman":0.257,"coverage_80":0.167,"nlpd":245.964,"mean_pred":36.28,"mean_obs":50.65},{"model":"GP, pooled noise","train_rounds":"0-1","test_round":2,"n":6,"rmse":18.726,"mae":11.927,"bias":-3.06,"spearman":-0.314,"coverage_80":0.833,"nlpd":4.491,"mean_pred":45.35,"mean_obs":42.29},{"model":"GP, pooled noise","train_rounds":"0-2","test_round":3,"n":6,"rmse":27.139,"mae":26.764,"bias":26.764,"spearman":0.257,"coverage_80":0.0,"nlpd":5.305,"mean_pred":45.89,"mean_obs":72.65},{"model":"GP, per-recipe SEM noise","train_rounds":"0-0","test_round":1,"n":6,"rmse":19.945,"mae":15.722,"bias":15.722,"spearman":0.771,"coverage_80":0.5,"nlpd":5.755,"mean_pred":34.93,"mean_obs":50.65},{"model":"GP, per-recipe SEM noise","train_rounds":"0-1","test_round":2,"n":6,"rmse":17.307,"mae":9.959,"bias":-6.052,"spearman":0.2,"coverage_80":0.833,"nlpd":5.787,"mean_pred":48.34,"mean_obs":42.29},{"model":"GP, per-recipe SEM noise","train_rounds":"0-2","test_round":3,"n":6,"rmse":24.326,"mae":22.277,"bias":22.277,"spearman":-0.657,"coverage_80":1.0,"nlpd":4.506,"mean_pred":50.37,"mean_obs":72.65},{"model":"Scheffe quadratic (Bayesian ridge)","train_rounds":"0-0","test_round":1,"n":6,"rmse":19.323,"mae":17.655,"bias":17.655,"spearman":0.657,"coverage_80":0.833,"nlpd":4.417,"mean_pred":32.99,"mean_obs":50.65},{"model":"Scheffe quadratic (Bayesian ridge)","train_rounds":"0-1","test_round":2,"n":6,"rmse":18.218,"mae":10.517,"bias":-4.547,"spearman":0.143,"coverage_80":0.833,"nlpd":4.446,"mean_pred":46.84,"mean_obs":42.29},{"model":"Scheffe quadratic (Bayesian ridge)","train_rounds":"0-2","test_round":3,"n":6,"rmse":29.805,"mae":29.089,"bias":29.089,"spearman":-0.6,"coverage_80":0.167,"nlpd":5.282,"mean_pred":43.56,"mean_obs":72.65},{"model":"Random forest","train_rounds":"0-0","test_round":1,"n":6,"rmse":13.786,"mae":12.304,"bias":12.304,"spearman":0.714,"coverage_80":0.833,"nlpd":4.12,"mean_pred":38.35,"mean_obs":50.65},{"model":"Random forest","train_rounds":"0-1","test_round":2,"n":6,"rmse":19.976,"mae":12.199,"bias":-3.149,"spearman":0.257,"coverage_80":0.667,"nlpd":5.2,"mean_pred":45.44,"mean_obs":42.29},{"model":"Random forest","train_rounds":"0-2","test_round":3,"n":6,"rmse":27.974,"mae":27.245,"bias":27.245,"spearman":-0.086,"coverage_80":0.0,"nlpd":14.781,"mean_pred":45.41,"mean_obs":72.65},{"model":"Mean only (baseline)","train_rounds":"0-0","test_round":1,"n":6,"rmse":13.285,"mae":10.664,"bias":10.664,"spearman":NaN,"coverage_80":0.833,"nlpd":4.086,"mean_pred":39.98,"mean_obs":50.65},{"model":"Mean only (baseline)","train_rounds":"0-1","test_round":2,"n":6,"rmse":16.629,"mae":10.384,"bias":-3.027,"spearman":NaN,"coverage_80":0.833,"nlpd":4.247,"mean_pred":45.32,"mean_obs":42.29},{"model":"Mean only (baseline)","train_rounds":"0-2","test_round":3,"n":6,"rmse":28.736,"mae":28.342,"bias":28.342,"spearman":NaN,"coverage_80":0.0,"nlpd":5.4,"mean_pred":44.31,"mean_obs":72.65}],"sim":[{"truth":"GP fit to all 24","noise":"low (SEM 4.97)","policy":"Random (feasible)","median_regret_18_runs":2.12,"q25":1.18,"q75":5.58,"median_paired_diff_vs_random":0.0,"seeds_better_than_random":"0/30","sign_test_p":"","median_finalist_regret":2.12,"finalist_seeds_better_than_random":"0/30"},{"truth":"GP fit to all 24","noise":"low (SEM 4.97)","policy":"GP greedy (exploit only)","median_regret_18_runs":1.64,"q25":0.79,"q75":8.02,"median_paired_diff_vs_random":-0.07,"seeds_better_than_random":"16/30","sign_test_p":0.572,"median_finalist_regret":4.41,"finalist_seeds_better_than_random":"12/30"},{"truth":"GP fit to all 24","noise":"low (SEM 4.97)","policy":"GP-UCB, kappa 2 (batch)","median_regret_18_runs":1.08,"q25":0.2,"q75":2.89,"median_paired_diff_vs_random":-0.94,"seeds_better_than_random":"22/30","sign_test_p":0.016,"median_finalist_regret":2.66,"finalist_seeds_better_than_random":"13/30"},{"truth":"GP fit to all 24","noise":"low (SEM 4.97)","policy":"GP-EI (batch)","median_regret_18_runs":1.35,"q25":0.2,"q75":4.21,"median_paired_diff_vs_random":-0.93,"seeds_better_than_random":"16/30","sign_test_p":0.711,"median_finalist_regret":2.47,"finalist_seeds_better_than_random":"13/30"},{"truth":"GP fit to all 24","noise":"low (SEM 4.97)","policy":"Four-role policy (deployed)","median_regret_18_runs":1.2,"q25":0.98,"q75":1.76,"median_paired_diff_vs_random":-0.36,"seeds_better_than_random":"19/30","sign_test_p":0.136,"median_finalist_regret":2.06,"finalist_seeds_better_than_random":"11/30"},{"truth":"GP fit to all 24","noise":"high (fitted 11.83)","policy":"Random (feasible)","median_regret_18_runs":2.12,"q25":1.18,"q75":5.58,"median_paired_diff_vs_random":0.0,"seeds_better_than_random":"0/30","sign_test_p":"","median_finalist_regret":7.61,"finalist_seeds_better_than_random":"0/30"},{"truth":"GP fit to all 24","noise":"high (fitted 11.83)","policy":"GP greedy (exploit only)","median_regret_18_runs":3.84,"q25":1.0,"q75":15.69,"median_paired_diff_vs_random":0.0,"seeds_better_than_random":"14/30","sign_test_p":1.0,"median_finalist_regret":7.94,"finalist_seeds_better_than_random":"12/30"},{"truth":"GP fit to all 24","noise":"high (fitted 11.83)","policy":"GP-UCB, kappa 2 (batch)","median_regret_18_runs":2.94,"q25":0.37,"q75":7.08,"median_paired_diff_vs_random":0.0,"seeds_better_than_random":"13/30","sign_test_p":1.0,"median_finalist_regret":7.63,"finalist_seeds_better_than_random":"15/30"},{"truth":"GP fit to all 24","noise":"high (fitted 11.83)","policy":"GP-EI (batch)","median_regret_18_runs":1.34,"q25":0.14,"q75":7.03,"median_paired_diff_vs_random":0.0,"seeds_better_than_random":"14/30","sign_test_p":1.0,"median_finalist_regret":6.19,"finalist_seeds_better_than_random":"12/30"},{"truth":"GP fit to all 24","noise":"high (fitted 11.83)","policy":"Four-role policy (deployed)","median_regret_18_runs":1.61,"q25":0.47,"q75":4.12,"median_paired_diff_vs_random":-0.08,"seeds_better_than_random":"15/30","sign_test_p":0.557,"median_finalist_regret":5.73,"finalist_seeds_better_than_random":"13/30"},{"truth":"Scheffe fit to all 24","noise":"low (SEM 4.97)","policy":"Random (feasible)","median_regret_18_runs":1.56,"q25":0.73,"q75":2.05,"median_paired_diff_vs_random":0.0,"seeds_better_than_random":"0/30","sign_test_p":"","median_finalist_regret":4.67,"finalist_seeds_better_than_random":"0/30"},{"truth":"Scheffe fit to all 24","noise":"low (SEM 4.97)","policy":"GP greedy (exploit only)","median_regret_18_runs":1.55,"q25":0.26,"q75":3.35,"median_paired_diff_vs_random":0.0,"seeds_better_than_random":"12/30","sign_test_p":0.845,"median_finalist_regret":3.02,"finalist_seeds_better_than_random":"17/30"},{"truth":"Scheffe fit to all 24","noise":"low (SEM 4.97)","policy":"GP-UCB, kappa 2 (batch)","median_regret_18_runs":0.01,"q25":0.01,"q75":0.2,"median_paired_diff_vs_random":-1.11,"seeds_better_than_random":"24/30","sign_test_p":0.001,"median_finalist_regret":1.51,"finalist_seeds_better_than_random":"24/30"},{"truth":"Scheffe fit to all 24","noise":"low (SEM 4.97)","policy":"GP-EI (batch)","median_regret_18_runs":0.07,"q25":0.01,"q75":1.32,"median_paired_diff_vs_random":-0.85,"seeds_better_than_random":"20/30","sign_test_p":0.061,"median_finalist_regret":1.75,"finalist_seeds_better_than_random":"18/30"},{"truth":"Scheffe fit to all 24","noise":"low (SEM 4.97)","policy":"Four-role policy (deployed)","median_regret_18_runs":0.52,"q25":0.01,"q75":1.31,"median_paired_diff_vs_random":-0.76,"seeds_better_than_random":"17/30","sign_test_p":0.248,"median_finalist_regret":1.96,"finalist_seeds_better_than_random":"16/30"},{"truth":"Scheffe fit to all 24","noise":"high (fitted 11.83)","policy":"Random (feasible)","median_regret_18_runs":1.56,"q25":0.73,"q75":2.05,"median_paired_diff_vs_random":0.0,"seeds_better_than_random":"0/30","sign_test_p":"","median_finalist_regret":5.54,"finalist_seeds_better_than_random":"0/30"},{"truth":"Scheffe fit to all 24","noise":"high (fitted 11.83)","policy":"GP greedy (exploit only)","median_regret_18_runs":1.79,"q25":0.53,"q75":3.98,"median_paired_diff_vs_random":0.11,"seeds_better_than_random":"10/30","sign_test_p":0.424,"median_finalist_regret":5.71,"finalist_seeds_better_than_random":"15/30"},{"truth":"Scheffe fit to all 24","noise":"high (fitted 11.83)","policy":"GP-UCB, kappa 2 (batch)","median_regret_18_runs":0.37,"q25":0.01,"q75":3.04,"median_paired_diff_vs_random":-0.35,"seeds_better_than_random":"16/30","sign_test_p":0.442,"median_finalist_regret":5.64,"finalist_seeds_better_than_random":"11/30"},{"truth":"Scheffe fit to all 24","noise":"high (fitted 11.83)","policy":"GP-EI (batch)","median_regret_18_runs":0.8,"q25":0.01,"q75":3.25,"median_paired_diff_vs_random":0.0,"seeds_better_than_random":"13/30","sign_test_p":1.0,"median_finalist_regret":5.42,"finalist_seeds_better_than_random":"13/30"},{"truth":"Scheffe fit to all 24","noise":"high (fitted 11.83)","policy":"Four-role policy (deployed)","median_regret_18_runs":1.36,"q25":0.12,"q75":3.41,"median_paired_diff_vs_random":0.12,"seeds_better_than_random":"12/30","sign_test_p":0.701,"median_finalist_regret":4.67,"finalist_seeds_better_than_random":"14/30"}],"stability":[{"variant":"gp_sem_noise","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":23.0,"slot_4_shift_pct":34.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"20/56/6/18","slot_4_recipe":"17/44/21/18"},{"variant":"gp_ls_floor_0.05","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":1.0,"slot_4_shift_pct":4.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"44/56/0/0","slot_4_recipe":"44/21/32/3"},{"variant":"gp_ls_floor_0.2","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":1.0,"slot_4_shift_pct":7.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"44/56/0/0","slot_4_recipe":"45/21/34/0"},{"variant":"gp_ls_upper_3","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":0.0,"slot_4_shift_pct":0.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"43/56/1/0","slot_4_recipe":"44/21/28/7"},{"variant":"gp_noise_s2_over_n","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":0.0,"slot_4_shift_pct":0.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"43/56/1/0","slot_4_recipe":"44/21/28/7"},{"variant":"gp_3coord_without_dmem","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":16.0,"slot_4_shift_pct":72.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"27/56/1/16","slot_4_recipe":"0/84/0/16"},{"variant":"gp_3coord_without_xvivo","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":1.0,"slot_4_shift_pct":8.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"44/56/0/0","slot_4_recipe":"43/21/36/0"},{"variant":"gp_without_e02","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":0.0,"slot_4_shift_pct":8.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"43/56/1/0","slot_4_recipe":"43/21/36/0"},{"variant":"gp_without_e14","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":1.0,"slot_4_shift_pct":1.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"43/56/0/1","slot_4_recipe":"44/21/29/6"},{"variant":"anchor_not_pending","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":0.0,"slot_4_shift_pct":1.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"43/56/1/0","slot_4_recipe":"44/21/27/8"},{"variant":"model_picks_cost_tolerance_1%","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":0.0,"slot_4_shift_pct":9.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"43/56/1/0","slot_4_recipe":"44/12/28/16"},{"variant":"price_fbs_x0.5_ar5_x1.0","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":30.0,"slot_4_shift_pct":1.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"44/26/19/11","slot_4_recipe":"44/21/29/6"},{"variant":"price_fbs_x0.5_ar5_x1.5","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":30.0,"slot_4_shift_pct":5.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"44/26/19/11","slot_4_recipe":"44/16/29/11"},{"variant":"price_fbs_x0.5_ar5_x2.02","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":30.0,"slot_4_shift_pct":6.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"44/26/19/11","slot_4_recipe":"44/15/29/12"},{"variant":"price_fbs_x1.0_ar5_x1.5","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":30.0,"slot_4_shift_pct":6.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"44/26/19/11","slot_4_recipe":"44/15/29/12"},{"variant":"price_fbs_x1.0_ar5_x2.02","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":30.0,"slot_4_shift_pct":6.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"44/26/19/11","slot_4_recipe":"44/15/29/12"},{"variant":"price_fbs_x1.5_ar5_x1.0","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":46.0,"slot_4_shift_pct":7.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"44/10/35/11","slot_4_recipe":"44/17/25/14"},{"variant":"price_fbs_x1.5_ar5_x1.5","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":20.0,"slot_4_shift_pct":6.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"44/36/20/0","slot_4_recipe":"44/15/29/12"},{"variant":"price_fbs_x1.5_ar5_x2.02","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":29.0,"slot_4_shift_pct":6.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"44/27/19/10","slot_4_recipe":"44/15/29/12"}],"stress":[{"setting":"cheap_discount_0%","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":30.0,"slot_4_shift_pct":1.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"44/26/19/11","slot_4_recipe":"44/21/29/6"},{"setting":"cheap_discount_5%","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":44.0,"slot_4_shift_pct":0.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"0/92/0/8","slot_4_recipe":"44/21/28/7"},{"setting":"min_gap_3%","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":0.0,"slot_4_shift_pct":0.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"43/56/1/0","slot_4_recipe":"44/21/28/7"},{"setting":"min_gap_8%","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":0.0,"slot_4_shift_pct":0.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"43/56/1/0","slot_4_recipe":"44/21/28/7"},{"setting":"min_scenarios_5_of_9","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":0.0,"slot_4_shift_pct":0.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"43/56/1/0","slot_4_recipe":"44/21/28/7"},{"setting":"min_scenarios_7_of_9","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":0.0,"slot_4_shift_pct":0.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"43/56/1/0","slot_4_recipe":"44/21/28/7"},{"setting":"single_media_allowed","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":0.0,"slot_4_shift_pct":0.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"43/56/1/0","slot_4_recipe":"44/21/28/7"},{"setting":"model_cost_tolerance_2%","slot_1_shift_pct":0.0,"slot_2_shift_pct":0.0,"slot_3_shift_pct":0.0,"slot_4_shift_pct":10.0,"slot_1_recipe":"40/22/21/17","slot_2_recipe":"50/18/18/14","slot_3_recipe":"43/56/1/0","slot_4_recipe":"44/11/28/17"}],"alternatives":[{"batch":"chosen: DMEM titration + 2 model picks","recipe":"40/22/21/17","predicted_viability_pct":66.3,"latent_sd_pct_points":7.3,"cost_eur_per_litre_base":178.19,"corr_with_e19":0.576},{"batch":"chosen: DMEM titration + 2 model picks","recipe":"50/18/18/14","predicted_viability_pct":62.5,"latent_sd_pct_points":7.4,"cost_eur_per_litre_base":178.69,"corr_with_e19":0.515},{"batch":"chosen: DMEM titration + 2 model picks","recipe":"43/56/1/0","predicted_viability_pct":65.9,"latent_sd_pct_points":5.5,"cost_eur_per_litre_base":173.92,"corr_with_e19":0.201},{"batch":"chosen: DMEM titration + 2 model picks","recipe":"44/21/28/7","predicted_viability_pct":69.1,"latent_sd_pct_points":7.2,"cost_eur_per_litre_base":178.32,"corr_with_e19":0.852},{"batch":"earlier: four-role GP batch","recipe":"44/26/19/11","predicted_viability_pct":70.2,"latent_sd_pct_points":5.2,"cost_eur_per_litre_base":177.69,"corr_with_e19":0.981},{"batch":"earlier: four-role GP batch","recipe":"43/56/1/0","predicted_viability_pct":65.9,"latent_sd_pct_points":5.5,"cost_eur_per_litre_base":173.92,"corr_with_e19":0.201},{"batch":"earlier: four-role GP batch","recipe":"37/33/30/0","predicted_viability_pct":60.1,"latent_sd_pct_points":9.1,"cost_eur_per_litre_base":176.82,"corr_with_e19":0.369},{"batch":"earlier: four-role GP batch","recipe":"45/21/27/7","predicted_viability_pct":69.1,"latent_sd_pct_points":6.9,"cost_eur_per_litre_base":178.31,"corr_with_e19":0.882},{"batch":"reviewer: E10 + E14 re-runs + exploit + cheaper","recipe":"24/39/0/36","predicted_viability_pct":35.9,"latent_sd_pct_points":6.5,"cost_eur_per_litre_base":176.04,"corr_with_e19":-0.015},{"batch":"reviewer: E10 + E14 re-runs + exploit + cheaper","recipe":"27/37/0/36","predicted_viability_pct":35.7,"latent_sd_pct_points":6.5,"cost_eur_per_litre_base":176.35,"corr_with_e19":-0.016},{"batch":"reviewer: E10 + E14 re-runs + exploit + cheaper","recipe":"44/26/19/11","predicted_viability_pct":70.2,"latent_sd_pct_points":5.2,"cost_eur_per_litre_base":177.69,"corr_with_e19":0.981},{"batch":"reviewer: E10 + E14 re-runs + exploit + cheaper","recipe":"43/56/1/0","predicted_viability_pct":65.9,"latent_sd_pct_points":5.5,"cost_eur_per_litre_base":173.92,"corr_with_e19":0.201}],"scenario_prices":[{"scenario":"fbs_x0.5_ar5_x1.0","fbs_multiplier":0.5,"ar5_multiplier":1.0,"dmem_eur_per_litre":113.69,"rpmi_10_eur_per_litre":101.25,"xvivo_eur_per_litre":181.0,"ar5_eur_per_litre":181.0},{"scenario":"fbs_x0.5_ar5_x1.5","fbs_multiplier":0.5,"ar5_multiplier":1.5,"dmem_eur_per_litre":113.69,"rpmi_10_eur_per_litre":101.25,"xvivo_eur_per_litre":181.0,"ar5_eur_per_litre":271.5},{"scenario":"fbs_x0.5_ar5_x2.02","fbs_multiplier":0.5,"ar5_multiplier":2.02,"dmem_eur_per_litre":113.69,"rpmi_10_eur_per_litre":101.25,"xvivo_eur_per_litre":181.0,"ar5_eur_per_litre":365.62},{"scenario":"fbs_x1.0_ar5_x1.0","fbs_multiplier":1.0,"ar5_multiplier":1.0,"dmem_eur_per_litre":180.89,"rpmi_10_eur_per_litre":168.45,"xvivo_eur_per_litre":181.0,"ar5_eur_per_litre":181.0},{"scenario":"fbs_x1.0_ar5_x1.5","fbs_multiplier":1.0,"ar5_multiplier":1.5,"dmem_eur_per_litre":180.89,"rpmi_10_eur_per_litre":168.45,"xvivo_eur_per_litre":181.0,"ar5_eur_per_litre":271.5},{"scenario":"fbs_x1.0_ar5_x2.02","fbs_multiplier":1.0,"ar5_multiplier":2.02,"dmem_eur_per_litre":180.89,"rpmi_10_eur_per_litre":168.45,"xvivo_eur_per_litre":181.0,"ar5_eur_per_litre":365.62},{"scenario":"fbs_x1.5_ar5_x1.0","fbs_multiplier":1.5,"ar5_multiplier":1.0,"dmem_eur_per_litre":248.09,"rpmi_10_eur_per_litre":235.65,"xvivo_eur_per_litre":181.0,"ar5_eur_per_litre":181.0},{"scenario":"fbs_x1.5_ar5_x1.5","fbs_multiplier":1.5,"ar5_multiplier":1.5,"dmem_eur_per_litre":248.09,"rpmi_10_eur_per_litre":235.65,"xvivo_eur_per_litre":181.0,"ar5_eur_per_litre":271.5},{"scenario":"fbs_x1.5_ar5_x2.02","fbs_multiplier":1.5,"ar5_multiplier":2.02,"dmem_eur_per_litre":248.09,"rpmi_10_eur_per_litre":235.65,"xvivo_eur_per_litre":181.0,"ar5_eur_per_litre":365.62}]};
+const NS = "http://www.w3.org/2000/svg";
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const el = (t, a = {}, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+const txt = (p, x, y, s, a = {}) => { const t = el("text", Object.assign({ x, y }, a), p); t.textContent = s; return t; };
+const tip = document.getElementById("tip");
+function showTip(ev, html) { tip.innerHTML = html; tip.style.opacity = 1; tip.style.left = Math.min(ev.clientX + 14, innerWidth - 290) + "px"; tip.style.top = (ev.clientY + 14) + "px"; }
+function hideTip() { tip.style.opacity = 0; }
+function hover(node, html) { node.addEventListener("mousemove", e => showTip(e, html)); node.addEventListener("mouseleave", hideTip); node.addEventListener("click", e => showTip(e, html)); }
+function frame(id, W, H) { const s = document.getElementById(id); s.innerHTML = ""; s.setAttribute("viewBox", `0 0 ${W} ${H}`); s.setAttribute("width", W); return s; }
+const MIX = ["--m1", "--m2", "--m3", "--m4"], NAMES = ["DMEM", "RPMI-10", "X-VIVO 15", "AR5"];
+const SLOT = { "slot 1": "--s1", "slot 2": "--s2", "slot 3": "--s3", "slot 4": "--s4", "anchor": "--anchor" };
+const ROUND = ["--r0", "--r1", "--r2", "--r3"];
+const VIR = ["#5A4A93", "#3B78A6", "#2A9D8F", "#7DB65F", "#E2BE45"];
+function vir(v) { const t = Math.max(0, Math.min(1, v / 85)) * (VIR.length - 1), i = Math.floor(t), f = t - i; if (i >= VIR.length - 1) return VIR[VIR.length - 1];
+  const a = VIR[i], b = VIR[i + 1], h = (c, k) => parseInt(c.slice(1 + 2 * k, 3 + 2 * k), 16);
+  return "#" + [0, 1, 2].map(k => Math.round(h(a, k) + (h(b, k) - h(a, k)) * f).toString(16).padStart(2, "0")).join(""); }
+const E19 = D.experiments.find(e => e.id === "E19");
 
-function drawComp(){
-  const svg=document.getElementById("compChart");svg.innerHTML="";
-  const W=760,rowH=22,top=24,L=70,barW=380,gap=40,vx=L+barW+gap,vw=W-vx-20,H=top+DATA.length*rowH+30;
-  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.setAttribute("width",W);svg.style.maxWidth="100%";svg.style.height="auto";
-  const cols=["--m1","--m2","--m3","--m4"].map(css);
-  el("text",{x:L,y:14},svg).textContent="Blend (0 to 100%)";
-  el("text",{x:vx,y:14},svg).textContent="Mean viability %";
-  [0,20,40,60,80,100].forEach(t=>{const x=vx+t/100*vw;el("line",{x1:x,x2:x,y1:top-4,y2:H-24,stroke:css("--line")},svg);el("text",{x:x,y:H-8,"text-anchor":"middle"},svg).textContent=t});
-  let prevRound=-1;
-  DATA.forEach((d,i)=>{
-    const y=top+i*rowH;
-    if(d.round!==prevRound&&i>0)el("line",{x1:0,x2:W,y1:y-1,y2:y-1,stroke:css("--line"),"stroke-dasharray":"3 3"},svg);
-    prevRound=d.round;
-    const g=el("g",{},svg);
-    el("rect",{x:0,y:y,width:W,height:rowH,fill:"transparent"},g);
-    el("text",{x:0,y:y+15},g).textContent=d.id;
-    el("text",{x:34,y:y+15},g).textContent="r"+d.round;
-    let x=L;d.f.forEach((f,k)=>{const w=f*barW;el("rect",{x:x,y:y+4,width:Math.max(w,0),height:rowH-8,fill:cols[k]},g);x+=w});
-    const cx=vx+d.v/100*vw,lo=vx+Math.max(0,d.v-d.sd)/100*vw,hi=vx+Math.min(100,d.v+d.sd)/100*vw;
-    el("line",{x1:lo,x2:hi,y1:y+rowH/2,y2:y+rowH/2,stroke:css("--muted"),"stroke-width":1.5},g);
-    const hot=d.id==="E19"||d.id==="E14"||d.id==="E10"||d.id==="E02";
-    el("circle",{cx:cx,cy:y+rowH/2,r:4.5,fill:hot?css("--accent"):css("--fg")},g);
-    const html=`<b>PBMC-${d.id}</b> · round ${d.round}<br>`+d.f.map((f,k)=>`${NAMES[k]}: ${(f*100).toFixed(1)}%`).join("<br>")+`<br>Viability ${d.v.toFixed(2)}% (SD ${d.sd}, n=${d.n})`;
-    g.addEventListener("mousemove",e=>showTip(e,html));g.addEventListener("mouseleave",hideTip);
-    g.addEventListener("click",e=>showTip(e,html));
+/* 1. The five formulations */
+function drawAnswer() {
+  const rows = D.picks.map(p => ({ slot: "slot " + p.slot, role: p.role, f: [p.dmem_pct, p.rpmi_10_pct, p.xvivo_pct, p.ar5_pct].map(x => x / 100),
+    mu: p.predicted_viability_pct, lo: p.measured_mean_80pct_low, hi: p.measured_mean_80pct_high, cost: p.cost_eur_per_litre_base }));
+  rows.push({ slot: "anchor", role: "E19 anchor (re-run)", f: E19.f, mu: 70.1, obs: E19.v, cost: 178.43 });
+  const W = 820, rh = 46, T = 26, L = 190, BW = 300, G = 40, VX = L + BW + G, VW = W - VX - 20, H = T + rows.length * rh + 26;
+  const s = frame("answerChart", W, H);
+  txt(s, L, 14, "Blend (0 to 100%)"); txt(s, VX, 14, "Viability %: model estimate and 80% range");
+  [40, 60, 80, 100].forEach(t => { const x = VX + (t - 30) / 70 * VW; el("line", { x1: x, x2: x, y1: T - 6, y2: H - 22, stroke: css("--line") }, s); txt(s, x, H - 8, t, { "text-anchor": "middle" }); });
+  const vx = v => VX + (v - 30) / 70 * VW;
+  rows.forEach((r, i) => {
+    const y = T + i * rh, g = el("g", {}, s);
+    el("rect", { x: 0, y: y + 6, width: 6, height: rh - 16, rx: 2, fill: css(SLOT[r.slot]) }, g);
+    txt(g, 14, y + 20, r.slot === "anchor" ? "Anchor" : "Slot " + r.slot.slice(5), { class: "ink", "font-weight": 600 });
+    txt(g, 14, y + 35, r.role);
+    let x = L; r.f.forEach((f, k) => { el("rect", { x, y: y + 9, width: f * BW, height: rh - 20, fill: css(MIX[k]) }, g); if (f > .09) txt(g, x + f * BW / 2, y + 27, Math.round(f * 100), { "text-anchor": "middle", fill: "#fff", "font-size": 10.5 }); x += f * BW; });
+    const cy = y + rh / 2 - 2;
+    if (r.lo !== undefined) el("line", { x1: vx(r.lo), x2: vx(r.hi), y1: cy, y2: cy, stroke: css(SLOT[r.slot]), "stroke-width": 3, "stroke-linecap": "round", opacity: .45 }, g);
+    el("circle", { cx: vx(r.mu), cy, r: 6, fill: css(SLOT[r.slot]) }, g);
+    if (r.obs) { el("circle", { cx: vx(r.obs), cy, r: 6, fill: "none", stroke: css("--anchor"), "stroke-width": 1.5 }, g); txt(g, vx(r.obs) + 9, cy + 4, "observed " + r.obs); }
+    txt(g, vx(r.mu), cy - 10, r.mu, { "text-anchor": "middle", class: "ink" });
+    hover(g, `<b>${r.role}</b><br>` + r.f.map((f, k) => `${NAMES[k]} ${Math.round(f * 1000) / 10}%`).join(" · ") + `<br>EUR ${r.cost}/L · estimate ${r.mu}` + (r.lo !== undefined ? ` (${r.lo} to ${r.hi})` : ` · observed ${r.obs}`));
   });
 }
 
-function drawRound(){
-  const svg=document.getElementById("roundChart");svg.innerHTML="";
-  const W=640,H=300,L=44,R=16,T=12,B=36,pw=W-L-R,ph=H-T-B;
-  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.setAttribute("width",W);svg.style.maxWidth="100%";svg.style.height="auto";
-  const ys=v=>T+ph*(1-v/100);
-  [0,20,40,60,80,100].forEach(t=>{el("line",{x1:L,x2:W-R,y1:ys(t),y2:ys(t),stroke:css("--line")},svg);el("text",{x:L-8,y:ys(t)+4,"text-anchor":"end"},svg).textContent=t});
-  const bw=pw/4;
-  for(let r=0;r<4;r++){
-    el("text",{x:L+bw*r+bw/2,y:H-12,"text-anchor":"middle"},svg).textContent="Round "+r;
-    const pts=DATA.filter(d=>d.round===r);
-    const m=pts.reduce((s,d)=>s+d.v,0)/pts.length;
-    el("line",{x1:L+bw*r+bw*.2,x2:L+bw*r+bw*.8,y1:ys(m),y2:ys(m),stroke:css("--accent"),"stroke-width":2},svg);
-    pts.forEach((d,j)=>{
-      const x=L+bw*r+bw*(.25+.5*j/(pts.length-1));
-      el("line",{x1:x,x2:x,y1:ys(Math.min(100,d.v+d.sd)),y2:ys(Math.max(0,d.v-d.sd)),stroke:css("--muted")},svg);
-      const c=el("circle",{cx:x,cy:ys(d.v),r:5,fill:css("--fg"),stroke:css("--surface"),"stroke-width":1.5},svg);
-      const html=`<b>PBMC-${d.id}</b><br>${d.v.toFixed(2)}% ± ${d.sd}`;
-      c.addEventListener("mousemove",e=>showTip(e,html));c.addEventListener("mouseleave",hideTip);
-    });
-    el("text",{x:L+bw*r+bw*.82,y:ys(m)-6,fill:css("--accent")},svg).textContent=m.toFixed(1);
+/* 2. Method flow */
+function drawFlow() {
+  const steps = [["Data", "24 blends, checked", "data"], ["Prices", "EUR/L + 9 scenarios", "cost"], ["Models", "4 compared", "models"],
+    ["Forward test", "missed by 27 pts", "models"], ["Simulation", "noise is the limit", "sim"], ["Batch", "2 designed + 2 model", "batch"],
+    ["Stress test", "19 reruns", "robust"], ["Plate", "5 × 11 wells", "plate"], ["Decision", "gate, screen, confirm", "plate"]];
+  const W = 820, H = 210, bw = 150, bh = 56, gx = (W - 5 * bw) / 4;
+  const s = frame("flowChart", W, H);
+  const pos = steps.map((_, i) => i < 5 ? [i * (bw + gx), 18] : [(8 - i) * (bw + gx) + (bw + gx) / 2, 128]);
+  el("defs", {}, s).innerHTML = `<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${css("--muted")}"/></marker>`;
+  for (let i = 0; i < steps.length - 1; i++) {
+    const [x1, y1] = pos[i], [x2, y2] = pos[i + 1];
+    let a = i < 4 ? [x1 + bw, y1 + bh / 2, x2, y2 + bh / 2] : i === 4 ? [x1 + bw / 2, y1 + bh, x2 + bw / 2, y2] : [x1, y1 + bh / 2, x2 + bw, y2 + bh / 2];
+    el("line", { x1: a[0], y1: a[1], x2: a[2] - (i === 4 ? 0 : (i < 4 ? 3 : -3)), y2: a[3] - (i === 4 ? 3 : 0), stroke: css("--muted"), "marker-end": "url(#ar)" }, s);
   }
+  steps.forEach((st, i) => {
+    const [x, y] = pos[i], g = el("g", { style: "cursor:pointer", tabindex: 0 }, s);
+    el("rect", { x, y, width: bw, height: bh, rx: 9, fill: css("--surface"), stroke: i === 5 ? css("--accent") : css("--line"), "stroke-width": i === 5 ? 2 : 1 }, g);
+    txt(g, x + 12, y + 22, (i + 1) + "  " + st[0], { class: "ink", "font-weight": 600, "font-size": 12.5 });
+    txt(g, x + 12, y + 40, st[1], { "font-size": 11 });
+    const go = () => document.getElementById(st[2]).scrollIntoView({ behavior: "smooth" });
+    g.addEventListener("click", go); g.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+  });
 }
 
-/* Toy 1-D GP with RBF kernel and UCB acquisition. */
-const BO={pts:[],truth:x=>0.55*Math.exp(-((x-0.22)**2)/0.012)+0.9*Math.exp(-((x-0.74)**2)/0.006)+0.15*Math.sin(9*x)+0.1,
-  ell:0.09,sf:0.35,noise:0.05};
-function seedRand(s){return()=>{s=(s*16807)%2147483647;return(s-1)/2147483646}}
-let rnd=seedRand(7);
-function gauss(){let u=rnd(),v=rnd();return Math.sqrt(-2*Math.log(u+1e-12))*Math.cos(2*Math.PI*v)}
-const k=(a,b)=>BO.sf**2*Math.exp(-((a-b)**2)/(2*BO.ell**2));
-function chol(A){const n=A.length,L=A.map(r=>r.map(()=>0));for(let i=0;i<n;i++)for(let j=0;j<=i;j++){let s=A[i][j];for(let p=0;p<j;p++)s-=L[i][p]*L[j][p];L[i][j]=i===j?Math.sqrt(Math.max(s,1e-12)):s/L[j][j]}return L}
-function solveL(L,b){const n=b.length,y=[];for(let i=0;i<n;i++){let s=b[i];for(let p=0;p<i;p++)s-=L[i][p]*y[p];y.push(s/L[i][i])}return y}
-function solveLT(L,y){const n=y.length,x=Array(n);for(let i=n-1;i>=0;i--){let s=y[i];for(let p=i+1;p<n;p++)s-=L[p][i]*x[p];x[i]=s/L[i][i]}return x}
-function posterior(xs){
-  const X=BO.pts.map(p=>p.x),Y=BO.pts.map(p=>p.y);const n=X.length;
-  const mY=n?Y.reduce((a,b)=>a+b,0)/n:0;
-  if(!n)return xs.map(()=>({m:mY,s:BO.sf}));
-  const K=X.map(a=>X.map(b=>k(a,b)));K.forEach((r,i)=>r[i]+=BO.noise**2);
-  const L=chol(K),alpha=solveLT(L,solveL(L,Y.map(y=>y-mY)));
-  return xs.map(x=>{const ks=X.map(a=>k(a,x));const m=mY+ks.reduce((s,v,i)=>s+v*alpha[i],0);const v=solveL(L,ks);const var_=Math.max(BO.sf**2-v.reduce((s,a)=>s+a*a,0),1e-9);return{m,s:Math.sqrt(var_)}});
+/* 3. DMEM signal */
+function drawDmem() {
+  const W = 820, H = 340, L = 50, R = 20, T = 14, B = 40, pw = W - L - R, ph = H - T - B;
+  const s = frame("dmemChart", W, H);
+  const xs = v => L + v / 80 * pw, ys = v => T + ph * (1 - v / 100);
+  [0, 20, 40, 60, 80, 100].forEach(t => { el("line", { x1: L, x2: W - R, y1: ys(t), y2: ys(t), stroke: css("--line") }, s); txt(s, L - 8, ys(t) + 4, t, { "text-anchor": "end" }); });
+  [0, 20, 40, 60, 80].forEach(t => txt(s, xs(t), H - 18, t + "%", { "text-anchor": "middle" }));
+  txt(s, xs(40), H - 3, "DMEM share of the blend", { "text-anchor": "middle" });
+  el("rect", { x: xs(43.5), y: T, width: xs(45.5) - xs(43.5), height: ph, fill: css("--accent-soft") }, s);
+  txt(s, xs(46), T + 14, "round 3 band", { fill: css("--accent") });
+  D.experiments.forEach(e => {
+    const x = xs(e.f[0] * 100), g = el("g", {}, s);
+    el("line", { x1: x, x2: x, y1: ys(Math.min(100, e.v + e.sd)), y2: ys(Math.max(0, e.v - e.sd)), stroke: css(ROUND[e.round]), opacity: .55 }, g);
+    el("circle", { cx: x, cy: ys(e.v), r: e.id === "E19" ? 7 : 5, fill: css(ROUND[e.round]), stroke: e.id === "E19" ? css("--fg") : css("--surface"), "stroke-width": 1.5 }, g);
+    if (["E19", "E14", "E12"].includes(e.id)) txt(g, x + 8, ys(e.v) + 4, e.id, { class: "ink" });
+    hover(g, `<b>PBMC-${e.id}</b> · round ${e.round}<br>DMEM ${(e.f[0] * 100).toFixed(1)}% · viability ${e.v}% (SD ${e.sd}, n=${e.n})`);
+  });
+  D.picks.filter(p => p.role.startsWith("DMEM")).forEach(p => {
+    const x = xs(p.dmem_pct), g = el("g", {}, s);
+    el("line", { x1: x, x2: x, y1: ys(p.measured_mean_80pct_high), y2: ys(p.measured_mean_80pct_low), stroke: css("--accent"), "stroke-dasharray": "3 3" }, g);
+    el("path", { d: `M${x},${ys(p.predicted_viability_pct) - 7} l7,7 l-7,7 l-7,-7z`, fill: css("--surface"), stroke: css("--accent"), "stroke-width": 2 }, g);
+    txt(g, x + 10, ys(p.predicted_viability_pct) - 8, p.dmem_pct + "%", { fill: css("--accent") });
+    hover(g, `<b>${p.role}</b><br>model estimate ${p.predicted_viability_pct} (80% range ${p.measured_mean_80pct_low} to ${p.measured_mean_80pct_high})`);
+  });
 }
-function boReset(){rnd=seedRand(7);BO.pts=[0.08,0.45,0.95].map(x=>({x,y:BO.truth(x)+BO.noise*gauss()}));drawBO()}
-function boRun(x){BO.pts.push({x,y:BO.truth(x)+BO.noise*gauss()});drawBO()}
-function suggest(){const kap=+document.getElementById("boKappa").value;const xs=Array.from({length:201},(_,i)=>i/200);const P=posterior(xs);let bi=0,bv=-1e9;P.forEach((p,i)=>{const u=p.m+kap*p.s;if(u>bv){bv=u;bi=i}});return xs[bi]}
-function drawBO(){
-  const svg=document.getElementById("boChart");svg.innerHTML="";
-  const W=760,H=320,L=40,R=16,T=12,B=30,pw=W-L-R,ph=H-T-B;
-  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.setAttribute("width",W);svg.style.maxWidth="100%";svg.style.height="auto";
-  const ymin=-0.4,ymax=1.5,xs=v=>L+v*pw,ys=v=>T+ph*(1-(v-ymin)/(ymax-ymin));
-  el("rect",{x:L,y:T,width:pw,height:ph,fill:"transparent"},svg);
-  [0,0.25,0.5,0.75,1].forEach(t=>{el("line",{x1:xs(t),x2:xs(t),y1:T,y2:T+ph,stroke:css("--line")},svg);el("text",{x:xs(t),y:H-10,"text-anchor":"middle"},svg).textContent=(t*100)+"%"});
-  el("text",{x:L+4,y:T+12},svg).textContent="result (higher is better)";
-  const grid=Array.from({length:161},(_,i)=>i/160),P=posterior(grid),kap=+document.getElementById("boKappa").value;
-  let band="M"+grid.map((x,i)=>`${xs(x)},${ys(P[i].m+2*P[i].s)}`).join("L")+"L"+grid.slice().reverse().map((x,i)=>{const p=P[grid.length-1-i];return`${xs(x)},${ys(p.m-2*p.s)}`}).join("L")+"Z";
-  el("path",{d:band,fill:css("--accent"),"fill-opacity":0.14,stroke:"none"},svg);
-  if(document.getElementById("boTruth").checked)el("path",{d:"M"+grid.map(x=>`${xs(x)},${ys(BO.truth(x))}`).join("L"),fill:"none",stroke:css("--muted"),"stroke-dasharray":"4 4","stroke-width":1.5},svg);
-  el("path",{d:"M"+grid.map((x,i)=>`${xs(x)},${ys(P[i].m)}`).join("L"),fill:"none",stroke:css("--accent"),"stroke-width":2},svg);
-  const ucb=grid.map((x,i)=>P[i].m+kap*P[i].s),umax=Math.max(...ucb),umin=Math.min(...ucb);
-  el("path",{d:"M"+grid.map((x,i)=>`${xs(x)},${T+ph-((ucb[i]-umin)/(umax-umin+1e-9))*ph*0.18}`).join("L"),fill:"none",stroke:css("--m1"),"stroke-width":1.5},svg);
-  const sx=suggest();
-  el("line",{x1:xs(sx),x2:xs(sx),y1:T,y2:T+ph,stroke:css("--m1"),"stroke-dasharray":"2 3"},svg);
-  el("text",{x:Math.min(xs(sx)+6,W-120),y:T+ph-6,fill:css("--m1")},svg).textContent="next pick (UCB)";
-  BO.pts.forEach(p=>el("circle",{cx:xs(p.x),cy:ys(p.y),r:5,fill:css("--fg"),stroke:css("--surface"),"stroke-width":1.5},svg));
-  const best=BO.pts.reduce((a,b)=>b.y>a.y?b:a);
-  document.getElementById("boRead").textContent=`experiments: ${BO.pts.length} · best so far: ${best.y.toFixed(2)} at ${(best.x*100).toFixed(0)}% · κ=${kap}`;
-  svg.onclick=e=>{const r=svg.getBoundingClientRect();const x=((e.clientX-r.left)/r.width*W-L)/pw;if(x>=0&&x<=1)boRun(x)};
+
+/* 4. All recipes */
+function drawComp() {
+  const W = 820, rh = 21, T = 22, L = 70, BW = 380, G = 40, VX = L + BW + G, VW = W - VX - 20, H = T + D.experiments.length * rh + 28;
+  const s = frame("compChart", W, H);
+  txt(s, L, 12, "Blend"); txt(s, VX, 12, "Mean viability %");
+  [0, 20, 40, 60, 80, 100].forEach(t => { const x = VX + t / 100 * VW; el("line", { x1: x, x2: x, y1: T - 4, y2: H - 24, stroke: css("--line") }, s); txt(s, x, H - 8, t, { "text-anchor": "middle" }); });
+  let prev = -1;
+  D.experiments.forEach((e, i) => {
+    const y = T + i * rh;
+    if (e.round !== prev && i > 0) el("line", { x1: 0, x2: W, y1: y - 1, y2: y - 1, stroke: css("--line"), "stroke-dasharray": "3 3" }, s);
+    prev = e.round;
+    const g = el("g", {}, s);
+    el("rect", { x: 0, y, width: W, height: rh, fill: "transparent" }, g);
+    txt(g, 0, y + 15, e.id); txt(g, 34, y + 15, "r" + e.round);
+    let x = L; e.f.forEach((f, k) => { el("rect", { x, y: y + 4, width: f * BW, height: rh - 8, fill: css(MIX[k]) }, g); x += f * BW; });
+    const cx = VX + e.v / 100 * VW;
+    el("line", { x1: VX + Math.max(0, e.v - e.sd) / 100 * VW, x2: VX + Math.min(100, e.v + e.sd) / 100 * VW, y1: y + rh / 2, y2: y + rh / 2, stroke: css("--muted"), "stroke-width": 1.5 }, g);
+    el("circle", { cx, cy: y + rh / 2, r: 4.5, fill: ["E19", "E14", "E10", "E02"].includes(e.id) ? css("--accent") : css("--fg") }, g);
+    hover(g, `<b>PBMC-${e.id}</b> · round ${e.round}<br>` + e.f.map((f, k) => `${NAMES[k]} ${(f * 100).toFixed(1)}%`).join("<br>") + `<br>viability ${e.v}% (SD ${e.sd}, n=${e.n}) · EUR ${e.cost}/L`);
+  });
 }
-document.getElementById("boNext").onclick=()=>boRun(suggest());
-document.getElementById("boReset").onclick=boReset;
-document.getElementById("boKappa").oninput=drawBO;
-document.getElementById("boTruth").onchange=drawBO;
-function drawAll(){drawComp();drawRound();drawBO()}
-boReset();drawComp();drawRound();
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change",drawAll);
-new MutationObserver(drawAll).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+/* 5. Prices */
+function drawCost() {
+  const FBS = 134.4, PEN = 2.632;
+  const rows = D.prices.map(p => { const v = p.price_per_litre, base = ["dmem", "rpmi_10"].includes(p.component_id);
+    return { name: { dmem: "DMEM-10", rpmi_10: "RPMI-10", xvivo: "X-VIVO 15", ar5: "AR5 (proxy)" }[p.component_id], v, parts: base ? [[v - FBS - PEN, "--m1", "base medium"], [FBS, "--accent", "FBS"], [PEN, "--muted", "antibiotics"]] : [[v, "--m3", p.price_basis === "hypothetical" ? "no public price; set equal to X-VIVO 15" : "complete medium"]] }; });
+  const W = 820, rh = 40, T = 10, L = 110, R = 80, H = T + rows.length * rh + 30, pw = W - L - R;
+  const s = frame("costChart", W, H), xs = v => L + v / 200 * pw;
+  [0, 50, 100, 150, 200].forEach(t => { el("line", { x1: xs(t), x2: xs(t), y1: T, y2: H - 24, stroke: css("--line") }, s); txt(s, xs(t), H - 8, "EUR " + t, { "text-anchor": "middle" }); });
+  rows.forEach((r, i) => {
+    const y = T + i * rh; txt(s, 0, y + 22, r.name, { class: "ink" });
+    let x = 0; r.parts.forEach(([v, c, lab]) => { const g = el("g", {}, s); el("rect", { x: xs(x), y: y + 8, width: xs(x + v) - xs(x), height: rh - 16, fill: css(c), opacity: c === "--m3" && r.name.startsWith("AR5") ? .45 : 1 }, g);
+      hover(g, `<b>${r.name}</b>: ${lab} EUR ${v.toFixed(2)}/L`); x += v; });
+    txt(s, xs(r.v) + 8, y + 24, r.v.toFixed(2), { class: "ink" });
+  });
+}
+
+/* 6. Forward test */
+function drawForward() {
+  const rows = D.forward.filter(r => r.model === "GP, pooled noise"), W = 820, rh = 46, T = 10, L = 140, R = 30, H = T + rows.length * rh + 34, pw = W - L - R;
+  const s = frame("forwardChart", W, H), xs = v => L + (v - 30) / 50 * pw;
+  [30, 40, 50, 60, 70, 80].forEach(t => { el("line", { x1: xs(t), x2: xs(t), y1: T, y2: H - 26, stroke: css("--line") }, s); txt(s, xs(t), H - 10, t + "%", { "text-anchor": "middle" }); });
+  rows.forEach((r, i) => {
+    const y = T + i * rh + rh / 2;
+    txt(s, 0, y + 4, `train 0-${r.test_round - 1} → round ${r.test_round}`, { class: "ink" });
+    el("line", { x1: xs(r.mean_pred), x2: xs(r.mean_obs), y1: y, y2: y, stroke: css("--line"), "stroke-width": 5, "stroke-linecap": "round" }, s);
+    el("circle", { cx: xs(r.mean_pred), cy: y, r: 6, fill: css("--surface"), stroke: css("--fg"), "stroke-width": 1.6 }, s);
+    el("circle", { cx: xs(r.mean_obs), cy: y, r: 6, fill: Math.abs(r.mean_obs - r.mean_pred) > 15 ? css("--accent") : css("--fg") }, s);
+    const d = r.mean_obs - r.mean_pred; txt(s, (xs(r.mean_pred) + xs(r.mean_obs)) / 2, y - 10, (d > 0 ? "+" : "") + d.toFixed(1), { "text-anchor": "middle", class: "ink" });
+  });
+}
+
+/* 7. Ranking */
+function drawRank() {
+  const rows = D.ranking.filter(r => r.model === "GP, pooled noise"), W = 820, rh = 30, T = 8, L = 110, R = 40, H = T + rows.length * rh + 30, pw = W - L - R;
+  const s = frame("rankChart", W, H), xs = v => L + (v + 0.2) / 1.2 * pw;
+  [-0.2, 0, 0.2, 0.4, 0.6, 0.8, 1].forEach(t => { el("line", { x1: xs(t), x2: xs(t), y1: T, y2: H - 22, stroke: t === 0 ? css("--muted") : css("--line") }, s); txt(s, xs(t), H - 6, t, { "text-anchor": "middle" }); });
+  rows.forEach((r, i) => { const y = T + i * rh; txt(s, 0, y + 19, `${r.subset} (n=${r.n})`, { class: "ink" });
+    const x0 = xs(0), x1 = xs(r.spearman); el("rect", { x: Math.min(x0, x1), y: y + 6, width: Math.abs(x1 - x0), height: rh - 12, rx: 3, fill: r.subset === "all 24" ? css("--accent") : css("--m1") }, s);
+    txt(s, Math.max(x0, x1) + 6, y + 19, r.spearman.toFixed(2), { class: "ink" }); });
+}
+
+/* 8. BO toy demo */
+const BO = { pts: [], truth: x => 0.55 * Math.exp(-((x - 0.22) ** 2) / 0.012) + 0.9 * Math.exp(-((x - 0.74) ** 2) / 0.006) + 0.15 * Math.sin(9 * x) + 0.1, ell: 0.09, sf: 0.35, noise: 0.05 };
+let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+const gauss = () => Math.sqrt(-2 * Math.log(rnd() + 1e-12)) * Math.cos(2 * Math.PI * rnd());
+const kern = (a, b) => BO.sf ** 2 * Math.exp(-((a - b) ** 2) / (2 * BO.ell ** 2));
+function chol(A) { const n = A.length, L = A.map(r => r.map(() => 0)); for (let i = 0; i < n; i++) for (let j = 0; j <= i; j++) { let s = A[i][j]; for (let p = 0; p < j; p++) s -= L[i][p] * L[j][p]; L[i][j] = i === j ? Math.sqrt(Math.max(s, 1e-12)) : s / L[j][j]; } return L; }
+function solveL(L, b) { const y = []; for (let i = 0; i < b.length; i++) { let s = b[i]; for (let p = 0; p < i; p++) s -= L[i][p] * y[p]; y.push(s / L[i][i]); } return y; }
+function solveLT(L, y) { const n = y.length, x = Array(n); for (let i = n - 1; i >= 0; i--) { let s = y[i]; for (let p = i + 1; p < n; p++) s -= L[p][i] * x[p]; x[i] = s / L[i][i]; } return x; }
+function post(xs) { const X = BO.pts.map(p => p.x), Y = BO.pts.map(p => p.y), n = X.length, m = n ? Y.reduce((a, b) => a + b, 0) / n : 0;
+  if (!n) return xs.map(() => ({ m, s: BO.sf })); const K = X.map(a => X.map(b => kern(a, b))); K.forEach((r, i) => r[i] += BO.noise ** 2);
+  const L = chol(K), al = solveLT(L, solveL(L, Y.map(y => y - m)));
+  return xs.map(x => { const ks = X.map(a => kern(a, x)), mu = m + ks.reduce((s, v, i) => s + v * al[i], 0), v = solveL(L, ks); return { m: mu, s: Math.sqrt(Math.max(BO.sf ** 2 - v.reduce((s, a) => s + a * a, 0), 1e-9)) }; }); }
+function boReset() { seed = 7; BO.pts = [0.08, 0.45, 0.95].map(x => ({ x, y: BO.truth(x) + BO.noise * gauss() })); drawBO(); }
+function boRun(x) { BO.pts.push({ x, y: BO.truth(x) + BO.noise * gauss() }); drawBO(); }
+function suggest() { const k = +document.getElementById("boKappa").value, xs = Array.from({ length: 201 }, (_, i) => i / 200), P = post(xs); let bi = 0, bv = -1e9; P.forEach((p, i) => { const u = p.m + k * p.s; if (u > bv) { bv = u; bi = i; } }); return xs[bi]; }
+function drawBO() {
+  const W = 820, H = 300, L = 40, R = 16, T = 12, B = 30, pw = W - L - R, ph = H - T - B, s = frame("boChart", W, H);
+  const ymin = -0.4, ymax = 1.5, xs = v => L + v * pw, ys = v => T + ph * (1 - (v - ymin) / (ymax - ymin));
+  [0, .25, .5, .75, 1].forEach(t => { el("line", { x1: xs(t), x2: xs(t), y1: T, y2: T + ph, stroke: css("--line") }, s); txt(s, xs(t), H - 10, (t * 100) + "%", { "text-anchor": "middle" }); });
+  const g = Array.from({ length: 161 }, (_, i) => i / 160), P = post(g), k = +document.getElementById("boKappa").value;
+  el("path", { d: "M" + g.map((x, i) => `${xs(x)},${ys(P[i].m + 2 * P[i].s)}`).join("L") + "L" + g.slice().reverse().map((x, i) => { const p = P[g.length - 1 - i]; return `${xs(x)},${ys(p.m - 2 * p.s)}`; }).join("L") + "Z", fill: css("--accent"), "fill-opacity": .14 }, s);
+  if (document.getElementById("boTruth").checked) el("path", { d: "M" + g.map(x => `${xs(x)},${ys(BO.truth(x))}`).join("L"), fill: "none", stroke: css("--muted"), "stroke-dasharray": "4 4", "stroke-width": 1.5 }, s);
+  el("path", { d: "M" + g.map((x, i) => `${xs(x)},${ys(P[i].m)}`).join("L"), fill: "none", stroke: css("--accent"), "stroke-width": 2 }, s);
+  const sx = suggest(); el("line", { x1: xs(sx), x2: xs(sx), y1: T, y2: T + ph, stroke: css("--m1"), "stroke-dasharray": "2 3" }, s);
+  txt(s, Math.min(xs(sx) + 6, W - 110), T + ph - 6, "next pick", { fill: css("--m1") });
+  BO.pts.forEach(p => el("circle", { cx: xs(p.x), cy: ys(p.y), r: 5, fill: css("--fg"), stroke: css("--surface"), "stroke-width": 1.5 }, s));
+  const best = BO.pts.reduce((a, b) => b.y > a.y ? b : a);
+  document.getElementById("boRead").textContent = `experiments ${BO.pts.length} · best ${best.y.toFixed(2)} at ${(best.x * 100).toFixed(0)}% · κ=${k}`;
+  s.onclick = e => { const r = s.getBoundingClientRect(), x = ((e.clientX - r.left) / r.width * W - L) / pw; if (x >= 0 && x <= 1) boRun(x); };
+}
+
+/* 9. Batch map */
+function drawMap() {
+  const W = 820, H = 360, L = 50, R = 20, T = 14, B = 40, pw = W - L - R, ph = H - T - B, s = frame("mapChart", W, H);
+  const xs = v => L + v / 80 * pw, ys = v => T + ph * (1 - v / 55);
+  [0, 10, 20, 30, 40, 50].forEach(t => { el("line", { x1: L, x2: W - R, y1: ys(t), y2: ys(t), stroke: css("--line") }, s); txt(s, L - 8, ys(t) + 4, t + "%", { "text-anchor": "end" }); });
+  [0, 20, 40, 60, 80].forEach(t => txt(s, xs(t), H - 18, t + "%", { "text-anchor": "middle" }));
+  txt(s, xs(40), H - 3, "DMEM share", { "text-anchor": "middle" }); txt(s, W - R, T + 12, "y axis: X-VIVO 15 share", { "text-anchor": "end" });
+  D.experiments.forEach(e => { const g = el("g", {}, s); el("circle", { cx: xs(e.f[0] * 100), cy: ys(e.f[2] * 100), r: 6, fill: vir(e.v), stroke: css("--surface"), "stroke-width": 1 }, g);
+    hover(g, `<b>PBMC-${e.id}</b>: viability ${e.v}%<br>DMEM ${(e.f[0] * 100).toFixed(1)}% · X-VIVO ${(e.f[2] * 100).toFixed(1)}%`); });
+  const t = D.picks.filter(p => p.role.startsWith("DMEM")), pts = [[t[0].dmem_pct, t[0].xvivo_pct], [E19.f[0] * 100, E19.f[2] * 100], [t[1].dmem_pct, t[1].xvivo_pct]];
+  el("path", { d: "M" + pts.map(p => `${xs(p[0])},${ys(p[1])}`).join("L"), fill: "none", stroke: css("--accent"), "stroke-dasharray": "5 4" }, s);
+  el("circle", { cx: xs(E19.f[0] * 100), cy: ys(E19.f[2] * 100), r: 10, fill: "none", stroke: css("--fg"), "stroke-width": 1.6 }, s);
+  txt(s, xs(E19.f[0] * 100), ys(E19.f[2] * 100) + 24, "E19", { "text-anchor": "middle", class: "ink" });
+  const star = (cx, cy, r) => { let d = ""; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .45 : r; d += (i ? "L" : "M") + (cx + rr * Math.cos(a)) + "," + (cy + rr * Math.sin(a)); } return d + "Z"; };
+  D.picks.forEach(p => { const x = xs(p.dmem_pct), y = ys(p.xvivo_pct), g = el("g", {}, s);
+    el("path", { d: star(x, y, 11), fill: css(SLOT["slot " + p.slot]), stroke: css("--fg"), "stroke-width": .8 }, g);
+    txt(g, x + 13, y - 8, p.slot + " " + p.role.replace("DMEM titration, ", "DMEM "), { class: "ink" });
+    hover(g, `<b>Slot ${p.slot}: ${p.role}</b><br>${p.dmem_pct}/${p.rpmi_10_pct}/${p.xvivo_pct}/${p.ar5_pct} · estimate ${p.predicted_viability_pct}`); });
+}
+
+/* 10. Correlation with E19 */
+function drawAlt() {
+  const groups = [...new Set(D.alternatives.map(a => a.batch))], W = 820, rh = 24, T = 8;
+  const rows = []; groups.forEach(g => { rows.push({ head: g }); D.alternatives.filter(a => a.batch === g).forEach(a => rows.push(a)); });
+  const L = 300, R = 50, H = T + rows.length * rh + 24, pw = W - L - R, s = frame("altChart", W, H), xs = v => L + Math.max(0, v) * pw;
+  [0, .25, .5, .75, 1].forEach(t => { el("line", { x1: xs(t), x2: xs(t), y1: T, y2: H - 20, stroke: css("--line") }, s); txt(s, xs(t), H - 4, t, { "text-anchor": "middle" }); });
+  rows.forEach((r, i) => { const y = T + i * rh;
+    if (r.head) { txt(s, 0, y + 16, r.head, { class: "ink", "font-weight": 600 }); return; }
+    txt(s, 16, y + 16, `${r.recipe} · est. ${r.predicted_viability_pct}`);
+    el("rect", { x: xs(0), y: y + 5, width: xs(r.corr_with_e19) - xs(0), height: rh - 10, rx: 3, fill: r.corr_with_e19 > .9 ? css("--bad") : css("--m1") }, s);
+    txt(s, xs(Math.max(0, r.corr_with_e19)) + 6, y + 16, r.corr_with_e19.toFixed(2), { class: "ink" }); });
+}
+
+/* 11. Sensitivity heatmap */
+function drawHeat() {
+  const label = { gp_sem_noise: "per-recipe noise", gp_noise_s2_over_n: "noise by reading count", "gp_ls_floor_0.05": "length-scale floor 0.05", "gp_ls_floor_0.2": "length-scale floor 0.2",
+    gp_ls_upper_3: "length-scale ceiling 3", gp_3coord_without_dmem: "3 coordinates, no DMEM", gp_3coord_without_xvivo: "3 coordinates, no X-VIVO", gp_without_e02: "without E02", gp_without_e14: "without E14",
+    anchor_not_pending: "E19 not pending", "model_picks_cost_tolerance_1%": "model picks +1% cost" };
+  const rows = D.stability.map(r => ({ n: label[r.variant] || r.variant.replace("price_fbs_x", "price FBS ×").replace("_ar5_x", ", AR5 ×"), v: [r.slot_1_shift_pct, r.slot_2_shift_pct, r.slot_3_shift_pct, r.slot_4_shift_pct] }))
+    .concat(D.stress.map(r => ({ n: "rule: " + r.setting.replace(/_/g, " "), v: [r.slot_1_shift_pct, r.slot_2_shift_pct, r.slot_3_shift_pct, r.slot_4_shift_pct] })));
+  const W = 820, rh = 19, T = 30, L = 230, cw = (W - L - 20) / 4, H = T + rows.length * rh + 10, s = frame("heatChart", W, H);
+  ["1 DMEM 40%", "2 DMEM 50%", "3 Cheaper", "4 Exp. improvement"].forEach((h, j) => txt(s, L + j * cw + cw / 2, 18, h, { "text-anchor": "middle", class: "ink" }));
+  rows.forEach((r, i) => { const y = T + i * rh; txt(s, 0, y + 14, r.n);
+    r.v.forEach((v, j) => { const c = el("rect", { x: L + j * cw + 2, y: y + 1, width: cw - 4, height: rh - 2, rx: 3, fill: v === 0 ? css("--sunk") : css("--accent"), "fill-opacity": v === 0 ? 1 : Math.min(1, .15 + v / 60) }, s);
+      txt(s, L + j * cw + cw / 2, y + 14, v, { "text-anchor": "middle", class: v > 35 ? "" : "ink", fill: v > 35 ? "#fff" : undefined }); hover(c, `${r.n}<br>slot ${j + 1} moved ${v}% of volume`); }); });
+}
+
+/* 12. Simulation */
+function drawSim() {
+  const pols = ["Random (feasible)", "GP greedy (exploit only)", "GP-UCB, kappa 2 (batch)", "GP-EI (batch)", "Four-role policy (deployed)"], names = ["Random", "Exploit only", "UCB", "EI", "Four-role"];
+  const sets = [["GP fit to all 24", "low", "o", 1], ["Scheffe fit to all 24", "low", "t", 1], ["GP fit to all 24", "high", "o", 0], ["Scheffe fit to all 24", "high", "t", 0]];
+  const W = 820, rh = 40, T = 34, L = 110, R = 30, H = T + pols.length * rh + 34, pw = W - L - R, s = frame("simChart", W, H), xs = v => L + v / 11 * pw;
+  [["GP truth, low noise", "o", 1], ["Scheffe truth, low noise", "t", 1], ["GP truth, realistic noise", "o", 0], ["Scheffe truth, realistic noise", "t", 0]].forEach(([lab, sh, f], k) => {
+    const x = L + k * 175, y = 12, c = css("--fg");
+    if (sh === "o") el("circle", { cx: x, cy: y, r: 5, fill: f ? c : css("--surface"), stroke: c, "stroke-width": 1.5 }, s);
+    else el("path", { d: `M${x},${y - 6} l6,10 l-12,0z`, fill: f ? c : css("--surface"), stroke: c, "stroke-width": 1.5 }, s);
+    txt(s, x + 10, y + 4, lab); });
+  [0, 2, 4, 6, 8, 10].forEach(t => { el("line", { x1: xs(t), x2: xs(t), y1: T, y2: H - 26, stroke: css("--line") }, s); txt(s, xs(t), H - 10, t + " pts", { "text-anchor": "middle" }); });
+  pols.forEach((p, i) => { const y = T + i * rh + rh / 2; txt(s, 0, y + 4, names[i], { class: "ink" });
+    sets.forEach(([tr, nz, shape, fill], j) => { const r = D.sim.find(q => q.truth === tr && q.noise.startsWith(nz) && q.policy === p); if (!r) return;
+      const x = xs(r.median_finalist_regret), yy = y + (j - 1.5) * 5, c = css("--fg"), g = el("g", {}, s);
+      if (shape === "o") el("circle", { cx: x, cy: yy, r: 5.5, fill: fill ? c : css("--surface"), stroke: c, "stroke-width": 1.5 }, g);
+      else el("path", { d: `M${x},${yy - 6} l6,10 l-12,0z`, fill: fill ? c : css("--surface"), stroke: c, "stroke-width": 1.5 }, g);
+      hover(g, `<b>${names[i]}</b> · ${tr.split(" ")[0]} truth, ${nz} noise<br>final pick ${r.median_finalist_regret} pts below best<br>beat random (discovery) in ${r.seeds_better_than_random}`); }); });
+}
+
+/* 13. Plate */
+let plateFocus = null;
+function drawPlate() {
+  const W = 620, H = 420, s = frame("plateChart", W, H), rows = "ABCDEFGH", cs = 46, x0 = 46, y0 = 30;
+  el("rect", { x: x0 - 26, y: y0 - 26, width: 12 * cs + 30, height: 8 * cs + 30, rx: 18, fill: css("--sunk"), stroke: css("--line") }, s);
+  for (let c = 1; c <= 12; c++) txt(s, x0 + (c - 1) * cs + cs / 2 - 8, y0 - 10, c, { "text-anchor": "middle" });
+  [...rows].forEach((r, i) => txt(s, x0 - 16, y0 + i * cs + cs / 2, r, { "text-anchor": "middle" }));
+  D.layout.forEach(w => { const r = rows.indexOf(w.well[0]), c = +w.well.slice(1), cx = x0 + (c - 1) * cs + cs / 2 - 8, cy = y0 + r * cs + cs / 2 - 4, g = el("g", {}, s);
+    const dim = plateFocus && w.position !== plateFocus;
+    if (w.well_type === "PBS edge") el("circle", { cx, cy, r: 17, fill: css("--surface"), stroke: css("--line") }, g);
+    else if (w.well_type === "control") { el("circle", { cx, cy, r: 17, fill: css("--surface"), stroke: css("--fg"), "stroke-width": 1.4, opacity: dim ? .25 : 1 }, g); txt(g, cx, cy + 4, w.position.startsWith("no-cell") ? "B" : "K", { "text-anchor": "middle", class: "ink", opacity: dim ? .25 : 1 }); }
+    else el("circle", { cx, cy, r: 17, fill: css(SLOT[w.position]), opacity: dim ? .15 : 1 }, g);
+    hover(g, `<b>${w.well}</b> · ${w.role}${w.replicate !== "" ? " · replicate " + w.replicate : ""}`); });
+}
+function plateButtons() {
+  const box = document.getElementById("plateBtns"), opts = [["All", null], ["1 DMEM 40%", "slot 1"], ["2 DMEM 50%", "slot 2"], ["3 Cheaper", "slot 3"], ["4 Exp. improvement", "slot 4"], ["E19 anchor", "anchor"]];
+  opts.forEach(([lab, key]) => { const b = document.createElement("button"); b.type = "button"; b.className = "pill" + (key === null ? " on" : ""); b.textContent = lab;
+    b.onclick = () => { plateFocus = key; [...box.children].forEach(x => x.classList.remove("on")); b.classList.add("on"); drawPlate(); }; box.appendChild(b); });
+}
+
+/* 14. Pass probability */
+function ncdf(z) { const t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989423 * Math.exp(-z * z / 2), p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; }
+function tq95(df) { const tbl = { 2: 2.920, 4: 2.132, 6: 1.943, 8: 1.860, 10: 1.812, 12: 1.782, 14: 1.761, 16: 1.746, 18: 1.734, 20: 1.725, 22: 1.717, 24: 1.711, 26: 1.706, 28: 1.701, 30: 1.697 }; return tbl[df] || 1.645; }
+function drawPass() {
+  const n = +document.getElementById("nWells").value, SD = 9.51, W = 820, H = 280, L = 50, R = 20, T = 12, B = 40, pw = W - L - R, ph = H - T - B, s = frame("passChart", W, H);
+  const xs = v => L + (v + 20) / 30 * pw, ys = v => T + ph * (1 - v);
+  [0, .25, .5, .75, 1].forEach(t => { el("line", { x1: L, x2: W - R, y1: ys(t), y2: ys(t), stroke: css("--line") }, s); txt(s, L - 8, ys(t) + 4, Math.round(t * 100) + "%", { "text-anchor": "end" }); });
+  [-20, -15, -10, -5, 0, 5, 10].forEach(t => txt(s, xs(t), H - 18, t, { "text-anchor": "middle" }));
+  txt(s, xs(-5), H - 3, "true difference from same-plate E19 (points)", { "text-anchor": "middle" });
+  el("line", { x1: xs(-5), x2: xs(-5), y1: T, y2: T + ph, stroke: css("--muted"), "stroke-dasharray": "3 3" }, s); txt(s, xs(-5) + 4, T + 12, "5-point margin");
+  const curve = (nn, col, w, dash) => { const se = SD * Math.sqrt(2 / nn); el("path", { d: "M" + Array.from({ length: 121 }, (_, i) => -20 + i * 0.25).map(d => `${xs(d)},${ys(ncdf((5 + d) / se))}`).join("L"), fill: "none", stroke: col, "stroke-width": w, "stroke-dasharray": dash || "" }, s); };
+  curve(4, css("--muted"), 1.5, "5 4"); curve(n, css("--accent"), 2.5);
+  const se = SD * Math.sqrt(2 / n), half = tq95(2 * n - 2) * se;
+  document.getElementById("passRead").textContent = `${n} wells per arm · 90% interval ± ${half.toFixed(1)} pts · passes when equal ${Math.round(ncdf(5 / se) * 100)}% · when 10 pts worse ${Math.round(ncdf(-5 / se) * 100)}%   (dashed: 4 wells)`;
+}
+
+function drawAll() { drawAnswer(); drawFlow(); drawDmem(); drawComp(); drawCost(); drawForward(); drawRank(); drawBO(); drawMap(); drawAlt(); drawHeat(); drawSim(); drawPlate(); drawPass(); }
+document.getElementById("boNext").onclick = () => boRun(suggest());
+document.getElementById("boReset").onclick = boReset;
+document.getElementById("boKappa").oninput = drawBO;
+document.getElementById("boTruth").onchange = drawBO;
+document.getElementById("nWells").oninput = drawPass;
+plateButtons(); boReset(); drawAll();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
+new MutationObserver(drawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+const links = [...document.querySelectorAll("nav.toc a")];
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) links.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id)); }), { rootMargin: "-40% 0px -55% 0px" });
+document.querySelectorAll("main section").forEach(sec => io.observe(sec));
 </script>
