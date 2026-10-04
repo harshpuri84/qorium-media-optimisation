@@ -156,3 +156,11 @@ Two reviews of commit a729478: the science, read as a cell biologist (`docs/revi
 - **Two donors at 5 and 6 wells (Fable).** Listed in `reports/lab_plan.md` as an option. Not adopted: the curvature contrast already has about 48% power at 11 wells, and halving wells per donor cuts it further.
 - **A no-cell blank per blend (Fable).** Listed as an option; it needs 10 wells per formulation instead of 11.
 - **About 28 wells per formulation for 80% power on the contrast (Astra).** Beyond one plate's capacity. Independent preparation repeats come first, in confirmation.
+
+## 2026 10 04 Language review of the memo
+
+A ChatGPT language review (`docs/review_language_chatgpt_2026-10-04.md`), judged item by item by Astra (`docs/review_language_astra_2026-10-04.md`).
+
+**Accepted:** title and opening no longer say "peak" or "earned"; "80% range" is now "80% predictive interval"; "honest" removed from the model comparison; NLPD direction stated; pending-point conditioning explained (at predicted means); forest coverage stated as both intervals covering 79%; "5% of volume" defined as half the summed absolute differences; "anchor" is now "E19 control" in memo and figures; FBS claim weakened to "changes little along the contrast"; success criterion no longer requires a candidate to advance; the "What I changed after review" paragraph removed (the story stays here and in the walkthrough).
+
+**Rejected:** replacing every "blend", "recipe" and "pick" with "formulation" (slot references get hard to read); ChatGPT's longer opening (page 4 has no room); dropping "a lab manager can check a constraint by hand" (a real mechanism).

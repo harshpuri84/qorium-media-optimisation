@@ -50,7 +50,7 @@ def batch_map():
         ax.annotate(short[p['role']], (x, z), xytext=offsets[p['role']], textcoords='offset points', fontsize=6.3,
                     color=INK, ha='right' if p['role'] == 'DMEM titration, 40%' else 'left')
     ax.scatter(ref[0] * 100, ref[2] * 100, s=55, facecolor='none', edgecolor=INK, lw=0.9, zorder=4)
-    ax.annotate('E19 anchor', (ref[0] * 100, ref[2] * 100), xytext=(0, -13), textcoords='offset points', fontsize=6.3, color=MUTED, ha='center')
+    ax.annotate('E19 control', (ref[0] * 100, ref[2] * 100), xytext=(0, -13), textcoords='offset points', fontsize=6.3, color=MUTED, ha='center')
     ax.set_xlabel('DMEM %')
     ax.set_ylabel('X-VIVO 15 %')
     cb = fig.colorbar(sc, ax=ax, fraction=0.05, pad=0.02)
@@ -100,7 +100,7 @@ def plate_map():
     for c in range(1, 13):
         ax.text(c, 8.95, str(c), ha='center', va='center', fontsize=5.5, color=MUTED)
     labels = [('slot 1', 'DMEM 40%'), ('slot 2', 'DMEM 50%'), ('slot 3', 'Cheaper'), ('slot 4', 'Exp. improvement'),
-              ('anchor', 'E19 anchor')]
+              ('anchor', 'E19 control')]
     spots = [(1, -0.35), (4.4, -0.35), (7.8, -0.35), (1, -1.05), (4.4, -1.05)]
     for (k, lab), (x0, y0) in zip(labels, spots):
         ax.add_patch(Circle((x0, y0), 0.22, facecolor=ROLE_COLOURS[k], edgecolor='white'))
