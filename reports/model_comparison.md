@@ -55,7 +55,7 @@ What this shows:
 
 1. **On all 24 recipes, no model clearly beats the mean.** The GP and the random forest have the lowest RMSE (16.77 and 16.32). The mean-only model has the best NLPD (4.44 against 5.93 for the GP). So the GP's uncertainty is less honest than a flat average's.
 2. **The GP's ranking is between rounds, not within them.** Its leave-one-out Spearman of 0.61 on all 24 falls to 0.11 on rounds 0 to 2, and sits between -0.09 and 0.37 within each round (`reports/tables/model_loo_ranking_by_round.csv`). It separates the round-3 cluster at 44% DMEM from the rest but cannot rank blends inside it. The Scheffe model ranks no better than chance overall. With n = 24, a coverage of 0.79 against 0.80 has a standard error near 0.08 and supports nothing either way.
-3. **E02 and E14 dominate the error.** They are unexplained low outcomes. Their readings agree with each other, and the data cannot tell a failed run from a sharp biological response. The GP's predictions for E10 are pulled down by E14, which sits 2.60% of volume away from it. Removing both drops the GP RMSE to 7.56. That is a sensitivity result, not grounds to delete them. Both stay in the primary fit.
+3. **E02 and E14 dominate the error.** They are unexplained low outcomes. Each ran in a different round from its near neighbours, so a donor or preparation effect is plausible, but the data cannot separate that from a sharp biological response. The GP's predictions for E10 are pulled down by E14, which sits 2.60% of volume away from it. Removing both drops the GP RMSE to 7.56. That is a sensitivity result, not grounds to delete them. Both stay in the primary fit.
 
 ## Forward-round check
 
@@ -84,10 +84,10 @@ There is no real way to replay a policy, because only one sequence of experiment
 - Use 30 paired seeds: every policy sees the same start points and the same noise draws.
 - Use two truths, a GP fit and a Scheffe fit to all 24 recipes.
 - Use two noise levels: the typical reading SEM (4.97) and the GP's fitted noise (11.83).
-- Include the four-role policy actually used for the recommendation.
+- Include the four-role policy, the batch policy before the redesign.
 - Score two things: discovery (the best blend sampled) and the finalist (the blend the lab would pick from noisy results).
 
-| Truth, noise | Random | Exploit only | GP-UCB | GP-EI | Four-role (deployed) |
+| Truth, noise | Random | Exploit only | GP-UCB | GP-EI | Four-role (earlier batch policy) |
 | --- | --- | --- | --- | --- | --- |
 | GP fit, 4.97 | 2.12 / 2.12 | 1.64 / 4.41 (16/30, p=0.572) | 1.08 / 2.66 (22/30, p=0.016) | 1.35 / 2.47 (16/30, p=0.711) | 1.20 / 2.06 (19/30, p=0.136) |
 | GP fit, 11.83 | 2.12 / 7.61 | 3.84 / 7.94 (14/30, p=1.000) | 2.94 / 7.63 (13/30, p=1.000) | 1.34 / 6.19 (14/30, p=1.000) | 1.61 / 5.73 (15/30, p=0.557) |
@@ -101,7 +101,7 @@ Each cell gives two medians after 18 runs, in viability points. The first is dis
 What this shows:
 
 1. **Random picks inside the rules land close to the best.** Random sampling under the same eligibility rules ends a median 2.12 (GP truth) and 1.56 (Scheffe truth) points from the best blend. An earlier run without these rules gave 7.82, but on a wider grid with a different optimum, so the two cannot be compared directly and the benefit of the rules is not isolated.
-2. **Only UCB beats random reliably, and only at low noise:** 22 and 24 of 30 paired seeds, sign test p = 0.016 and 0.001. These are 16 exploratory comparisons without a multiplicity correction. EI, exploit-only and the four-role policy do not reach p < 0.05 in any setting.
+2. **Only UCB shows nominal evidence of beating random, and only at low noise:** 22 and 24 of 30 paired seeds, sign test p = 0.016 and 0.001. These are 16 exploratory comparisons; neither p-value clears a Bonferroni threshold of 0.003. EI, exploit-only and the four-role policy do not reach p < 0.05 in any setting.
 3. **At realistic noise, no advantage was detected.** At 11.83 every policy beats random in 10 to 16 of 30 seeds (p ≥ 0.42). That is "no detected difference" with 30 seeds, not evidence of equivalence. The sign tests are on discovery regret; on finalist regret UCB at low noise on the GP truth wins only 13 of 30 (median 2.66 against random's 2.12).
 4. **Picking a winner from single noisy readings is costly.** Under the rule "pick the highest observed mean", the finalist sits 4.7 to 7.9 points below the best available at the fitted noise. The simulation shows this selection error; it does not test remedies such as replication or confirmation, or how to split a budget between them.
 
@@ -112,7 +112,7 @@ Common random numbers: within a seed, every policy that measures a given recipe 
 - Both truths are smooth fits to the same 24 points. Neither contains a failure mechanism like E14 or a batch shift like round 3.
 - The finalist is chosen from single noisy observations. Replicate wells would narrow the finalist gap; the simulation does not model them.
 - The simulated campaigns run no anchor.
-- The four-role policy includes a cheaper-alternative slot, which costs it some viability by design. In the simulation it uses 1 optimiser restart and a 2% grid; the deployed selection uses 10 restarts and a 1% grid.
+- The four-role policy was the batch policy before the redesign; the final batch uses two designed steps plus two model picks. It includes a cheaper-alternative slot, which costs it some viability by design. In the simulation it uses 1 optimiser restart and a 2% grid; the deployed selection uses 10 restarts and a 1% grid.
 
 ## Decision for batch selection
 

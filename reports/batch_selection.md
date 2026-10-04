@@ -26,26 +26,26 @@ Each formulation gets 11 wells: 55 formulation wells, 2 no-cell blanks and 2 hea
 
 ## How the batch was built
 
-1. **Designed DMEM steps.** E19's RPMI-10 : X-VIVO 15 : AR5 ratios are held fixed and DMEM moves to 40% and 50%, rounded to whole percentages. DMEM is the only component with a clear signal, and the GP's DMEM length scale sits at its floor of 0.1, so the model claims a sharp peak near 44% that nobody has tested on either side.
+1. **Designed DMEM steps.** E19's RPMI-10 : X-VIVO 15 : AR5 ratios are held approximately fixed (22:21:17 and 18:18:14 against E19's 20.1:19.6:15.7, after whole-percent rounding) and DMEM moves to 40% and 50%. DMEM is the only component with a clear signal, and the GP's DMEM length scale sits at its floor of 0.1, so the model claims a sharp peak near 44% that nobody has tested on either side.
 2. **Pending first.** The E19 anchor and both designed steps are conditioned on as pending results before the model chooses, so the model picks look away from them.
 3. **Cheaper alternative.** Highest posterior mean at least 2.5% below E19's cost.
 4. **Expected improvement.** Highest expected improvement over the incumbent posterior mean (70.2), with every earlier slot pending.
 
-Every pick keeps at least 5% of volume from every tested recipe, the single media and every other pick.
+Every model pick keeps at least 5% of volume from every tested recipe, the single media and every other pick. The designed steps sit 4.7% and 5.3% from E19 by design.
 
 ## Why each recipe
 
 1. **DMEM 40%: 40 / 22 / 21 / 17.** Tests the lower side of the claimed peak. The model predicts 66.3, a 3.8-point drop from E19's 70.1. If viability holds, the peak is broader than the model thinks. FBS share 6.2%, slightly below E19's 6.5%.
 2. **DMEM 50%: 50 / 18 / 18 / 14.** Tests the upper side. The model predicts 62.5. A strict E19 ceiling would exclude it by EUR 0.26/L, a gap smaller than the uncertainty in the FBS price, which is why the designed steps carry a 1% tolerance.
 3. **Cheaper: 43 / 56 / 1 / 0.** Asks whether RPMI-10 can replace both serum-free media. Saves EUR 4.51/L (2.53%). The models disagree on it (51.9 with per-recipe noise against 65.9). It raises FBS to 9.9%, so it is not a step toward an animal-free medium. It depends on prices: at half-price FBS the cheaper pick becomes 44 / 26 / 19 / 11.
-4. **Expected improvement: 44 / 21 / 28 / 7.** Keeps the round-3 DMEM level and moves volume from AR5 to X-VIVO 15. AR5 is the medium with no public price, so a pass here would remove the least certain cost from the problem. Correlation with E19 is 0.852, so it is the pick most likely to read close to the anchor.
+4. **Expected improvement: 44 / 21 / 28 / 7.** Keeps the round-3 DMEM level and moves volume from AR5 to X-VIVO 15. AR5 is the medium with no public price, so a pass here would shrink the least certain cost (slot 4 still holds 7% AR5). Correlation with E19 is 0.852, so it is the pick most likely to read close to the anchor.
 
 ## Batches considered
 
 | Batch | Recipes | Why not chosen |
 | --- | --- | --- |
 | Earlier four-role GP batch | 44/26/19/11, 43/56/1/0, 37/33/30/0, 45/21/27/7 | Slot 1 was 0.981 correlated with E19 and predicted at 70.2 against 70.1: the model priced it at nothing and the screen could not resolve it. The explore pick depended on the model (it moved up to 40% of volume between fits) |
-| Reviewer's diagnostic batch | E10, E14, 44/26/19/11, 43/56/1/0 | Re-running E10 and E14 would test whether their 40.6-point gap reproduces. E14's own readings agree closely (SD 2.70), which points to a technical failure; re-running it mostly teaches about the lab on that day, not about the medium. I rejected it and logged why in `docs/DECISIONS.md` |
+| Reviewer's diagnostic batch | E10, E14, 44/26/19/11, 43/56/1/0 | Re-running E10 and E14 would test whether their 40.6-point gap reproduces. E10 and E14 ran in different rounds, so their gap most plausibly reflects a donor or preparation difference. Re-running both on one plate with one donor tests that preparation rather than the medium, and spends two of five slots in a low-DMEM region the data already rate poorly. I rejected it and logged why in `docs/DECISIONS.md` |
 | Chosen | 40/22/21/17, 50/18/18/14, 43/56/1/0, 44/21/28/7 | Tests the one signal in the data, keeps a cost test and an AR5 test, and uses idle wells for replicates |
 
 ## Robustness
@@ -82,7 +82,7 @@ What this shows:
 
 - **Slot 4 is stable** except under the per-recipe noise model (34%) and the fit without DMEM as a coordinate (72%). The direction, less AR5 and more X-VIVO 15 at about 44% DMEM, holds in every other rerun.
 - **Slot 3 depends on prices and on the 2.5% margin.** At a 5% margin it becomes 0/92/0/8, nearly pure RPMI-10. The margin is a judgement call.
-- **Coordinate choice matters.** Four fractions summing to one carry a redundant coordinate. Dropping DMEM hides the one component with signal inside the other three and changes the kernel's smoothness assumptions; dropping X-VIVO 15 changes little. I keep four coordinates with a length-scale floor; log-ratio coordinates are the standard alternative for the next round.
+- **Coordinate choice matters.** Four fractions summing to one carry a redundant coordinate. Dropping DMEM hides the one component with signal inside the other three and changes the kernel's smoothness assumptions; dropping X-VIVO 15 changes little. I keep four coordinates with a length-scale floor; log-ratio coordinates (once zero components are handled) or orthonormal simplex coordinates are the options for the next round.
 
 ## Exploration and exploitation
 
@@ -94,8 +94,8 @@ The plate is read only after the assay owner confirms it is valid against criter
 
 | Valid plate shows | Next step |
 | --- | --- |
-| Viability falls off at 40% or 50% DMEM | The DMEM peak is real; search near 44% and relax the other three components |
-| 40% and 50% within the screen of E19 | The peak is broader than the model thinks; widen the DMEM range next round |
+| Curvature detected along the E19 path | Evidence of a local optimum near 44%; confirm, then search there |
+| No curvature detected | Inconclusive, or broader than the model thinks; widen the DMEM range |
 | Slot 3 not excluded | Candidate for confirmation; not a step toward animal-free media |
 | Slot 4 not excluded | AR5 may be replaceable by X-VIVO 15; confirm before acting on it |
 | E19 far below 80 | Review preparation and assay conditions before the next round |

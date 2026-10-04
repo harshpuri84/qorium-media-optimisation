@@ -131,3 +131,28 @@ Two adversarial reviews of commit c37a45f: statistics and decisions (`docs/revie
 - **Re-running E10 and E14 (Astra).** The reviewer proposed E19, E10, E14 and two model picks, to test whether the 40.6-point gap reproduces. Rejected: E14's own readings agree closely (SD 2.70), which points to a failed run; re-running it would teach about the lab on that day rather than the medium, and it would spend two of five slots on the 24-36% DMEM region the data already rate poorly.
 - **Swapping the exploit pick for UCB as the deployed policy (Fable, implied).** The simulation found UCB the only policy beating random, but only at low noise. At the fitted noise no policy was detected to beat random, so designed contrasts were preferred to any acquisition rule.
 - **Log-ratio coordinates now (both).** Kept four coordinates with a length-scale floor for this round and reported the three-coordinate sensitivity. Log-ratio coordinates are listed for the next round; changing the model now would invalidate the comparison work already reviewed.
+
+## 2026 10 04 Biology review and data-science review of the final memo
+
+Two reviews of commit a729478: the science, read as a cell biologist (`docs/review_biology_fable51_2026-10-04.md`), and an adversarial data-science review (`docs/review_adversarial_ds_astra_2026-10-04.md`).
+
+**Accepted**
+
+- **DMEM is a proxy.** DMEM share stands for glucose (4.5 against 2 g/L), calcium (1.8 against 0.4 mM), bicarbonate and osmolality. This design cannot separate them; pH after equilibration and osmolality are recorded per blend.
+- **No promise to settle the peak.** The model predicts drops of 3.8 and 7.6 points at 40% and 50% DMEM; with 11 wells the power is about 24% and 59%. A curvature contrast (E19 minus the interpolated mean of the two steps, predicted 5.6, SE about 3.5, power about 48%) is pre-registered, and "inconclusive" is an allowed outcome. "The peak is real" is replaced by "curvature along the E19 path".
+- **Designed steps are read, not screened.** Slot 2 costs EUR 0.26/L over E19 and cannot pass a cost screen, so the memo reads slots 1 and 2 as a contrast and screens only slots 3 and 4.
+- **E14 belief withdrawn.** E10 and E14 ran in different rounds, so a donor or preparation effect is plausible; the low within-run SD cannot tell that from real biology. This replaces "technical failure" from 2026 10 03.
+- **Shrinkage described correctly.** The GP combines E19's readings with its neighbours and the fitted noise; it does not correct for picking the best of six.
+- **Scheffe cause withdrawn.** The data do not show whether shape, coverage or confounding explain the poor ranking.
+- **Simulation wording.** UCB has nominal evidence in two settings; neither p-value clears the Bonferroni threshold of 0.003.
+- **Coordinates.** Log-ratio coordinates need zero handling; orthonormal simplex coordinates are named as the other option.
+- **Serum-free is not animal-free.** X-VIVO 15 and AR5 are protein-containing (human albumin, transferrin). FBS is held at 6.2 to 6.8% across slots 1, 2, 4 and E19.
+- **Plate.** t = 0 count, one defined harvest procedure, pH after equilibration.
+- **Qorium transfer.** Two media phases (expansion, then collagen production with ascorbate over 2 to 4 weeks), animal-free attachment substrates and dissociation enzymes, phenotype and passage recorded. Serum-free growth of bovine skin fibroblasts is an expectation to test, not a fact.
+- **Mismatches fixed.** The 5% gap applies to model picks; designed steps sit 4.7% and 5.3% from E19. Step ratios are approximate after rounding. Slot 4 still holds 7% AR5. The four-role policy is labelled the earlier batch policy. The reading-count sensitivity uses `new_wells=REPLICATES` (outputs unchanged). The 1% tolerance is stated as checked at base prices.
+
+**Rejected or left as options**
+
+- **Two donors at 5 and 6 wells (Fable).** Listed in `reports/lab_plan.md` as an option. Not adopted: the curvature contrast already has about 48% power at 11 wells, and halving wells per donor cuts it further.
+- **A no-cell blank per blend (Fable).** Listed as an option; it needs 10 wells per formulation instead of 11.
+- **About 28 wells per formulation for 80% power on the contrast (Astra).** Beyond one plate's capacity. Independent preparation repeats come first, in confirmation.

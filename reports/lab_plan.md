@@ -13,9 +13,11 @@ The memo gives the decision. This page gives what the bench needs, what I could 
 | Cells | One donor, one thaw, one rest period for all 57 cell-containing wells, so the E19 comparison is not confounded by donor or thaw | design rule |
 | Lots | FBS lot, basal media lots and serum-free media lots logged per medium preparation. FBS is the largest source of lot-to-lot variation in these media | `COMPONENT_LOT` in `docs/SCHEMA.md` |
 | Seeding density, well volume, rest time after thaw | **SOP**, copied from the source study's methods | not in the public workbook |
-| Readout | Viability % **and** total and viable cells per mL from the same AOPI read. Viability alone can stay high while cells are lost | `outputs/results_template.csv` |
-| Medium checks | pH and osmolality of each blend before dispensing. DMEM carries more bicarbonate than RPMI, so blends differ in pH under 5% CO2 | results template |
+| Readout | Viability % **and** total and viable cells per mL from the same AOPI read, plus a t = 0 count from the seeded suspension. Viability alone can stay high while cells are lost |
+| Harvest | One harvest procedure for every well, defined in the SOP: what is collected, how it is mixed, and the volume read | `outputs/results_template.csv` |
+| Medium checks | pH after equilibration in the incubator, and osmolality, for each blend. DMEM carries more bicarbonate than RPMI, so blends differ in pH under 5% CO2. DMEM share also moves glucose (4.5 against 2 g/L) and calcium (1.8 against 0.4 mM), so this plate cannot say which of them drives a DMEM effect | results template |
 | Pooling | The source study pooled cultures before reading. Reading single wells needs enough events per well; the assay owner confirms this, or wells are pooled and the replicate count changes | **SOP** |
+| Options if capacity allows | A no-cell blank per blend, to correct for medium autofluorescence (10 wells per formulation instead of 11). A second donor as a block, to show the ranking is not one donor's | option |
 | Supply | 11 wells per arm assumes enough cells from one donor and enough of each medium; if not, cut wells evenly across arms and widen the screen accordingly | assumption |
 
 ## 2. Plate validity, set before the run
@@ -50,10 +52,11 @@ The recipes do not transfer. Qorium grows bovine skin fibroblasts in bioreactors
 | PBMC case study | Qorium version |
 |---|---|
 | Suspension immune cells, viability at 72 h | Adherent bovine fibroblasts: attachment, growth to confluence and collagen deposition over weeks. Dead cells detach, so viability says little; growth rate and collagen are the endpoints |
-| Four commercial media, two with 10% FBS | An approved animal-product-free ingredient list. That excludes FBS and also animal-derived insulin, transferrin, albumin and trypsin. Dermal fibroblasts are among the easier cells to expand serum-free and commercial fibroblast serum-free media exist; the published gap below serum controls is for primary bovine myoblasts (Kolkmann, Post et al. 2020). The open question is collagen output per cell under animal-free conditions |
+| Four commercial media, two with 10% FBS | An approved animal-product-free ingredient list. That excludes FBS and also animal-derived insulin, transferrin, albumin and trypsin. Human dermal fibroblasts grow well serum-free and commercial fibroblast serum-free media exist; for bovine skin fibroblasts that is an expectation to test. The published gap below serum controls is for primary bovine myoblasts (Kolkmann, Post et al. 2020). Attachment substrates and dissociation enzymes must also be animal-free |
 | Mixture of four complete media on a simplex | Concentrations of 8 to 15 defined components in a box. The redundant-coordinate issue disappears, the kernel has more dimensions than this data could support, so it needs priors or a screening design first |
 | One endpoint | A non-destructive growth readout during culture, and collagen at the end. Collagen needs a definition first: deposited or secreted, per culture or per cell (for example hydroxyproline or Sirius Red), plus material-quality acceptance. Destructive assays need sister wells, which costs capacity |
 | Cost per litre against E19 | Medium cost per gram of acceptable collagen or per square metre of sheet, with quality constraints |
+| One medium | Two media phases: expansion, then collagen production. Collagen needs ascorbate and 2 to 4 weeks. Phenotype and passage number are recorded, because fibroblasts drift with passage |
 | A round takes days | A round takes weeks. Each round must carry more information, which argues for replication and designed contrasts over more formulations |
 
 **What changes in the code:** the candidate generator (box constraints instead of a simplex), the kernel inputs and priors, the cost denominator, the endpoints and their noise models, and the decision rules. The pending-point conditioning, anchor, validity gate and screen-then-confirm logic carry over.

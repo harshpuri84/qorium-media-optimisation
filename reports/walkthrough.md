@@ -20,7 +20,7 @@ A screen share of the memo and repo. Each block lists what is on screen, then wh
 
 "Second, DMEM is the only signal. Around 30% it scores 48, at 44% it scores 68 to 81, and from 60 to 77% it scores 43 to 56. The other three media vary widely inside round 3 and barely move the result.
 
-"Third, E14. It is almost identical to E10 and scored 7.5% against 48. Its own readings agree, so I think it's a technical failure. I keep it in the fit, because dropping data by its outcome biases the model."
+"Third, E14. It is almost identical to E10 and scored 7.5% against 48. E10 and E14 ran in different rounds, so it's most likely a donor or preparation difference, but the data can't prove that. I keep it in the fit, because dropping data by its outcome biases the model."
 
 ## 2:00 to 3:30. How far to trust the model
 
@@ -48,7 +48,7 @@ A screen share of the memo and repo. Each block lists what is on screen, then wh
 
 "I re-ran the selection 19 ways: different noise models, kernel limits, coordinates, without the odd results, and 8 price scenarios. The DMEM steps are fixed by design. Slot 4 holds except in two fits. Slot 3 moves with prices, which is expected for a cost pick.
 
-"I also simulated 30 paired campaigns. At this noise level no selection policy beat random picks reliably, and the blend you'd pick from single noisy readings ended 5 to 8 points below the best. So the plate spends its idle wells on replicates. Eleven wells per arm shrink the uncertainty on each comparison from plus or minus 13 points to plus or minus 7."
+"I also simulated 30 paired campaigns. At this noise level no selection policy showed a clear advantage over random picks, and the blend you'd pick from single noisy readings ended 5 to 8 points below the best. So the plate spends its idle wells on replicates. Eleven wells per arm shrink the uncertainty on each comparison from plus or minus 13 points to plus or minus 7."
 
 ## 6:15 to 8:00. From plate to decision, and Qorium
 
@@ -66,12 +66,13 @@ A screen share of the memo and repo. Each block lists what is on screen, then wh
 
 | Question | Short answer |
 |---|---|
+| Is your DMEM peak glucose, calcium, pH or osmolality? | The data can't separate them; DMEM share stands for all four. This plate records pH and osmolality per blend; the next round adds a glucose- or bicarbonate-matched contrast |
 | Why trust a GP that missed round 3 by 27 points? | I don't, as a forecast. I use it to propose candidates and to show me where it is overconfident. The DMEM steps test that overconfidence directly |
 | Why designed points instead of the model's picks? | The simulation found no reliable advantage for any policy at this noise level, and the model's sharpest assumption is untested. A designed contrast answers a clear question whatever the model believes |
 | What does P(above E19) = 0.39 mean? | Under the model, a 39% chance slot 4's true viability beats E19's. It ignores batch effects, which is why E19 is on the plate |
 | Why 11 wells? | The plate had 36 idle interior wells. Eleven per arm cut the interval on each comparison from about 13 to about 7 points without adding formulations |
 | Why is 50% DMEM allowed above the cost ceiling? | It is EUR 0.26/L over, smaller than the uncertainty in the FBS price. I allowed designed points 1% over; model picks must stay under |
-| Why exclude the reviewer's E10 and E14 re-runs? | E14's readings agree closely with each other, which points to a failed run. Re-running it would test the lab on that day, not the medium |
+| Why exclude the reviewer's E10 and E14 re-runs? | They ran in different rounds, so the gap most plausibly reflects donor or preparation. Re-running both with one donor tests the preparation, not the medium, and spends two of five slots where the data already score poorly |
 | If you had one more plate, run this or fix the noise first? | Run this. The anchor and 11 wells per arm are the noise measurement |
 | How would you build the team around this loop? | Start with a modeller-engineer and a lab-data owner embedded with R&D. The first deliverable is the schema and a frozen dataset per round. The assay owner holds the veto on plate validity |
 | Why believe a Bayesian method helps at all? | It hasn't yet beaten the mean, and the memo says so. Its value today is structure: an explicit uncertainty rule, an anchor and pass criteria set in advance. It earns trust when forward rounds beat the mean |
@@ -83,6 +84,6 @@ A screen share of the memo and repo. Each block lists what is on screen, then wh
 | Which donor and which thaw? | The historical data do not record them. This plate uses one donor and one thaw for every well; donor effects belong in the confirmation run |
 | Why viability and not cell count? | It is the only endpoint in the public data. This plate also records total and viable cells per mL from the same read |
 | How do you know 81% is real and not debris? | I don't. The plate adds heat-killed controls to set the dead-cell gate, and blanks for background |
-| Does a PBMC blend tell you anything about bovine fibroblasts? | Only the method. Fibroblasts are adherent and among the easier cells to grow serum-free. Your 2020 work showed the gap for bovine myoblasts; for fibroblasts I'd expect the open question to be collagen output per cell, not growth |
+| Does a PBMC blend tell you anything about bovine fibroblasts? | Only the method. Fibroblasts are adherent and need animal-free attachment and dissociation reagents. Human dermal fibroblasts grow well serum-free; for bovine skin fibroblasts that's an expectation to test. Your 2020 work showed the gap for bovine myoblasts. And collagen needs ascorbate and two to four weeks, so it's a separate production-phase medium |
 | What would your first Qorium plate look like? | Two designed steps on the component your team thinks matters most, two model picks within an approved animal-free list, your production medium as anchor, replicated wells, a growth readout during culture and collagen at the end |
 | What changes in your code for Qorium? | The candidate generator, the kernel inputs and priors, the cost denominator and the endpoints. The anchor, pending-point conditioning, validity gate and screen-then-confirm logic carry over |

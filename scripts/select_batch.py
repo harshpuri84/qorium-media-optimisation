@@ -184,7 +184,7 @@ def main():
         'gp_ls_floor_0.05': (GP('pooled', restarts=10, ls_floor=0.05).fit(X, y, sem), X),
         'gp_ls_floor_0.2': (GP('pooled', restarts=10, ls_floor=0.2).fit(X, y, sem), X),
         'gp_ls_upper_3': (GP('pooled', restarts=10, ls_upper=3.0).fit(X, y, sem), X),
-        'gp_noise_s2_over_n': (GP('pooled_n', restarts=10, n_readings=n_read).fit(X, y, sem), X),
+        'gp_noise_s2_over_n': (GP('pooled_n', restarts=10, n_readings=n_read, new_wells=REPLICATES).fit(X, y, sem), X),
         'gp_3coord_without_dmem': (GP('pooled', restarts=10, cols=(1, 2, 3)).fit(X, y, sem), X),
         'gp_3coord_without_xvivo': (GP('pooled', restarts=10, cols=(0, 1, 3)).fit(X, y, sem), X),
         'gp_without_e02': drop(LOW_IDS[0]),

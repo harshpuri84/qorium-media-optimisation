@@ -1,4 +1,4 @@
-@page { size: A4; margin: 14mm 14mm 14mm 14mm; }
+@page { size: A4; margin: 12mm 13mm 12mm 13mm; }
 body { font-family: "Inter", "Helvetica Neue", Arial, sans-serif; font-size: 9.4pt; line-height: 1.37; color: #262521; max-width: none; margin: 0; padding: 0; }
 header#title-block-header { border-bottom: 2px solid #C15F3C; padding-bottom: 6px; margin-bottom: 10px; }
 h1.title { font-size: 17pt; margin: 0 0 2px; letter-spacing: -0.01em; }

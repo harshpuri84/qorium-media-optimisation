@@ -76,8 +76,8 @@ td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:now
 .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;margin:4px 0 10px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .sw{width:11px;height:11px;border-radius:3px;display:inline-block}
-.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
-@media (max-width:760px){.flow{grid-template-columns:1fr}}
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+@media (max-width:980px){.flow{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:560px){.flow{grid-template-columns:1fr}}
 .step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;position:relative}
 .step .n{font:500 11px/1 var(--mono);color:var(--accent);letter-spacing:.06em}
 .step h5{margin:6px 0 4px;font-size:14.5px}
@@ -229,7 +229,7 @@ details p{margin:8px 0 2px;font-size:14.5px}
     <tbody>
       <tr><td>Round 3 beat every earlier round</td><td class="num">72.65% vs 39.98 to 50.65%</td><td>Recipe and lab day are confounded within the main data</td></tr>
       <tr><td>E19's recipe was re-run in the paper's control comparison</td><td class="num">80.2% (n = 6, SD 7.5)</td><td>Assumed a separate run (the data give no dates): round 3 then partly reproduces, and the anchor measures what is left</td></tr>
-      <tr><td>Two near-identical blends disagree</td><td class="num">E10 48.15% vs E14 7.52%</td><td>E14 is most likely a failed run; kept in the fit, because dropping data by outcome biases the model</td></tr>
+      <tr><td>Two near-identical blends disagree</td><td class="num">E10 48.15% vs E14 7.52%</td><td>E10 and E14 ran in different rounds, so a donor or preparation effect is plausible but unproven; E14 stays in the fit</td></tr>
       <tr><td>Readings are noisy</td><td class="num">pooled SD 9.51 pts</td><td>A 5-point gap is inside the noise of a few readings</td></tr>
     </tbody></table></div>
   <div class="fig">
@@ -239,7 +239,7 @@ details p{margin:8px 0 2px;font-size:14.5px}
   </div>
   <div class="pair">
     <div class="card memo"><div class="lab">Memo wording</div>
-      <p>DMEM is the only component with a clear signal. Across rounds 1 and 2, blends at 29 to 33% DMEM scored 48 to 49%, E12 at 44.5% scored 68.1%, and blends at 60 to 77% scored 43 to 56%. All six round-3 blends sit at 44 to 45% DMEM and score 67 to 81% while their other three components vary widely.</p>
+      <p>DMEM share is the only blend variable with a clear signal. It stands for what differs between DMEM and RPMI: glucose, calcium, bicarbonate (pH) and osmolality, which this design cannot separate. Across rounds 1 and 2, blends at 29 to 33% DMEM scored 48 to 49%, E12 at 44.5% scored 68.1%, and blends at 60 to 77% scored 43 to 56%. All six round-3 blends sit at 44 to 45% DMEM and score 67 to 81% while their other three components vary widely.</p>
     </div>
     <div class="card plain"><div class="lab">In plain words</div>
       <p>One dial seems to matter: how much DMEM is in the mix. Around 44% works; much less or much more does worse. The other three ingredients swing a lot in the best round without changing the result much.</p>
@@ -284,7 +284,7 @@ details p{margin:8px 0 2px;font-size:14.5px}
   <div class="pair">
     <div class="card memo"><div class="lab">Memo wording</div>
       <p>On all 24 blends no model beats the mean on honest uncertainty (NLPD 4.44 for the mean against 5.93 for the GP). The GP's leave-one-out rank correlation of 0.61 comes from separating round 3 from the rest; within rounds 0 to 2 it is 0.11. Every model under-predicted round 3 by 22 to 29 points. So the GP proposes candidates and the plate decides.</p>
-      <p>The model shrinks E19's observed 81.0 to 70.1, because the top of six noisy results is partly luck. Its DMEM length scale sits at its floor: it believes viability changes sharply with DMEM.</p>
+      <p>The model pulls E19's observed 81.0 down to 70.1, because it combines E19's readings with its lower-scoring neighbours and the fitted noise. Its DMEM length scale sits at its floor: it believes viability changes sharply with DMEM.</p>
     </div>
     <div class="card plain"><div class="lab">In plain words</div>
       <p>The model (a Gaussian process, GP) is a forecaster that also says how unsure it is. Tested honestly, it was wrong by 27 points on the round that mattered. It can tell "round-3 style" from "earlier style", but not which round-3 blend is best.</p>
@@ -336,7 +336,7 @@ details p{margin:8px 0 2px;font-size:14.5px}
   <div class="pair">
     <div class="card memo"><div class="lab">Memo wording</div>
       <p>An earlier version used four model picks. One of them, 44/26/19/11, was 0.981 correlated with E19 under the model and predicted at 70.2 against E19's 70.1: a well the model priced at nothing and the assay could not resolve. Independent reviewers flagged it, and I replaced it and the exploration pick with the two DMEM steps.</p>
-      <p>A reviewer also proposed re-running E10 and E14. I rejected it: E14's readings agree closely, which points to a failed run, so re-running it tests the lab on that day rather than the medium.</p>
+      <p>A reviewer also proposed re-running E10 and E14. I rejected it: the two ran in different rounds, so the gap most plausibly reflects donor or preparation, and re-running both on one plate tests that preparation, not the medium.</p>
     </div>
     <div class="card plain"><div class="lab">In plain words</div>
       <p>If the forecaster already rates a lane the same as the control lane, piloting it tells you almost nothing. Better to pilot where the forecaster is confident but nobody has checked: 40% and 50% DMEM.</p>
@@ -355,7 +355,7 @@ details p{margin:8px 0 2px;font-size:14.5px}
   </div>
   <div class="pair">
     <div class="card memo"><div class="lab">Memo wording</div>
-      <p>The DMEM steps are fixed by design. Slot 3 moved by a median 16% of volume, mainly with prices; slot 4 by a median 6%, and by 72% only in the fit without DMEM as a coordinate. Four fractions summing to one carry one redundant coordinate; dropping DMEM hides the signal inside the other three. I keep all four with a floor on the length scales; log-ratio coordinates are the standard alternative for the next round.</p>
+      <p>The DMEM steps are fixed by design. Slot 3 moved by a median 16% of volume, mainly with prices; slot 4 by a median 6%, and by 72% only in the fit without DMEM as a coordinate. Four fractions summing to one carry one redundant coordinate; dropping DMEM hides the signal inside the other three. I keep all four with a floor on the length scales; log-ratio coordinates (once zero components are handled) or orthonormal simplex coordinates are the options for the next round.</p>
     </div>
     <div class="card plain"><div class="lab">In plain words</div>
       <p>I changed one assumption at a time and watched whether the picks moved. The cheap pick moves when serum prices move, which is what a cost pick should do. The AR5 swap holds in almost every test.</p>
@@ -373,7 +373,7 @@ details p{margin:8px 0 2px;font-size:14.5px}
   </div>
   <div class="pair">
     <div class="card memo"><div class="lab">Memo wording</div>
-      <p>Random picks inside the rules ended 1.6 to 2.1 points from the best blend. Only UCB beat random reliably, and only at low noise (sign test p = 0.016 and 0.001, out of 16 exploratory comparisons). At the fitted noise of 11.8 points I detected no advantage for any policy, and the blend picked from single noisy readings sat 4.7 to 7.9 points below the best. That is why this plate spends wells on replicates and two slots on designed contrasts rather than four model picks.</p>
+      <p>Random picks inside the rules ended 1.6 to 2.1 points from the best blend. Only UCB showed nominal evidence of beating random, at low noise (sign test p = 0.016 and 0.001; 16 exploratory tests, Bonferroni threshold 0.003). At the fitted noise of 11.8 points I detected no advantage for any policy, and the blend picked from single noisy readings sat 4.7 to 7.9 points below the best. That is why this plate spends wells on replicates and two slots on designed contrasts rather than four model picks.</p>
     </div>
     <div class="card plain"><div class="lab">In plain words</div>
       <p>I played the experiment 30 times on fake data where I know the right answer. With this much noise, clever picking barely beats random picking. What hurts is choosing the winner from one noisy result. So the plate measures each blend 11 times instead of chasing more candidates.</p>
@@ -392,8 +392,9 @@ details p{margin:8px 0 2px;font-size:14.5px}
   </div>
   <div class="flow">
     <div class="step"><div class="n">STEP 1</div><h5>Is the plate valid?</h5><p>Blanks, heat-killed controls, missing wells and spread are checked against rules set before the run. Invalid plates are repeated, not interpreted.</p></div>
-    <div class="step"><div class="n">STEP 2</div><h5>Screen</h5><p>A blend passes if its mean is no more than 5 points below the same-plate E19, at equal or lower cost. A pass means "not excluded".</p></div>
-    <div class="step"><div class="n">STEP 3</div><h5>Confirm, then decide</h5><p>One finalist against E19 on independent cell and medium preparations, on different days. Accept if the lower bound stays above minus 5 points.</p></div>
+    <div class="step"><div class="n">STEP 2</div><h5>Read the DMEM steps</h5><p>Pre-registered test: E19 minus the mean of the 40% and 50% steps. Predicted 5.6 points, SE about 3.5, power about 48%. "Inconclusive" is allowed. Read regardless of cost.</p></div>
+    <div class="step"><div class="n">STEP 3</div><h5>Screen slots 3 and 4</h5><p>A blend passes if its mean is no more than 5 points below the same-plate E19, at equal or lower cost. A pass means "not excluded".</p></div>
+    <div class="step"><div class="n">STEP 4</div><h5>Confirm, then decide</h5><p>One finalist against E19 on independent cell and medium preparations, on different days. Accept if the lower bound stays above minus 5 points.</p></div>
   </div>
   <div class="fig">
     <h4>How sharp is the screen?</h4>
@@ -404,8 +405,8 @@ details p{margin:8px 0 2px;font-size:14.5px}
   <div class="tbl"><table>
     <thead><tr><th>A valid plate shows</th><th>Next step</th></tr></thead>
     <tbody>
-      <tr><td>Viability falls off at 40% or 50% DMEM</td><td>The sharp DMEM peak is real; search near 44% and relax the other three</td></tr>
-      <tr><td>40% and 50% close to E19</td><td>The peak is broader than the model thinks; widen the DMEM range</td></tr>
+      <tr><td>Curvature detected along the E19 path</td><td>Evidence of a local optimum near 44%; confirm, then search there</td></tr>
+      <tr><td>No curvature detected</td><td>Inconclusive, or broader than the model thinks; widen the DMEM range</td></tr>
       <tr><td>Slot 3 not excluded</td><td>Candidate for confirmation; it raises FBS to 9.9%, so it does not help an animal-free medium</td></tr>
       <tr><td>Slot 4 not excluded</td><td>AR5 may be replaceable by X-VIVO 15; confirm before acting</td></tr>
       <tr><td>E19 far below 80</td><td>Review preparation and assay conditions before the next round</td></tr>
@@ -415,7 +416,7 @@ details p{margin:8px 0 2px;font-size:14.5px}
       <p>With 11 wells per arm the 90% interval on the difference is about plus or minus 7 points: a blend equal to E19 passes 89% of the time, one 10 points worse 11%. A lead needs a mean above E19 by more than the interval. This plate estimates variation within one preparation only; independent repeats come first and size the confirmation.</p>
     </div>
     <div class="card plain"><div class="lab">In plain words</div>
-      <p>The plate is a filter, not a verdict. It throws out clear losers. Anything that survives gets a proper trial on fresh cells and fresh media on different days, because all 55 wells on this plate share one batch of cells, so they cannot tell you how much results move between batches.</p>
+      <p>The two DMEM steps are a question, not candidates: does viability drop on both sides of 44%? The plate has about even odds of seeing that, so "can't tell" is a fair answer and I say so up front. The other two are a filter, not a verdict. It throws out clear losers. Anything that survives gets a proper trial on fresh cells and fresh media on different days, because all 55 wells on this plate share one batch of cells, so they cannot tell you how much results move between batches.</p>
     </div>
   </div>
 </section>
@@ -427,7 +428,7 @@ details p{margin:8px 0 2px;font-size:14.5px}
     <thead><tr><th>PBMC case study</th><th>Qorium version</th></tr></thead>
     <tbody>
       <tr><td>Suspension immune cells, viability at 72 h</td><td>Adherent bovine fibroblasts, growth to confluence and collagen over weeks. Dead cells detach, so viability says little; growth rate and collagen are the endpoints</td></tr>
-      <tr><td>Two media carry 10% FBS</td><td>Animal-free list: no FBS, no animal-derived insulin, transferrin, albumin or trypsin. Fibroblasts are among the easier cells to grow serum-free; the published gap is for bovine myoblasts (Kolkmann, Post et al. 2020). The open question is collagen output per cell</td></tr>
+      <tr><td>Two media carry 10% FBS</td><td>Animal-free list: no FBS, no animal-derived insulin, transferrin, albumin or trypsin. Human dermal fibroblasts grow well serum-free; for bovine skin fibroblasts that is an expectation to test, and the published gap is for bovine myoblasts (Kolkmann, Post et al. 2020). Two media are needed, expansion and collagen production (ascorbate, 2 to 4 weeks), plus animal-free attachment and dissociation reagents</td></tr>
       <tr><td>Four complete media on a simplex</td><td>8 to 15 defined components in a box; needs priors or a screening design first</td></tr>
       <tr><td>Cost per litre against E19</td><td>Medium cost per gram of acceptable collagen or per square metre of sheet</td></tr>
       <tr><td>A round takes days</td><td>A round takes weeks, so each round must carry more information</td></tr>
@@ -459,6 +460,7 @@ details p{margin:8px 0 2px;font-size:14.5px}
     <div class="tl"><div class="when">3 Oct · GPT-6 Astra</div><h5>Memo and workflow reviews</h5><p>"Ranking aid" overclaimed; the confirmation size had only 51% power; every pick raised FBS against Qorium's animal-free process; no plate-validity gate. Rewrote the decision path and added a lab plan.</p></div>
     <div class="tl"><div class="when">3 Oct · five Sonnet 5.5 auditors</div><h5>Audit swarm: numbers, statistics, biology, panel, code</h5><p>Most important: the simulation did not give every policy the same noise. Fixed, and the result reversed: at realistic noise no policy beat random. Also added plate controls, viable cell counts, a licence and the 3-coordinate checks.</p></div>
     <div class="tl"><div class="when">3 Oct · Astra and Fable, adversarial</div><h5>Two reviewers told to break it</h5><p>Both showed the exploit pick was the same as E19 in the model's eyes. I chose the DMEM titration and 11 wells per arm. I rejected re-running E10 and E14, and logged why.</p></div>
+    <div class="tl"><div class="when">4 Oct · Fable 5.1 and Astra</div><h5>Biologist and data-scientist reviews of the final memo</h5><p>DMEM share is a proxy for glucose, calcium, pH and osmolality. The steps cannot "settle" the peak (about 48% power), so the curvature test is pre-registered with "inconclusive" allowed. Added t = 0 read, two media phases for Qorium, and fixed seven mismatches.</p></div>
   </div>
   <div class="pair">
     <div class="card memo"><div class="lab">How I describe it</div>
@@ -498,7 +500,7 @@ details p{margin:8px 0 2px;font-size:14.5px}
   <details><summary>What does P(above E19) = 0.39 mean?</summary><p>Under the model, a 39% chance slot 4's true viability beats E19's. It ignores batch effects, which is why E19 runs on the same plate.</p></details>
   <details><summary>Why 11 wells?</summary><p>The plate had 36 idle interior wells. Eleven per arm cut the interval on each comparison from about 13 to about 7 points without adding formulations.</p></details>
   <details><summary>Why is 50% DMEM allowed above the cost ceiling?</summary><p>It is EUR 0.26/L over, smaller than the uncertainty in the FBS price. Designed points may be 1% over; model picks must stay under.</p></details>
-  <details><summary>Does a PBMC blend tell you anything about bovine fibroblasts?</summary><p>Only the method. Fibroblasts attach to surfaces and are among the easier cells to grow serum-free. Your 2020 work showed the gap for bovine myoblasts; for fibroblasts the open question is collagen output per cell.</p></details>
+  <details><summary>Does a PBMC blend tell you anything about bovine fibroblasts?</summary><p>Only the method. Fibroblasts attach to surfaces and need animal-free attachment and dissociation reagents. Human dermal fibroblasts grow well serum-free; for bovine skin fibroblasts that is an expectation to test. Your 2020 work showed the gap for bovine myoblasts, and collagen needs ascorbate and 2 to 4 weeks, so it is a separate production medium.</p></details>
   <details><summary>How do you know 81% is real and not debris?</summary><p>I don't. The plate adds heat-killed controls to set the dead-cell gate and blanks for background, and records viable cells per mL as well as viability.</p></details>
   <details><summary>How would you build the team around this loop?</summary><p>Start with a modeller-engineer and a lab-data owner embedded with R&amp;D. First deliverable: the schema and a frozen dataset per round, not a model. The assay owner holds the veto on plate validity.</p></details>
   <details><summary>Why believe a Bayesian method helps at all?</summary><p>It has not beaten the plain average yet, and the memo says so. Its value today is structure: an explicit uncertainty rule, an anchor and pass criteria set in advance. It earns trust when forward rounds beat the average.</p></details>
