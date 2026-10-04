@@ -38,7 +38,7 @@ A screen share of the memo and repo. Each block lists what is on screen, then wh
 
 "An earlier version used four model picks. Reviewers showed one of them was, to the model, the same as E19: correlation 0.98, predicted 70.2 against 70.1. A wasted well. I replaced it, and the exploration pick, with the two DMEM steps.
 
-"Another reviewer proposed re-running E10 and E14 to explain their gap. I rejected that. E14 looks like a lab failure, so re-running it tells us about that day, not about the medium.
+"Another reviewer proposed re-running E10 and E14 to explain their gap. I rejected that. E10 and E14 ran in different rounds, so their gap most likely reflects the donor or the preparation. Re-running both on one plate tests that preparation, not the medium, and spends two of five slots where the data already score poorly.
 
 "The two model picks: slot 3 is the best blend at least 2.5% cheaper. It nearly drops the serum-free media, but it raises FBS, so it's no help for an animal-free process. Slot 4 moves volume from AR5 to X-VIVO 15. AR5 has no public price, so if that works, the least certain cost leaves the problem."
 

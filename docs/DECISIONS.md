@@ -144,7 +144,7 @@ Two reviews of commit a729478: the science, read as a cell biologist (`docs/revi
 - **E14 belief withdrawn.** E10 and E14 ran in different rounds, so a donor or preparation effect is plausible; the low within-run SD cannot tell that from real biology. This replaces "technical failure" from 2026 10 03.
 - **Shrinkage described correctly.** The GP combines E19's readings with its neighbours and the fitted noise; it does not correct for picking the best of six.
 - **Scheffe cause withdrawn.** The data do not show whether shape, coverage or confounding explain the poor ranking.
-- **Simulation wording.** UCB has nominal evidence in two settings; neither p-value clears the Bonferroni threshold of 0.003.
+- **Simulation wording.** UCB has nominal evidence in two settings; against the Bonferroni threshold of 0.003, p = 0.001 clears it and p = 0.016 does not (corrected 4 Oct after a fact-check; the first version said neither clears).
 - **Coordinates.** Log-ratio coordinates need zero handling; orthonormal simplex coordinates are named as the other option.
 - **Serum-free is not animal-free.** X-VIVO 15 and AR5 are protein-containing (human albumin, transferrin). FBS is held at 6.2 to 6.8% across slots 1, 2, 4 and E19.
 - **Plate.** t = 0 count, one defined harvest procedure, pH after equilibration.
