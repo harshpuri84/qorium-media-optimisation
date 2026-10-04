@@ -16,7 +16,7 @@ A screen share of the memo and repo. Each block lists what is on screen, then wh
 
 "Twenty-four blends of four commercial media, PBMC viability at 72 hours. Three things matter.
 
-"First, round 3 beat everything at 73%, but all six round-3 blends sit at 44% DMEM. So a good recipe and a good lab day look the same. Partly answered, though: the same paper re-ran E19's recipe separately and got 80%.
+"First, round 3 beat everything at 73%, but all six round-3 blends sit at 44% DMEM. So a good recipe and a good lab day look the same. Partly answered, though, if I read the paper right: the same paper re-ran E19's recipe separately and got 80%.
 
 "Second, DMEM is the only signal. Around 30% it scores 48, at 44% it scores 68 to 81, and from 60 to 77% it scores 43 to 56. The other three media vary widely inside round 3 and barely move the result.
 

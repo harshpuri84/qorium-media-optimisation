@@ -19,7 +19,7 @@ Five formulations, 11 randomised wells each: two designed DMEM steps around the 
 | 4 | Expected improvement | 44% | 21% | 28% | 7% | 178.32 | 69.1 (51.3 to 86.8) | 0.39 |
 | Anchor | E19 re-run | 44.6% | 20.1% | 19.6% | 15.7% | 178.43 | 70.1; observed 81.0 | |
 
-*The model shrinks E19's 81.0 to 70.1 because its 11.8-point noise estimate treats the top of six as partly luck. The independent 80.2 re-run suggests that shrinkage is too strong, which is one more reason the same-plate E19, not the model, sets the bar. Ranges are for one measured recipe mean under the model. P(above E19) uses the joint posterior and ignores shifts between batches.*
+*The model shrinks E19's 81.0 to 70.1 because its 11.8-point noise estimate treats the top of six as partly luck. The 80.2 re-run, if it was a separate run, suggests that shrinkage is too strong, which is one more reason the same-plate E19, not the model, sets the bar. Ranges are for one measured recipe mean under the model. P(above E19) uses the joint posterior and ignores shifts between batches.*
 
 <figure class="float"><img src="figures/09_memo_batch_map.png" alt="Batch map"><figcaption>Picks (stars) against the 24 historical blends. Slots 1 and 2 sit on a line through E19: same ratios of the other three media, DMEM moved down and up.</figcaption></figure>
 
@@ -45,6 +45,7 @@ The decision is which 3 to 5 formulations go on the next plate, when each PBMC r
 | Cells | PBMCs stand in for bovine fibroblasts | Allowed by the brief |
 | Prices | FBS from a search snippet; AR5 unpriced, set equal to X-VIVO 15 and varied to 2.02 times | `price_sources.csv` |
 | Lab | Blends at 1% resolution; cells for 57 wells from one donor | To confirm |
+| E19 re-run | The paper's 80.2% control comparison was a separate run from round 3 | Data give no dates; to confirm from the methods |
 
 ## What the data says
 
@@ -53,7 +54,7 @@ I used the public PBMC media-blending data from Narayanan et al. (2025): 24 blen
 | Finding | Number | So what |
 |---|---|---|
 | Round 3 beat every earlier round | 72.65% vs 39.98 to 50.65% | Recipe and lab day are confounded within the main data |
-| E19's recipe was re-run in a separate comparison in the same paper | 80.2% (n = 6, SD 7.5) | Round 3 partly reproduces; the anchor measures what is left |
+| E19's recipe was re-run in the paper's control comparison | 80.2% (n = 6, SD 7.5) | Assumed a separate run (the data give no dates): round 3 then partly reproduces, and the anchor measures what is left |
 | Two near-identical blends disagree | E10 48.15% vs E14 7.52%, 2.60% of volume apart | E14 is most likely a technical failure, but no record proves it. It stays in the primary fit; without it the picks move at most 1% of volume while slot 4's estimate rises from 69 to 87, so the plate, not the fit, decides |
 | Readings are noisy | pooled within-recipe SD 9.51 points | A 5-point gap is inside the noise of four readings |
 
