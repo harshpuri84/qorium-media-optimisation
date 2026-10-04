@@ -27,7 +27,7 @@ Five formulations, 11 randomised wells each: two designed DMEM steps around the 
 
 **Cost.** Model picks cost no more per litre than E19 in at least 6 of 9 FBS and AR5 price scenarios. The designed steps may cost up to 1% more: 50% DMEM is EUR 0.26/L over E19, a gap smaller than the uncertainty in the FBS price itself. Savings against E19 are small (up to 2.53%), so this ceiling screens candidates; it is not a business case.
 
-**What I changed after review.** An earlier model pick, 44/26/19/11, was 0.981 correlated with E19 under the model and predicted at 70.2 against 70.1: a well the model priced at nothing. Reviewers flagged it; I replaced it and the exploration pick with the two DMEM steps.
+**What I changed after review.** An earlier version used four model picks. One of them, 44/26/19/11, was 0.981 correlated with E19 under the model and predicted at 70.2 against E19's 70.1: a well the model priced at nothing and the assay could not resolve. Independent reviewers flagged it, and I replaced it and the exploration pick with the two DMEM steps.
 
 ## What the data says
 
@@ -86,6 +86,7 @@ I used the public PBMC media-blending data from Narayanan et al. (2025): 24 blen
 ## Qorium, risks and validation
 
 - **Transfer.** Qorium grows adherent bovine skin fibroblasts on an animal-free process, so FBS and animal-derived insulin, transferrin and albumin are out. Fibroblasts are among the easier cells to grow serum-free; the published gap is for bovine myoblasts (Kolkmann, Post et al. 2020). The open question is collagen output per cell. A Qorium round takes weeks, not days, so each round must carry more information. What changes: a box of defined components instead of a simplex, growth and collagen endpoints, cost per gram of collagen. `reports/lab_plan.md` sketches that first plate.
-- **Model and validation.** The forward-test miss is the main warning; if E19 lands far from 80, add a batch term. This batch succeeds if it settles whether the DMEM peak is sharp and leaves one blend for confirmation.
+- **Model.** The forward-test miss is the main warning. If this plate's E19 lands far from 80, add a batch term before the next round.
+- **Validation.** This batch succeeds if it settles whether the DMEM peak is sharp and leaves at least one blend for confirmation.
 
-**Sources and method.** Data: Narayanan et al. 2025, Nat. Commun. 16:6055. Method: Cosenza et al. 2022, Biotechnol. Bioeng. 119:2447. `run_all.sh` reproduces every number. AI assistants wrote code and drafts and independent AI reviewers attacked the work; I set the questions and made the calls, logged in `docs/DECISIONS.md`.
+**Code, sources and method.** `run_all.sh` reproduces everything from public data (seed 20261002). Data: Narayanan et al. 2025, Nat. Commun. 16:6055. Method: Cosenza et al. 2022, Biotechnol. Bioeng. 119:2447.
