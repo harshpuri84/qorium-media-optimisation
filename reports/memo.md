@@ -29,6 +29,23 @@ Five formulations, 11 randomised wells each: two designed DMEM steps around the 
 
 **What I changed after review.** An earlier version used four model picks. One of them, 44/26/19/11, was 0.981 correlated with E19 under the model and predicted at 70.2 against E19's 70.1: a well the model priced at nothing and the assay could not resolve. Independent reviewers flagged it, and I replaced it and the exploration pick with the two DMEM steps.
 
+## Problem, objective and constraints
+
+The decision is which 3 to 5 formulations go on the next plate, when each round takes days, single results are noisy and only 24 historical blends exist. The goal is a next experiment that teaches the lab something whatever the result, not the best prediction.
+
+**Objective.** Maximise mean PBMC viability at 72 hours, subject to a cost per litre of prepared medium no higher than E19's under the same price scenario. I chose a constraint over a weighted score because a lab manager can check a constraint by hand.
+
+| Constraint or assumption | Value | Source or reason |
+|---|---|---|
+| Mixture | Fractions sum to 100%, whole percentages | 176,851 candidates |
+| Cost | Model picks at or below E19 (EUR 178.43/L) in 6 of 9 scenarios; designed steps up to 1% over | Cost rule |
+| Spacing | At least 5% of volume from any tested recipe, single medium or other pick | No near-duplicates |
+| Capacity | 5 formulations, 11 wells each | Brief caps at 5; 36 wells were idle |
+| Endpoint | Viability at 72 h, plus viable cells per mL | Only public endpoint |
+| Cells | PBMCs stand in for bovine fibroblasts | Allowed by the brief |
+| Prices | FBS from a search snippet; AR5 unpriced, set equal to X-VIVO 15 and varied to 2.02 times | `price_sources.csv` |
+| Lab | Blends at 1% resolution; cells for 57 wells from one donor | To confirm |
+
 ## What the data says
 
 I used the public PBMC media-blending data from Narayanan et al. (2025): 24 blends of four commercial media in four rounds of six, 103 viability readings at 72 hours. The tables are complete and labelled, and a four-part mixture keeps cost and feasibility checkable. PBMCs are human immune cells, not bovine fibroblasts, and two of the four media carry 10% FBS: the method transfers to Qorium, the recipes do not.
@@ -44,15 +61,28 @@ I used the public PBMC media-blending data from Narayanan et al. (2025): 24 blen
 
 **Models.** I compared a GP, a random forest, a Scheffe quadratic mixture model and the plain mean. On all 24 blends no model beats the mean on honest uncertainty (NLPD 4.44 for the mean against 5.93 for the GP). The GP's leave-one-out rank correlation of 0.61 comes from separating round 3 from the rest; within rounds 0 to 2 it is 0.11. The Scheffe model fails because its 10 coefficients face 24 points, six of them on one DMEM line and two near 7%. The forward test is the honest one: every model under-predicted round 3 by 22 to 29 points. So the GP proposes candidates and the plate decides.
 
+**Why a GP.** It returns an estimate and its uncertainty together, which batch selection needs to weigh "likely good" against "unknown". It handles small, noisy data through an explicit noise term, and pending picks can be conditioned on exactly, which makes batch selection simple. The random forest matched its error but gives no principled uncertainty; the Scheffe model ranked no better than chance. BoTorch or Ax would add little on 24 points and four components; scikit-learn with explicit conditioning is easier to check (`check_gp.py`).
+
 **Mixture coordinates.** Four fractions summing to one carry one redundant coordinate. Dropping X-VIVO 15 as a coordinate moves the model picks by 1 to 8% of volume; dropping DMEM moves them by up to 72%, because DMEM is where the signal is and hiding it inside the other three changes the kernel's smoothness assumptions. I keep all four with a floor on the length scales; log-ratio coordinates are the standard alternative for the next round.
 
 ## How sure we are
+
+| Source of uncertainty | How I handle it |
+|---|---|
+| Reading noise | The GP learns 11.83 points SD on a recipe mean, against a root-mean-square reading SEM of 4.97; the gap covers run-to-run variation and model error, so I use the larger figure |
+| Model form | Reruns with other noise models, length-scale limits and three-coordinate fits |
+| Unexplained low results | Reruns without E02 and without E14 |
+| Prices | Reruns under 8 other FBS and AR5 price scenarios |
+| My selection rules | One-at-a-time changes to the cheaper margin, minimum gap, scenario rule and cost tolerance |
+| Batch shift | E19 re-run on the same plate; 11 wells per formulation in randomised row blocks |
 
 <figure class="float"><img src="figures/12_memo_pass_probability.png" alt="Screen pass probability"><figcaption>Chance a blend passes the 5-point screen. Eleven wells per arm sharpen the screen at no cost in formulations.</figcaption></figure>
 
 **Robustness.** I reran the selection 19 times: other noise models, length-scale limits, three-coordinate fits, without E02 or E14, with E19 not pending, with a 1% cost tolerance for model picks, and under 8 other price scenarios. The DMEM steps are fixed by design. Slot 3 moved by a median 16% of volume, mainly with prices; slot 4 by a median 6%, and by 72% only in the fit without DMEM as a coordinate.
 
 **Simulation.** I ran 30 paired campaigns of 18 blends against two smooth synthetic truths at two noise levels, with the same rules and measurement errors for every policy. Random picks inside the rules ended 1.6 to 2.1 points from the best blend. Only UCB beat random reliably, and only at low noise (sign test p = 0.016 and 0.001, out of 16 exploratory comparisons). At the fitted noise of 11.8 points I detected no advantage for any policy, and the blend picked from single noisy readings sat 4.7 to 7.9 points below the best. That is why this plate spends wells on replicates and two slots on designed contrasts rather than four model picks. The simulation did not test that remedy.
+
+**Exploration and exploitation.** The batch explores where the model is most confident and least tested, the sharp DMEM peak, with two designed steps that answer a clear question whatever the model believes. It exploits with two model picks at the current DMEM level: one for cost, one for the most promising change. The anchor makes all four readable against the best blend on the same plate.
 
 ## From plate to decision
 
