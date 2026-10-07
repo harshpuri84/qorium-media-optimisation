@@ -38,8 +38,9 @@ A failed check makes the plate inconclusive: investigate, then repeat the same f
 
 | Step | Rule |
 |---|---|
-| Screen | A blend passes if its mean is no more than 5 points below the same-plate E19, at equal or lower cost. With 11 wells per arm the 90% interval on the difference is about plus or minus 7 points (t, 20 degrees of freedom) |
-| How often a blend passes | Truly equal to E19: 89%. 5 points worse: 50%. 10 points worse: 11%. 15 points worse: under 1%. All four comparisons share one E19 estimate, so their errors are correlated |
+| DMEM diagnostic | Read the prespecified contrast: E19 minus the interpolated mean of the 40% and 50% DMEM steps. This tests curvature along E19's dilution path, regardless of cost; an inconclusive result is allowed |
+| Screen | Slots 3 and 4 pass if their mean is no more than 5 points below the same-plate E19, at equal or lower cost. With 11 wells per arm the 90% interval on the difference is about plus or minus 7 points (t, 20 degrees of freedom), assuming independent wells with the historical SD |
+| How often a blend passes | Truly equal to E19: 89%. 5 points worse: 50%. 10 points worse: 11%. 15 points worse: under 1%. Both screening comparisons share one E19 estimate, so their errors are correlated |
 | What a pass means | "Not excluded". A lead needs a mean above E19 by more than the interval |
 | Independent repeats | This plate estimates variation within one cell and one medium preparation. Before sizing confirmation, repeat the finalist and E19 on independent preparations to estimate preparation-to-preparation variance |
 | Confirm | One finalist, two at most. Paired comparison against concurrent E19, blocked by independent preparations on different days. Accept if the one-sided 95% lower bound on the difference stays above minus 5 points, with acceptable cost and quality |
@@ -63,7 +64,7 @@ The recipes do not transfer. Qorium grows bovine skin fibroblasts in bioreactors
 
 **A first Qorium plate in the same pattern:** two designed steps on the component the team believes matters most, two model picks within an approved animal-free list, the current production medium as the anchor, replicated wells, a growth readout mid-culture and collagen at the end.
 
-## 5. Questions I would ask the CSO
+## 5. Open questions
 
 1. Which endpoint decides a medium change: growth rate, collagen per cell, sheet properties, or cost per square metre?
 2. What loss in that endpoint is acceptable for what saving, and who signs it off?
