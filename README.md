@@ -20,16 +20,16 @@ docs/              Schema, data dictionary, decisions log, data audit, plan, rev
 scripts/           Data preparation, cost rule, model comparison, batch selection and GP checks
 notebooks/         Narrated walkthrough notebook, executed with outputs (renders on GitHub)
 reports/           Memo (md, rendered html and pdf, css), walkthrough script, exploratory, model and batch reports
-reports/figures/   Figures 01 to 10 (09 and 10 are the memo figures)
+reports/figures/   Figures 01 to 12 (09 to 12 are the memo figures)
 reports/tables/    Generated evidence tables
 outputs/           Recommended blends, plate formulations, randomised plate layout, recipe manifest and per-well results template
 ```
 
-Start with `reports/memo.pdf`, or `notebooks/walkthrough.ipynb` for the same story with the evidence inline. Then `reports/batch_selection.md` for the recommendation detail, `reports/model_comparison.md` for the evidence, and `docs/SCHEMA.md` for the data model.
+Start with [the memo](reports/memo.pdf), or [the notebook](notebooks/walkthrough.ipynb) for the same story with the evidence inline. Then read [the batch recommendation](reports/batch_selection.md), [model evidence](reports/model_comparison.md), [lab plan and open questions](reports/lab_plan.md), and [data schema](docs/SCHEMA.md). Use [the eight-minute walkthrough](reports/walkthrough.md) for the interview. Dated review files and the decision log record earlier snapshots; their old recipe values and findings may be superseded.
 
 ## Reproduce everything
 
-Python 3.12 or newer and the pinned dependencies in `requirements.txt`. One command rebuilds every table, figure and the recommendation (seed 20261002). It regenerates the tracked outputs in place and finishes by listing any files that differ from the committed version. A fresh clone into a fresh environment took 4 to 5 minutes on an Apple-silicon laptop, and its outputs matched the committed files byte for byte. Other platforms may differ in the last decimals of optimiser output.
+Python 3.12 or newer and the pinned dependencies in `requirements.txt`. One command rebuilds the generated analysis tables, figures and recommendation (seed 20261002). It regenerates the tracked outputs in place and finishes by listing any files that differ from the committed version. The previously recorded fresh-clone run took 4 to 5 minutes on an Apple-silicon laptop. An isolated rerun on 7 October reproduced the CSVs and PNGs byte for byte; the five exploratory PDFs differed only in creation-date metadata. Other platforms may differ in the last decimals of optimiser output.
 
 ```sh
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
@@ -86,7 +86,7 @@ Base prices (2026-10-02): DMEM-10 EUR 180.89, RPMI-10 EUR 168.45, X-VIVO 15 EUR 
 - Prices are provisional: FBS comes from a search snippet and AR5 is a hypothetical proxy. Results are reported across nine price scenarios.
 - The GP is a ranking aid, not a forecaster: every model under-predicted round 3 by 22 to 29 points. The batch includes an E19 re-run as a same-plate anchor.
 
-See [project plan](docs/PLAN.md), [data dictionary](docs/DATA_DICTIONARY.md), [decisions](docs/DECISIONS.md) and [data audit](docs/data_audit.md).
+See [project plan](docs/PLAN.md), [data dictionary](docs/DATA_DICTIONARY.md), [decisions](docs/DECISIONS.md), [data audit](docs/data_audit.md) and [Markdown consistency audit](docs/markdown_audit_2026-10-07.md).
 
 See the [exploratory report](reports/exploratory_analysis.md) for the findings and modelling implications. PNG figures support review; PDF versions support reuse in the technical memo.
 
@@ -96,4 +96,4 @@ Code: MIT (`LICENSE`). Data: the PBMC and K. phaffii workbooks in `data/raw/nara
 
 ## How this was built
 
-I used AI assistants to draft code and text and as adversarial reviewers. Their review records are in `docs/` with dates, and every change they prompted is logged in `docs/DECISIONS.md`. Every number in the memo is reproduced by `run_all.sh`. The judgement calls are mine.
+I used AI assistants to draft code and text and as adversarial reviewers. Their review records are in `docs/` with dates, and every change they prompted is logged in `docs/DECISIONS.md`. `run_all.sh` reproduces the data, model, simulation and recommendation results cited in the memo. The screen and confirmation planning figures are conditional statistical calculations described in [the lab plan](reports/lab_plan.md), rather than a separate output of the runner. The judgement calls are mine.

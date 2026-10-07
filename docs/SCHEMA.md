@@ -5,7 +5,7 @@ This schema covers two things. The first is what this repo stores today. The sec
 ## Design rules
 
 - Keep the recipe (what we intend to mix), the preparation (what was actually mixed, from which lots), the culture (cells in a well) and the measurement (what the assay read) apart. The same recipe on two plates is two runs. A model that confuses them counts re-runs as new information and misses batch effects. The E19 anchor exists for that reason.
-- Biological replication lives on CELL_PREP and MEDIUM_PREP, not on WELL. Four wells from one cell preparation and one medium preparation measure repeatability, not robustness. Confirmation needs independent preparations.
+- Biological replication lives on CELL_PREP and MEDIUM_PREP, not on WELL. Eleven wells from one cell preparation and one medium preparation measure within-preparation repeatability, not robustness across independent preparations. Confirmation needs independent preparations.
 - A measurement belongs to a SAMPLE. A sample can pool several wells, and one sample can be read several times. This is how the source study worked: it pooled cultures before reading.
 - Raw results are never overwritten. Each measurement keeps its raw-file reference, protocol version, QC status and any exclusion reason. Summaries are derived.
 - Every price carries a currency, a date, a source and a basis (`observed`, `estimate` or `hypothetical`).
@@ -77,7 +77,7 @@ erDiagram
         string run_id PK
         string formulation_id FK
         string batch_id FK
-        string role "exploit, cheaper, explore, EI, anchor"
+        string role "DMEM step, cheaper, EI, anchor; other roles in future designs"
     }
     MEDIUM_PREP {
         string medium_prep_id PK

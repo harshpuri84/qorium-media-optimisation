@@ -20,7 +20,7 @@ Regenerate with `python scripts/select_batch.py`. Outputs:
 
 Each formulation gets 11 wells: 55 formulation wells, 2 no-cell blanks and 2 heat-killed controls in the 60 interior wells, and a PBS ring on the edge.
 
-- **Model estimate.** Posterior mean of the pooled-noise GP. The model shrinks E19's observed 81.0 to 70.1, so compare picks with 70.1. The forward test missed round 3 by up to 29 points, so these are conditional on the model.
+- **Model estimate.** Posterior mean of the pooled-noise GP. The model shrinks E19's observed 81.0 to 70.1; model predictions and probabilities use that joint posterior. The experiment compares measured candidates with the concurrent E19 re-run. Every model under-predicted round 3 by 22 to 29 points, so predictions are conditional on the fitted model.
 - **P(above E19).** From the joint posterior of each pick and E19. It ignores shifts between batches.
 - **Cost.** Model picks cost no more than E19 (EUR 178.43/L) at base prices and in at least 6 of 9 price scenarios (slot 3: 7, slot 4: 8). The designed steps may cost up to 1% more; slot 2 is EUR 0.26/L over at base prices and meets the ceiling in 6 of 9 scenarios, slot 1 in 3 of 9.
 
@@ -44,8 +44,8 @@ Every model pick keeps at least 5% of volume from every tested recipe, the singl
 
 | Batch | Recipes | Why not chosen |
 | --- | --- | --- |
-| Earlier four-role GP batch | 44/26/19/11, 43/56/1/0, 37/33/30/0, 45/21/27/7 | Slot 1 was 0.981 correlated with E19 and predicted at 70.2 against 70.1: the model priced it at nothing and the screen could not resolve it. The explore pick depended on the model (it moved up to 40% of volume between fits) |
-| Reviewer's diagnostic batch | E10, E14, 44/26/19/11, 43/56/1/0 | Re-running E10 and E14 would test whether their 40.6-point gap reproduces. E10 and E14 ran in different rounds, so their gap most plausibly reflects a donor or preparation difference. Re-running both on one plate with one donor tests that preparation rather than the medium, and spends two of five slots in a low-DMEM region the data already rate poorly. I rejected it and logged why in `docs/DECISIONS.md` |
+| Earlier four-role GP batch | 44/26/19/11, 43/56/1/0, 37/33/30/0, 45/21/27/7 | Slot 1 was 0.981 correlated with E19 and predicted at 70.2 against 70.1: little predicted improvement, although measuring it could still add information. The explore pick depended on the model (it moved up to 40% of volume between fits) |
+| Reviewer's diagnostic batch | E10, E14, 44/26/19/11, 43/56/1/0 | A same-plate re-run of E10 and E14 would test whether their 40.6-point gap reproduces under shared conditions; it cannot establish its historical cause. I prioritised the DMEM contrast around the strongest observed region rather than allocating two slots to this alternative. The cause of the gap remains unresolved; see `docs/DECISIONS.md` |
 | Chosen | 40/22/21/17, 50/18/18/14, 43/56/1/0, 44/21/28/7 | Tests the one signal in the data, keeps a cost test and an AR5 test, and uses idle wells for replicates |
 
 ## Robustness
@@ -80,13 +80,13 @@ Every model pick keeps at least 5% of volume from every tested recipe, the singl
 
 What this shows:
 
-- **Slot 4 is stable** except under the per-recipe noise model (34%) and the fit without DMEM as a coordinate (72%). The direction, less AR5 and more X-VIVO 15 at about 44% DMEM, holds in every other rerun.
+- **Slot 4 is stable** except under the per-recipe noise model (34%) and the fit without DMEM as a coordinate (72%). Most other reruns retain less AR5 and more X-VIVO 15 near 44% DMEM. Allowing model picks 1% extra cost is another exception: slot 4 becomes 44/12/28/16, with 16% AR5 versus E19's 15.7%.
 - **Slot 3 depends on prices and on the 2.5% margin.** At a 5% margin it becomes 0/92/0/8, nearly pure RPMI-10. The margin is a judgement call.
 - **Coordinate choice matters.** Four fractions summing to one carry a redundant coordinate. Dropping DMEM hides the one component with signal inside the other three and changes the kernel's smoothness assumptions; dropping X-VIVO 15 changes little. I keep four coordinates with a length-scale floor; log-ratio coordinates (once zero components are handled) or orthonormal simplex coordinates are the options for the next round.
 
 ## Exploration and exploitation
 
-The batch explores where the model is most confident and least tested: the claimed sharp DMEM peak. That is a designed contrast, not a model pick, because the simulation detected no advantage for any acquisition policy at the fitted noise level, and the blend picked from single noisy readings ended 4.7 to 7.9 points below the best available. The two model picks cover cost (slot 3) and the most promising change at the current DMEM level (slot 4). Eleven wells per arm address the noise directly.
+The designed steps test the model's sharp DMEM response along E19's mixture path. Their latent posterior SDs are 7.3 and 7.4 points, versus 5.5 and 7.2 for the model picks. That is a designed contrast, not a model pick, because the simulation detected no advantage for any acquisition policy at the fitted noise level, and the blend picked from single noisy readings ended 4.7 to 7.9 points below the best available. The two model picks cover cost (slot 3) and the most promising change at the current DMEM level (slot 4). Eleven wells per arm address the noise directly.
 
 ## What the lab result would tell us
 
@@ -94,10 +94,10 @@ The plate is read only after the assay owner confirms it is valid against criter
 
 | Valid plate shows | Next step |
 | --- | --- |
-| Curvature detected along the E19 path | Evidence of a local optimum near 44%; confirm, then search there |
+| Curvature detected along the E19 path | Evidence of curvature along the tested mixture path; confirm before narrowing the search |
 | No curvature detected | Inconclusive, or broader than the model thinks; widen the DMEM range |
 | Slot 3 not excluded | Candidate for confirmation; not a step toward animal-free media |
 | Slot 4 not excluded | AR5 may be replaceable by X-VIVO 15; confirm before acting on it |
 | E19 far below 80 | Review preparation and assay conditions before the next round |
 
-A blend passes the screen if its mean is no more than 5 points below the same-plate E19 at equal or lower cost. With 11 wells per arm, the 90% interval on that difference is about plus or minus 7 points (t, 20 degrees of freedom): a blend equal to E19 passes 89% of the time, one 10 points worse 11%. A pass means "not excluded"; a lead needs a mean above E19 by more than the interval. This plate measures variation within one cell and medium preparation only. Independent repeats come first; they set the size of the confirmation run.
+Slots 3 and 4 pass the screen if their mean is no more than 5 points below the same-plate E19 at equal or lower cost. With 11 wells per arm, the 90% interval on that difference is about plus or minus 7 points (t, 20 degrees of freedom), assuming independent wells with historical SD 9.51. Using a normal approximation, a blend equal to E19 passes 89% of the time, one 10 points worse 11%. A pass means "not excluded"; a lead needs a mean above E19 by more than the interval. This plate measures variation within one cell and medium preparation only. Independent repeats come first; they set the size of the confirmation run.

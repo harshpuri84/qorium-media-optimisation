@@ -6,7 +6,7 @@ A screen share of the memo and repo. Each block lists what is on screen, then wh
 
 **Screen.** `reports/memo.pdf`, page 1.
 
-"One line first. The data can't tell us which blend is best. They point to one signal, DMEM around 44%, and a model that is far more confident about that peak than it has earned. So I recommend a plate that tests the peak directly. Two blends step DMEM down to 40% and up to 50%, keeping E19's other ratios. Two blends come from the model: one cheaper, and one that swaps AR5 for X-VIVO 15. And E19 itself, the best historical blend, runs again on the same plate as the anchor. Eleven wells each, no more expensive than E19.
+"One line first. The data can't tell us which blend is best. They point to one signal, DMEM around 44%, and a model that is far more confident about that peak than it has earned. So I recommend a plate that tests the peak directly. Two blends step DMEM down to 40% and up to 50%, approximately preserving E19's other-component ratios. Two blends come from the model: one cheaper, and one that swaps AR5 for X-VIVO 15. And E19 itself, the best historical blend, runs again on the same plate as the anchor. Eleven wells each. Model picks stay within E19's cost; the designed steps may be up to 1% over at base prices.
 
 "I'm not a cell biologist. I used AI assistants for the code and drafts and as adversarial reviewers. My job was to frame the question, decide between options, and reject what didn't hold up. I'll show you where I did that."
 
@@ -20,7 +20,7 @@ A screen share of the memo and repo. Each block lists what is on screen, then wh
 
 "Second, DMEM is the only signal. Around 30% it scores 48, at 44% it scores 68 to 81, and from 60 to 77% it scores 43 to 56. The other three media vary widely inside round 3 and barely move the result.
 
-"Third, E14. It is almost identical to E10 and scored 7.5% against 48. E10 and E14 ran in different rounds, so it's most likely a donor or preparation difference, but the data can't prove that. I keep it in the fit, because dropping data by its outcome biases the model."
+"Third, E14. It is almost identical to E10 and scored 7.5% against 48. E10 and E14 ran in different rounds, so a donor or preparation difference is plausible, but the data cannot distinguish it from a real recipe effect. I keep it in the fit, because dropping data by its outcome biases the model."
 
 ## 2:00 to 3:30. How far to trust the model
 
@@ -36,11 +36,11 @@ A screen share of the memo and repo. Each block lists what is on screen, then wh
 
 **Screen.** Memo batch map, then `reports/batch_selection.md`, "Batches considered".
 
-"An earlier version used four model picks. Reviewers showed one of them was, to the model, the same as E19: correlation 0.98, predicted 70.2 against 70.1. A wasted well. I replaced it, and the exploration pick, with the two DMEM steps.
+"An earlier version used four model picks. One was strongly correlated with E19 under the model: 0.98, predicted 70.2 against 70.1. I prioritised the DMEM steps over that small predicted improvement and the exploration pick. A correlated candidate can still provide information; this was a choice about what the next plate should test.
 
-"Another reviewer proposed re-running E10 and E14 to explain their gap. I rejected that. E10 and E14 ran in different rounds, so their gap most likely reflects the donor or the preparation. Re-running both on one plate tests that preparation, not the medium, and spends two of five slots where the data already score poorly.
+"Another reviewer proposed re-running E10 and E14. That is a useful alternative: a same-plate comparison would test whether their gap reproduces under shared conditions, though it could not identify the historical cause. I prioritised the DMEM contrast because it directly tests the response around the strongest observed region. E10 and E14 remain unresolved, and both stay in the fit.
 
-"The two model picks: slot 3 is the best blend at least 2.5% cheaper. It nearly drops the serum-free media, but it raises FBS, so it's no help for an animal-free process. Slot 4 moves volume from AR5 to X-VIVO 15. AR5 has no public price, so if that works, the least certain cost leaves the problem."
+"The two model picks: slot 3 is the best blend at least 2.5% cheaper. It nearly drops the serum-free media, but it raises FBS, so it's no help for an animal-free process. Slot 4 moves volume from AR5 to X-VIVO 15. AR5 has no public price. Slot 4 still contains 7% AR5, so it tests a partial substitution and reduces exposure to that uncertain price."
 
 ## 5:00 to 6:15. What could make me wrong
 
@@ -56,9 +56,9 @@ A screen share of the memo and repo. Each block lists what is on screen, then wh
 
 "Three steps. First, is the plate valid? The assay owner checks blanks, dead-cell controls and spread against rules set in advance. If it fails, we repeat it; we don't interpret it.
 
-"Then the screen. A blend passes if it is within 5 points of the same-plate E19 at equal or lower cost. A pass means 'not excluded', not 'better'.
+"Second, read the DMEM contrast, whether or not those steps meet the cost screen. Then screen slots 3 and 4: their mean must be no more than 5 points below the same-plate E19 at equal or lower cost. A pass means 'not excluded', not 'better'.
 
-"Then confirmation, on independent cell and medium preparations, sized from what this plate teaches us about variation.
+"Third, before sizing confirmation, repeat the finalist and E19 on independent cell and medium preparations. Those repeats estimate preparation-to-preparation variation; this plate estimates variation within one preparation only.
 
 "For Qorium, the recipes don't transfer: your cells are adherent fibroblasts and the process is animal-free. What transfers is the loop: designed contrasts where the model is overconfident, an anchor every round, replicates, a validity gate, and cost per unit of collagen as the business test. My questions for you are which endpoint decides a medium change, and what loss is acceptable for what saving."
 
@@ -72,8 +72,8 @@ A screen share of the memo and repo. Each block lists what is on screen, then wh
 | What does P(above E19) = 0.39 mean? | Under the model, a 39% chance slot 4's true viability beats E19's. It ignores batch effects, which is why E19 is on the plate |
 | Why 11 wells? | The plate had 36 idle interior wells. Eleven per arm cut the interval on each comparison from about 13 to about 7 points without adding formulations |
 | Why is 50% DMEM allowed above the cost ceiling? | It is EUR 0.26/L over, smaller than the uncertainty in the FBS price. I allowed designed points 1% over; model picks must stay under |
-| Why exclude the reviewer's E10 and E14 re-runs? | They ran in different rounds, so the gap most plausibly reflects donor or preparation. Re-running both with one donor tests the preparation, not the medium, and spends two of five slots where the data already score poorly |
-| If you had one more plate, run this or fix the noise first? | Run this. The anchor and 11 wells per arm are the noise measurement |
+| Why exclude the reviewer's E10 and E14 re-runs? | Same-plate re-runs would test whether the gap reproduces under shared conditions. I prioritised the DMEM contrast around the strongest observed region; the historical cause of the E10/E14 gap remains unresolved |
+| If you had one more plate, run this or fix the noise first? | Run this if the assay owner accepts the protocol. The anchor and 11 wells measure within-preparation repeatability; independent repeats are still needed to estimate preparation effects |
 | How would you build the team around this loop? | Start with a modeller-engineer and a lab-data owner embedded with R&D. The first deliverable is the schema and a frozen dataset per round. The assay owner holds the veto on plate validity |
 | Why believe a Bayesian method helps at all? | It hasn't yet beaten the mean, and the memo says so. Its value today is structure: an explicit uncertainty rule, an anchor and pass criteria set in advance. It earns trust when forward rounds beat the mean |
 

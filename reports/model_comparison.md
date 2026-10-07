@@ -53,8 +53,8 @@ The full table is in `reports/tables/model_loo.csv`. Mean-only has no ranking ab
 
 What this shows:
 
-1. **On all 24 recipes, no model clearly beats the mean.** The GP and the random forest have the lowest RMSE (16.77 and 16.32). The mean-only model has the best NLPD (4.44 against 5.93 for the GP). So the GP's uncertainty is less honest than a flat average's.
-2. **The GP's ranking is between rounds, not within them.** Its leave-one-out Spearman of 0.61 on all 24 falls to 0.11 on rounds 0 to 2, and sits between -0.09 and 0.37 within each round (`reports/tables/model_loo_ranking_by_round.csv`). It separates the round-3 cluster at 44% DMEM from the rest but cannot rank blends inside it. The Scheffe model ranks no better than chance overall. With n = 24, a coverage of 0.79 against 0.80 has a standard error near 0.08 and supports nothing either way.
+1. **On all 24 recipes, no model clearly beats the mean.** The GP and the random forest have the lowest RMSE (16.77 and 16.32). The mean-only model has the best NLPD (4.44 against 5.93 for the GP). The GP assigns lower predictive density to the held-out means than the mean baseline; that score reflects both prediction error and uncertainty.
+2. **The GP's ranking is between rounds, not within them.** Its leave-one-out Spearman of 0.61 on all 24 falls to 0.11 on rounds 0 to 2, and sits between -0.09 and 0.37 within each round (`reports/tables/model_loo_ranking_by_round.csv`). It separates the round-3 cluster at 44% DMEM from the rest but cannot rank blends inside it. The Scheffe model ranks no better than chance overall. With n = 24, a binomial approximation gives coverage 0.79 a standard error near 0.08. Leave-one-out errors share training data, so this is only a rough illustration; 79% coverage does not establish calibration.
 3. **E02 and E14 dominate the error.** They are unexplained low outcomes. Each ran in a different round from its near neighbours, so a donor or preparation effect is plausible, but the data cannot separate that from a sharp biological response. The GP's predictions for E10 are pulled down by E14, which sits 2.60% of volume away from it. Removing both drops the GP RMSE to 7.56. That is a sensitivity result, not grounds to delete them. Both stay in the primary fit.
 
 ## Forward-round check
@@ -72,7 +72,7 @@ Each model is trained on rounds 0 to r and predicts round r+1. This is the close
 - Every model under-predicts round 3 by 22 to 29 points. The pooled GP predicts a mean of 45.89% against an observed 72.65%.
 - Two explanations fit: round 3 found a new region, or round 3 ran on a better day (cells, reagents, operator). The data cannot separate them.
 
-The consequence for the batch: treat the GP as a ranking aid, not a forecast. Absolute predictions carry about 20 points of uncertainty beyond what the model reports. The decision rests on a same-plate comparison with a re-run of E19.
+The consequence for the batch: treat the GP as a ranking aid, not a forecast. The forward-round miss shows that the fitted intervals do not capture all uncertainty; it does not establish a calibrated extra 20-point uncertainty term. The decision rests on a same-plate comparison with a re-run of E19.
 
 ## Policy comparison by simulation (illustrative)
 

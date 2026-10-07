@@ -1,5 +1,7 @@
 # Fix plan after the GPT-6 Astra review (2026-10-02)
 
+**Historical plan.** The following triage records the 2 October snapshot. Later implementation and batch changes are recorded in [DECISIONS.md](DECISIONS.md); use [PLAN.md](PLAN.md) for current delivery status. Old slot numbers and unresolved items below are not the current recommendation.
+
 Source: [review_gpt6_astra_2026-10-02.md](review_gpt6_astra_2026-10-02.md). The review was read-only and ran in Codex on GPT-6-Astra (medium) through Herdr.
 
 I spot-checked findings 1, 9 and 11 against the code and README, and all three hold. Findings 2 to 8 and 10 come from reading the code and look correct, but I have not re-run them myself.

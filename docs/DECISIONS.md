@@ -1,5 +1,7 @@
 # Data and modelling decisions
 
+This is a chronological decision log. Later entries supersede earlier recipes, statistics and interpretations. The current recommendation is in [batch_selection.md](../reports/batch_selection.md), and the current experimental handoff is in [lab_plan.md](../reports/lab_plan.md).
+
 ## 2026 10 02 Starting dataset
 
 Selected the `MediaBlendingStudies` sheet in the PBMC workbook accompanying Narayanan et al. (2025). It offers 24 experiments, a low-dimensional constrained mixture and repeated readings. This choice makes noise, feasibility and experiment selection assessable within the timebox. It sacrifices direct alignment with the 2022 muscle-cell ingredient study. It does not establish transfer to Qorium cells or production endpoints.
@@ -164,3 +166,16 @@ A ChatGPT language review (`docs/review_language_chatgpt_2026-10-04.md`), judged
 **Accepted:** title and opening no longer say "peak" or "earned"; "80% range" is now "80% predictive interval"; "honest" removed from the model comparison; NLPD direction stated; pending-point conditioning explained (at predicted means); forest coverage stated as both intervals covering 79%; "5% of volume" defined as half the summed absolute differences; "anchor" is now "E19 control" in memo and figures; FBS claim weakened to "changes little along the contrast"; success criterion no longer requires a candidate to advance; the "What I changed after review" paragraph removed (the story stays here and in the walkthrough).
 
 **Rejected:** replacing every "blend", "recipe" and "pick" with "formulation" (slot references get hard to read); ChatGPT's longer opening (page 4 has no room); dropping "a lab manager can check a constraint by hand" (a real mechanism).
+
+
+## 2026 10 07 Markdown consistency audit
+
+Reviewed all 24 tracked Markdown files against the current recommendation and evidence tables. The PDF, presentation, notebook, code and numerical outputs were left unchanged.
+
+- **E10/E14 rationale corrected.** The historical cause remains unresolved. Concurrent re-runs would test whether the discrepancy reproduces under shared conditions; they would not identify the original cause. The DMEM contrast was prioritised as a question about the strongest observed region. This supersedes earlier claims that re-running the pair would test preparation rather than medium.
+- **Screen and confirmation aligned.** Only slots 3 and 4 undergo the cost/performance screen. The designed steps have a base-price tolerance and are diagnostic. Independent preparation repeats, rather than this single plate, provide the variance needed to size confirmation.
+- **AR5 and uncertainty claims narrowed.** Slot 4 contains 7% AR5. High correlation with E19 does not imply zero information value, and a forward bias is not a calibrated extra uncertainty term.
+- **Documentation updated.** PLAN now records completed delivery and remaining assay handoff questions. The data dictionary identifies source prices as the durable editing point. Historical plans and decisions are labelled as snapshots.
+- **Verification claims scoped.** The isolated rerun reproduced all 30 tracked CSVs and 12 PNGs. The five exploratory PDFs changed only their creation-date metadata. Statistical screen and confirmation figures are conditional calculations, not separately generated runner outputs.
+
+Findings, checks and file-by-file disposition: [Markdown audit](markdown_audit_2026-10-07.md).

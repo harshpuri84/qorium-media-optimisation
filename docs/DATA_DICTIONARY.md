@@ -34,9 +34,9 @@ The source is `PBMC_Experiments.xlsx`, sheet `MediaBlendingStudies`, from [Figsh
 
 ## Component costs
 
-`data/inputs/component_costs.csv` contains four components. `component_id` matches the fraction columns without `_fraction`. `prepared_medium_label` describes the media to price. `price_per_litre` is numeric and initially blank. `currency` is a common currency code. `price_basis` is `observed`, `estimate` or `hypothetical`. `price_source` is a URL or supplied quote reference. `as_of_date` is an optional ISO date. `notes` records preparation and price assumptions.
+`data/inputs/component_costs.csv` contains four components. `component_id` matches the fraction columns without `_fraction`. `prepared_medium_label` describes the media to price. `price_per_litre` is numeric in the current snapshot; incomplete inputs would leave costs unavailable. `currency` is a common currency code. `price_basis` is `observed`, `estimate` or `hypothetical`. `price_source` points to catalogue or quote provenance, directly or through `price_sources.csv`. `as_of_date` is an optional ISO date. `notes` records preparation and price assumptions.
 
-The file is an editable input and is not overwritten by preparation. All four price values, currencies, bases and source references must be populated before any blend cost is calculated. Negative or nonfinite prices and mixed currencies stop preparation. Zero remains zero.
+`scripts/build_costs.py` regenerates this file and `cost_scenarios.csv` from `price_sources.csv`; edit the source prices to make a lasting change. `prepare_data.py` reads the resulting costs without overwriting an existing cost file. Direct edits to `component_costs.csv` are lost on the next `run_all.sh`. All four price values, currencies, bases and source references must be populated before any blend cost is calculated. Negative or nonfinite prices and mixed currencies stop preparation. Zero remains zero.
 
 ## Quality issues and audit
 
